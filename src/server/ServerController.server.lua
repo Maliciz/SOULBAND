@@ -3,10 +3,10 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Підключення менеджерів
-local DataManager = require(script.Parent:WaitForChild("DataManager"))
-local ShopManager = require(script.Parent:WaitForChild("ShopManager"))
-local ContractManager = require(script.Parent:WaitForChild("ContractManager"))
-local BandManager = require(script.Parent:WaitForChild("BandManager"))
+local DataManager = require(script:WaitForChild("DataManager"))
+local ShopManager = require(script:WaitForChild("ShopManager"))
+local ContractManager = require(script:WaitForChild("ContractManager"))
+local BandManager = require(script:WaitForChild("BandManager"))
 
 -- Створення Remote Events/Functions у ReplicatedStorage (якщо вони не створені вручну в Studio)
 local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
