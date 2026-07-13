@@ -9,6 +9,42 @@
       },
       "GameSettings": {
         "$path": "src/shared/GameSettings.lua"
+      },
+      "Remotes": {
+        "$className": "Folder",
+        "StartSong": {
+          "$className": "RemoteEvent"
+        },
+        "FinishSong": {
+          "$className": "RemoteFunction"
+        },
+        "AcceptContract": {
+          "$className": "RemoteFunction"
+        },
+        "BuyItem": {
+          "$className": "RemoteFunction"
+        },
+        "EquipItem": {
+          "$className": "RemoteFunction"
+        },
+        "HireMusician": {
+          "$className": "RemoteFunction"
+        },
+        "UpgradeMusician": {
+          "$className": "RemoteFunction"
+        },
+        "EquipMusicianClothing": {
+          "$className": "RemoteFunction"
+        },
+        "SetCustomKeybinds": {
+          "$className": "RemoteEvent"
+        },
+        "SetGender": {
+          "$className": "RemoteFunction"
+        },
+        "RequestPlayerData": {
+          "$className": "RemoteFunction"
+        }
       }
     },
     "ServerScriptService": {
