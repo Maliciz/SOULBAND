@@ -35,6 +35,9 @@
         "$className": "StarterPlayerScripts",
         "RhythmClient": {
           "$path": "src/client/RhythmClient.client.lua"
+        },
+        "HUDController": {
+          "$path": "src/client/HUDController.client.lua"
         }
       }
     }

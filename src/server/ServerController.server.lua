@@ -58,6 +58,11 @@ Players.PlayerAdded:Connect(function(player)
 	fansVal.Value = data.Fans
 	fansVal.Parent = leaderstats
 
+	local cashVal = Instance.new("IntValue")
+	cashVal.Name = "Cash"
+	cashVal.Value = data.Cash
+	cashVal.Parent = leaderstats
+
 	-- Оновлюємо лідерборд при зміні даних
 	spawn(function()
 		while player.Parent do
@@ -65,6 +70,7 @@ Players.PlayerAdded:Connect(function(player)
 			if currentData then
 				levelVal.Value = currentData.Level
 				fansVal.Value = currentData.Fans
+				cashVal.Value = currentData.Cash
 			end
 			task.wait(1)
 		end
