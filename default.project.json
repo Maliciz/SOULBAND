@@ -1,0 +1,42 @@
+{
+  "name": "TokyoBandSimulator",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "SongData": {
+        "$path": "src/shared/SongData.lua"
+      },
+      "GameSettings": {
+        "$path": "src/shared/GameSettings.lua"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "ServerController": {
+        "$path": "src/server/ServerController.server.lua",
+        "DataManager": {
+          "$path": "src/server/DataManager.lua"
+        },
+        "ShopManager": {
+          "$path": "src/server/ShopManager.lua"
+        },
+        "BandManager": {
+          "$path": "src/server/BandManager.lua"
+        },
+        "ContractManager": {
+          "$path": "src/server/ContractManager.lua"
+        }
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "RhythmClient": {
+          "$path": "src/client/RhythmClient.client.lua"
+        }
+      }
+    }
+  }
+}
