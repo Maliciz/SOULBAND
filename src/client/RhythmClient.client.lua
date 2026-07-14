@@ -48,6 +48,14 @@ local feedbackLabel = nil
 local accuracyLabel = nil
 local countdownLabel = nil
 
+-- Статистика для вікна результатів
+local perfectCount = 0
+local goodCount = 0
+local badCount = 0
+local missCount = 0
+local missSeconds = {}
+local noteHistory = {}
+
 -- Елементи кастомного GUI (MainGui--inGame)
 local customGuiMode = false
 local customLanes = {}       -- {x, c, n, m}
@@ -81,6 +89,13 @@ soundPerfect.Parent = game.Workspace.CurrentCamera
 local dimThread = nil
 local missSoundThread = nil
 local function triggerMiss()
+	if isPlaying then
+		local elapsedSec = os.clock() - songStartTime
+		local sec = math.round(elapsedSec * 10) / 10
+		if #missSeconds == 0 or missSeconds[#missSeconds] ~= sec then
+			table.insert(missSeconds, sec)
+		end
+	end
 	pcall(function()
 		soundDefect:Stop()
 		soundDefect.Volume = 0.6
@@ -733,6 +748,300 @@ local function spawnNote(track, targetTime, duration)
 	})
 end
 
+-- Відображення результатів виступу
+local function showResultsScreen(finalAccuracy, rewards)
+	local resultsFrame = Instance.new("Frame")
+	resultsFrame.Name = "ResultsFrame"
+	resultsFrame.Size = UDim2.new(0, 520, 0, 520)
+	resultsFrame.Position = UDim2.new(0.5, -260, 0.5, -260)
+	resultsFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+	resultsFrame.BackgroundTransparency = 0.15
+	resultsFrame.BorderSizePixel = 0
+	resultsFrame.Parent = screenGui
+
+	local uiCorner = Instance.new("UICorner")
+	uiCorner.CornerRadius = UDim.new(0, 12)
+	uiCorner.Parent = resultsFrame
+
+	local uiStroke = Instance.new("UIStroke")
+	uiStroke.Color = Color3.fromRGB(220, 220, 220)
+	uiStroke.Thickness = 2.5
+	uiStroke.Parent = resultsFrame
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0, 45)
+	title.Position = UDim2.new(0, 0, 0, 15)
+	title.BackgroundTransparency = 1
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.TextSize = 26
+	title.Font = Enum.Font.FredokaOne
+	title.Text = "СТАТИСТИКА ВИСТУПУ"
+	title.Parent = resultsFrame
+
+	local songTitle = Instance.new("TextLabel")
+	songTitle.Size = UDim2.new(1, 0, 0, 25)
+	songTitle.Position = UDim2.new(0, 0, 0, 55)
+	songTitle.BackgroundTransparency = 1
+	songTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+	songTitle.TextSize = 18
+	songTitle.Font = Enum.Font.SourceSansBold
+	songTitle.Text = string.format("%s (%s)", currentSong.Title, currentSong.Difficulty)
+	songTitle.Parent = resultsFrame
+
+	local accuracyVal = Instance.new("TextLabel")
+	accuracyVal.Size = UDim2.new(0.5, -20, 0, 70)
+	accuracyVal.Position = UDim2.new(0, 20, 0, 95)
+	accuracyVal.BackgroundTransparency = 1
+	accuracyVal.TextColor3 = Color3.fromRGB(255, 255, 255)
+	accuracyVal.TextSize = 52
+	accuracyVal.Font = Enum.Font.FredokaOne
+	accuracyVal.Text = string.format("%d%%", finalAccuracy)
+	accuracyVal.Parent = resultsFrame
+
+	local accuracyLabel = Instance.new("TextLabel")
+	accuracyLabel.Size = UDim2.new(0.5, -20, 0, 20)
+	accuracyLabel.Position = UDim2.new(0, 20, 0, 160)
+	accuracyLabel.BackgroundTransparency = 1
+	accuracyLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
+	accuracyLabel.TextSize = 15
+	accuracyLabel.Font = Enum.Font.SourceSansBold
+	accuracyLabel.Text = "ТОЧНІСТЬ"
+	accuracyLabel.Parent = resultsFrame
+
+	local ratingsFrame = Instance.new("Frame")
+	ratingsFrame.Size = UDim2.new(0.5, -20, 0, 100)
+	ratingsFrame.Position = UDim2.new(0.5, 0, 0, 90)
+	ratingsFrame.BackgroundTransparency = 1
+	ratingsFrame.Parent = resultsFrame
+
+	local ratings = {
+		{ name = "PERFECT", count = perfectCount, color = Color3.fromRGB(255, 255, 255) },
+		{ name = "GOOD", count = goodCount, color = Color3.fromRGB(200, 200, 200) },
+		{ name = "BAD", count = badCount, color = Color3.fromRGB(120, 120, 120) },
+		{ name = "MISS", count = missCount, color = Color3.fromRGB(240, 80, 80) }
+	}
+
+	for idx, r in ipairs(ratings) do
+		local yOffset = (idx - 1) * 24
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.new(0.6, 0, 0, 20)
+		label.Position = UDim2.new(0, 0, 0, yOffset)
+		label.BackgroundTransparency = 1
+		label.TextColor3 = r.color
+		label.TextSize = 16
+		label.Font = Enum.Font.SourceSansBold
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Text = r.name
+		label.Parent = ratingsFrame
+
+		local val = Instance.new("TextLabel")
+		val.Size = UDim2.new(0.4, 0, 0, 20)
+		val.Position = UDim2.new(0.6, 0, 0, yOffset)
+		val.BackgroundTransparency = 1
+		val.TextColor3 = Color3.fromRGB(240, 240, 240)
+		val.TextSize = 16
+		val.Font = Enum.Font.SourceSansBold
+		val.TextXAlignment = Enum.TextXAlignment.Right
+		val.Text = tostring(r.count)
+		val.Parent = ratingsFrame
+	end
+
+	local rewardsFrame = Instance.new("Frame")
+	rewardsFrame.Size = UDim2.new(1, -40, 0, 55)
+	rewardsFrame.Position = UDim2.new(0, 20, 0, 195)
+	rewardsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+	rewardsFrame.BackgroundTransparency = 0.4
+	rewardsFrame.BorderSizePixel = 0
+	rewardsFrame.Parent = resultsFrame -- Parent directly to resultsFrame
+
+	local rCorner = Instance.new("UICorner")
+	rCorner.CornerRadius = UDim.new(0, 8)
+	rCorner.Parent = rewardsFrame
+
+	local xpVal = rewards and rewards.XPEarned or 0
+	local cashVal = rewards and rewards.CashEarned or 0
+	local fansVal = rewards and rewards.FansEarned or 0
+
+	local rewardList = {
+		{ name = "XP", val = "+" .. tostring(xpVal), color = Color3.fromRGB(120, 200, 255) },
+		{ name = "Cash", val = "+" .. tostring(cashVal) .. "$", color = Color3.fromRGB(120, 255, 120) },
+		{ name = "Fans", val = "+" .. tostring(fansVal), color = Color3.fromRGB(255, 200, 120) }
+	}
+
+	for idx, rew in ipairs(rewardList) do
+		local xPos = (idx - 1) * 0.33
+		local container = Instance.new("Frame")
+		container.Size = UDim2.new(0.33, 0, 1, 0)
+		container.Position = UDim2.new(xPos, 0, 0, 0)
+		container.BackgroundTransparency = 1
+		container.Parent = rewardsFrame
+
+		local valLbl = Instance.new("TextLabel")
+		valLbl.Size = UDim2.new(1, 0, 0.6, 0)
+		valLbl.Position = UDim2.new(0, 0, 0.1, 0)
+		valLbl.BackgroundTransparency = 1
+		valLbl.TextColor3 = rew.color
+		valLbl.TextSize = 20
+		valLbl.Font = Enum.Font.FredokaOne
+		valLbl.Text = rew.val
+		valLbl.Parent = container
+
+		local nameLbl = Instance.new("TextLabel")
+		nameLbl.Size = UDim2.new(1, 0, 0.4, 0)
+		nameLbl.Position = UDim2.new(0, 0, 0.55, 0)
+		nameLbl.BackgroundTransparency = 1
+		nameLbl.TextColor3 = Color3.fromRGB(160, 160, 160)
+		nameLbl.TextSize = 13
+		nameLbl.Font = Enum.Font.SourceSansBold
+		nameLbl.Text = rew.name:upper()
+		nameLbl.Parent = container
+	end
+
+	local graphTitle = Instance.new("TextLabel")
+	graphTitle.Size = UDim2.new(1, -40, 0, 20)
+	graphTitle.Position = UDim2.new(0, 20, 0, 260)
+	graphTitle.BackgroundTransparency = 1
+	graphTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+	graphTitle.TextSize = 14
+	graphTitle.Font = Enum.Font.SourceSansBold
+	graphTitle.TextXAlignment = Enum.TextXAlignment.Left
+	graphTitle.Text = "ХРОНОЛОГІЯ ВИСТУПУ (Зелений = Успіх, Червоний = Пропуск):"
+	graphTitle.Parent = resultsFrame
+
+	local graphBg = Instance.new("Frame")
+	graphBg.Size = UDim2.new(1, -40, 0, 30)
+	graphBg.Position = UDim2.new(0, 20, 0, 285)
+	graphBg.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+	graphBg.BorderSizePixel = 0
+	graphBg.Parent = resultsFrame
+
+	local gCorner = Instance.new("UICorner")
+	gCorner.CornerRadius = UDim.new(0, 6)
+	gCorner.Parent = graphBg
+
+	local gLine = Instance.new("Frame")
+	gLine.Size = UDim2.new(1, -20, 0, 2)
+	gLine.Position = UDim2.new(0, 10, 0.5, -1)
+	gLine.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+	gLine.BorderSizePixel = 0
+	gLine.Parent = graphBg
+
+	local songLength = currentSong.Length
+	for _, note in ipairs(noteHistory) do
+		local ratio = math.clamp(note.time / songLength, 0, 1)
+		
+		local dot = Instance.new("Frame")
+		dot.Size = UDim2.new(0, 4, 0, 12)
+		dot.Position = UDim2.new(ratio, -2, 0.5, -6)
+		dot.BorderSizePixel = 0
+		
+		if note.rating == "PERFECT" or note.rating == "GOOD" then
+			dot.BackgroundColor3 = Color3.fromRGB(120, 255, 120)
+		elseif note.rating == "BAD" then
+			dot.BackgroundColor3 = Color3.fromRGB(255, 230, 100)
+		else
+			dot.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+		end
+		
+		dot.Parent = gLine
+	end
+
+	local missTitle = Instance.new("TextLabel")
+	missTitle.Size = UDim2.new(1, -40, 0, 20)
+	missTitle.Position = UDim2.new(0, 20, 0, 325)
+	missTitle.BackgroundTransparency = 1
+	missTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+	missTitle.TextSize = 14
+	missTitle.Font = Enum.Font.SourceSansBold
+	missTitle.TextXAlignment = Enum.TextXAlignment.Left
+	missTitle.Text = "СЕКУНДИ З ПОМИЛКАМИ:"
+	missTitle.Parent = resultsFrame
+
+	local missScroll = Instance.new("ScrollingFrame")
+	missScroll.Size = UDim2.new(1, -40, 0, 80)
+	missScroll.Position = UDim2.new(0, 20, 0, 345)
+	missScroll.BackgroundTransparency = 1
+	missScroll.BorderSizePixel = 0
+	missScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	missScroll.ScrollBarThickness = 4
+	missScroll.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
+	missScroll.Parent = resultsFrame
+
+	local missListText = ""
+	if #missSeconds == 0 then
+		missListText = "Без помилок! Ідеальний виступ! 🎉"
+	else
+		local secsStr = {}
+		for _, sec in ipairs(missSeconds) do
+			table.insert(secsStr, string.format("%.1fs", sec))
+		end
+		missListText = table.concat(secsStr, ", ")
+	end
+
+	local missTxtLabel = Instance.new("TextLabel")
+	missTxtLabel.Size = UDim2.new(1, 0, 1, 0)
+	missTxtLabel.BackgroundTransparency = 1
+	missTxtLabel.TextColor3 = #missSeconds == 0 and Color3.fromRGB(120, 255, 120) or Color3.fromRGB(220, 220, 220)
+	missTxtLabel.TextSize = 14
+	missTxtLabel.Font = Enum.Font.SourceSans
+	missTxtLabel.TextWrapped = true
+	missTxtLabel.TextXAlignment = Enum.TextXAlignment.Left
+	missTxtLabel.TextYAlignment = Enum.TextYAlignment.Top
+	missTxtLabel.Text = missListText
+	missTxtLabel.Parent = missScroll
+
+	local continueBtn = Instance.new("TextButton")
+	continueBtn.Size = UDim2.new(0, 200, 0, 45)
+	continueBtn.Position = UDim2.new(0.5, -100, 1, -65)
+	continueBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+	continueBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	continueBtn.TextSize = 18
+	continueBtn.Font = Enum.Font.FredokaOne
+	continueBtn.Text = "ПРОДОВЖИТИ"
+	continueBtn.Parent = resultsFrame
+
+	local cCorner = Instance.new("UICorner")
+	cCorner.CornerRadius = UDim.new(0, 8)
+	cCorner.Parent = continueBtn
+
+	local cStroke = Instance.new("UIStroke")
+	cStroke.Color = Color3.fromRGB(120, 255, 120)
+	cStroke.Thickness = 1.5
+	cStroke.Parent = continueBtn
+
+	continueBtn.MouseEnter:Connect(function()
+		TweenService:Create(continueBtn, TweenInfo.new(0.15), {
+			BackgroundColor3 = Color3.fromRGB(70, 180, 100)
+		}):Play()
+	end)
+
+	continueBtn.MouseLeave:Connect(function()
+		TweenService:Create(continueBtn, TweenInfo.new(0.15), {
+			BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+		}):Play()
+	end)
+
+	continueBtn.MouseButton1Click:Connect(function()
+		if customGuiMode then
+			screenGui.Enabled = false
+			feedbackLabel.Text = ""
+			if countdownLabel then
+				countdownLabel.Text = ""
+				countdownLabel.Visible = false
+			end
+			if originalParent then
+				screenGui.Parent = originalParent
+			end
+		else
+			if screenGui then
+				screenGui:Destroy()
+				screenGui = nil
+				countdownLabel = nil
+			end
+		end
+	end)
+end
+
 -- Завершення гри
 local function endSong(failed)
 	if not isPlaying then return end
@@ -768,49 +1077,39 @@ local function endSong(failed)
 	activeNotes = {}
 	heldTracks = {false, false, false, false}
 
-	task.wait(2)
-
-	-- Надсилаємо результати на сервер
+	-- Надсилаємо результати на сервер та отримуємо нагороди
 	local success, rewards = FinishSongFunc:InvokeServer(finalAccuracy)
 
-	-- Закриття/очищення інтерфейсу
-	if customGuiMode then
-		screenGui.Enabled = false
-		feedbackLabel.Text = ""
-		if countdownLabel then
-			countdownLabel.Text = ""
-			countdownLabel.Visible = false
-		end
-		if originalParent then
-			screenGui.Parent = originalParent
-		end
-	else
-		if screenGui then
-			screenGui:Destroy()
-			screenGui = nil
-			countdownLabel = nil
-		end
-	end
-
-	if success and rewards then
-		local summary = string.format(
-			"Результати виступу (%s):\nТочність: %d%%\nДосвід: +%d XP\nГроші: +%d$\nФани: +%d",
-			currentContractName,
-			rewards.Accuracy,
-			rewards.XPEarned,
-			rewards.CashEarned,
-			rewards.FansEarned
-		)
-		if rewards.LeveledUp then
-			summary = summary .. "\n\n🎉 РІВЕНЬ ГУРТУ ПІДВИЩЕНО ДО " .. rewards.NewLevel .. "! 🎉"
+	if not failed then
+		-- Приховуємо ігровий інтерфейс
+		for _, child in ipairs(screenGui:GetChildren()) do
+			if child:IsA("GuiObject") and child.Name ~= "ResultsFrame" and child.Name ~= "FeedbackLabel" then
+				child.Visible = false
+			end
 		end
 		
-		local StarterGui = game:GetService("StarterGui")
-		StarterGui:SetCore("SendNotification", {
-			Title = "Контракт Виконано!",
-			Text = summary,
-			Duration = 10
-		})
+		-- Показуємо екран результатів
+		showResultsScreen(finalAccuracy, rewards)
+	else
+		task.wait(2)
+		-- Закриття/очищення інтерфейсу при провалі
+		if customGuiMode then
+			screenGui.Enabled = false
+			feedbackLabel.Text = ""
+			if countdownLabel then
+				countdownLabel.Text = ""
+				countdownLabel.Visible = false
+			end
+			if originalParent then
+				screenGui.Parent = originalParent
+			end
+		else
+			if screenGui then
+				screenGui:Destroy()
+				screenGui = nil
+				countdownLabel = nil
+			end
+		end
 	end
 end
 
@@ -826,6 +1125,13 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	notesTotal = #song.Notes
 	currentHp = 100
 	heldTracks = {false, false, false, false}
+	perfectCount = 0
+	goodCount = 0
+	badCount = 0
+	missCount = 0
+	missSeconds = {}
+	noteHistory = {}
+	local songEndTime = nil
 
 	-- СТВОРЕННЯ ТА ПРОГРАВАННЯ МУЗИЧНОЇ ДОРІЖКИ ПІСНІ
 	if song.AudioId and song.AudioId ~= "" and song.AudioId ~= "rbxassetid://0" then
@@ -869,8 +1175,19 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 		local elapsed = os.clock() - songStartTime
 
-		-- Перевірка завершення пісні за часом (з додатковим запасом у 12 секунд для догравання останніх нот)
-		if elapsed >= currentSong.Length + 12 then
+		-- Динамічне завершення пісні після останньої ноти з затримкою в 3 секунди
+		if spawnedNoteIndex > #currentSong.Notes and #activeNotes == 0 then
+			if not songEndTime then
+				songEndTime = os.clock() + 3.0
+			elseif os.clock() >= songEndTime then
+				connection:Disconnect()
+				endSong(false)
+				return
+			end
+		end
+
+		-- Захисний ліміт на випадок багів (якщо ноти застрягли)
+		if elapsed >= currentSong.Length + 15 then
 			connection:Disconnect()
 			endSong(false)
 			return
@@ -946,6 +1263,8 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					soundPerfect:Play()
 					popFeedback("HOLD COMPLETE!", Color3.fromRGB(255, 255, 255))
 					notesHit = notesHit + 1.2
+					perfectCount = perfectCount + 1
+					table.insert(noteHistory, { time = note.TargetTime + note.Duration, rating = "PERFECT" })
 					
 					local activeFrame = customGuiMode and customActiveFrames[note.Track]
 					if activeFrame then
@@ -960,6 +1279,8 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						-- Пропуск ноти (Miss) - тільки якщо по ній НЕ попали!
 						triggerMiss()
 						popFeedback("MISS!", Color3.fromRGB(120, 120, 120))
+						missCount = missCount + 1
+						table.insert(noteHistory, { time = note.TargetTime, rating = "MISS" })
 					end
 					
 					returnNoteToPool(note)
@@ -1100,6 +1421,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			spawnHitParticles(pressedTrack, "PERFECT!")
 			pulseButton(pressedTrack)
 			cameraShake(0.04, 0.06)
+			perfectCount = perfectCount + 1
+			table.insert(noteHistory, { time = bestNote.TargetTime, rating = "PERFECT" })
 		else
 			bestNote.Hit = true
 
@@ -1110,6 +1433,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				spawnHitParticles(pressedTrack, "PERFECT!")
 				pulseButton(pressedTrack)
 				cameraShake(0.05, 0.08)
+				perfectCount = perfectCount + 1
+				table.insert(noteHistory, { time = bestNote.TargetTime, rating = "PERFECT" })
 				
 				if activeFrame then
 					activeFrame.BackgroundColor3 = trackColor
@@ -1122,6 +1447,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				spawnHitParticles(pressedTrack, "GOOD!")
 				pulseButton(pressedTrack)
 				cameraShake(0.02, 0.06)
+				goodCount = goodCount + 1
+				table.insert(noteHistory, { time = bestNote.TargetTime, rating = "GOOD" })
 				
 				if activeFrame then
 					activeFrame.BackgroundColor3 = trackColor
@@ -1132,6 +1459,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				notesHit = notesHit + 0.25
 				triggerMiss()
 				spawnHitParticles(pressedTrack, "BAD!")
+				badCount = badCount + 1
+				table.insert(noteHistory, { time = bestNote.TargetTime, rating = "BAD" })
 				
 				if activeFrame then
 					activeFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
@@ -1142,6 +1471,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	else
 		triggerMiss()
 		popFeedback("BAD!", Color3.fromRGB(120, 120, 120))
+		badCount = badCount + 1
+		table.insert(noteHistory, { time = elapsed, rating = "BAD" })
 		
 		if activeFrame then
 			activeFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
@@ -1186,6 +1517,8 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 				
 				triggerMiss()
 				popFeedback("HOLD BREAK!", Color3.fromRGB(100, 100, 100))
+				missCount = missCount + 1
+				table.insert(noteHistory, { time = elapsed, rating = "MISS" })
 			end
 		end
 	end
