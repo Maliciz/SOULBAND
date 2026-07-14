@@ -558,7 +558,7 @@ local function createRhythmGui()
 			feedbackLabel.BackgroundTransparency = 1
 			feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 			feedbackLabel.TextSize = 36
-			feedbackLabel.Font = Enum.Font.FredokaOne
+			feedbackLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 			feedbackLabel.Text = ""
 			feedbackLabel.Parent = customGui
 		end
@@ -572,8 +572,8 @@ local function createRhythmGui()
 			accuracyLabel.BackgroundTransparency = 1
 			accuracyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 			accuracyLabel.TextSize = 20
-			accuracyLabel.Font = Enum.Font.SourceSansBold
-			accuracyLabel.Text = "Точність: 100% | HP: 100"
+			accuracyLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+			accuracyLabel.Text = "Accuracy: 100% | HP: 100"
 			accuracyLabel.Parent = customGui
 		end
 		
@@ -586,7 +586,7 @@ local function createRhythmGui()
 			countdownLabel.BackgroundTransparency = 1
 			countdownLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 			countdownLabel.TextSize = 24
-			countdownLabel.Font = Enum.Font.FredokaOne
+			countdownLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 			countdownLabel.Text = ""
 			countdownLabel.Visible = false
 			countdownLabel.Parent = customGui
@@ -666,7 +666,7 @@ local function createRhythmGui()
 			keyLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 			keyLabel.TextSize = 20
 			keyLabel.Text = currentKeybinds[i]
-			keyLabel.Font = Enum.Font.FredokaOne
+			keyLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 			keyLabel.Parent = lane
 		end
 
@@ -698,7 +698,7 @@ local function createRhythmGui()
 		feedbackLabel.BackgroundTransparency = 1
 		feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		feedbackLabel.TextSize = 32
-		feedbackLabel.Font = Enum.Font.FredokaOne
+		feedbackLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		feedbackLabel.Text = ""
 		feedbackLabel.Parent = rhythmFrame
 
@@ -708,8 +708,8 @@ local function createRhythmGui()
 		accuracyLabel.BackgroundTransparency = 1
 		accuracyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 		accuracyLabel.TextSize = 22
-		accuracyLabel.Font = Enum.Font.SourceSansBold
-		accuracyLabel.Text = "Точність: 100% | HP: 100"
+		accuracyLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+		accuracyLabel.Text = "Accuracy: 100% | HP: 100"
 		accuracyLabel.Parent = rhythmFrame
 		
 		countdownLabel = Instance.new("TextLabel")
@@ -719,7 +719,7 @@ local function createRhythmGui()
 		countdownLabel.BackgroundTransparency = 1
 		countdownLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 		countdownLabel.TextSize = 20
-		countdownLabel.Font = Enum.Font.FredokaOne
+		countdownLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		countdownLabel.Text = ""
 		countdownLabel.Visible = false
 		countdownLabel.Parent = rhythmFrame
@@ -772,8 +772,8 @@ local function showResultsScreen(finalAccuracy, rewards)
 	title.BackgroundTransparency = 1
 	title.TextColor3 = Color3.fromRGB(255, 255, 255)
 	title.TextSize = 28
-	title.Font = Enum.Font.FredokaOne
-	title.Text = "СТАТИСТИКА ВИСТУПУ"
+	title.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+	title.Text = "PERFORMANCE STATS"
 	title.Parent = contentFrame
 
 	local songTitle = Instance.new("TextLabel")
@@ -782,7 +782,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	songTitle.BackgroundTransparency = 1
 	songTitle.TextColor3 = Color3.fromRGB(160, 160, 160)
 	songTitle.TextSize = 18
-	songTitle.Font = Enum.Font.SourceSansBold
+	songTitle.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	songTitle.Text = string.format("%s (%s)", currentSong.Title, currentSong.Difficulty)
 	songTitle.Parent = contentFrame
 
@@ -792,7 +792,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	accuracyVal.BackgroundTransparency = 1
 	accuracyVal.TextColor3 = Color3.fromRGB(255, 255, 255)
 	accuracyVal.TextSize = 56
-	accuracyVal.Font = Enum.Font.FredokaOne
+	accuracyVal.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	accuracyVal.Text = string.format("%d%%", finalAccuracy)
 	accuracyVal.Parent = contentFrame
 
@@ -802,8 +802,8 @@ local function showResultsScreen(finalAccuracy, rewards)
 	accuracyLabel.BackgroundTransparency = 1
 	accuracyLabel.TextColor3 = Color3.fromRGB(130, 130, 130)
 	accuracyLabel.TextSize = 15
-	accuracyLabel.Font = Enum.Font.SourceSansBold
-	accuracyLabel.Text = "ТОЧНІСТЬ"
+	accuracyLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+	accuracyLabel.Text = "ACCURACY"
 	accuracyLabel.Parent = contentFrame
 
 	local ratingsFrame = Instance.new("Frame")
@@ -827,7 +827,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		label.BackgroundTransparency = 1
 		label.TextColor3 = r.color
 		label.TextSize = 16
-		label.Font = Enum.Font.SourceSansBold
+		label.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		label.TextXAlignment = Enum.TextXAlignment.Left
 		label.Text = r.name
 		label.Parent = ratingsFrame
@@ -838,7 +838,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		val.BackgroundTransparency = 1
 		val.TextColor3 = Color3.fromRGB(220, 220, 220)
 		val.TextSize = 16
-		val.Font = Enum.Font.SourceSansBold
+		val.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		val.TextXAlignment = Enum.TextXAlignment.Right
 		val.Text = tostring(r.count)
 		val.Parent = ratingsFrame
@@ -880,7 +880,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		valLbl.BackgroundTransparency = 1
 		valLbl.TextColor3 = rew.color
 		valLbl.TextSize = 20
-		valLbl.Font = Enum.Font.FredokaOne
+		valLbl.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		valLbl.Text = rew.val
 		valLbl.Parent = container
 
@@ -890,7 +890,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		nameLbl.BackgroundTransparency = 1
 		nameLbl.TextColor3 = Color3.fromRGB(130, 130, 130)
 		nameLbl.TextSize = 13
-		nameLbl.Font = Enum.Font.SourceSansBold
+		nameLbl.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		nameLbl.Text = rew.name:upper()
 		nameLbl.Parent = container
 	end
@@ -901,9 +901,9 @@ local function showResultsScreen(finalAccuracy, rewards)
 	graphTitle.BackgroundTransparency = 1
 	graphTitle.TextColor3 = Color3.fromRGB(160, 160, 160)
 	graphTitle.TextSize = 14
-	graphTitle.Font = Enum.Font.SourceSansBold
+	graphTitle.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	graphTitle.TextXAlignment = Enum.TextXAlignment.Left
-	graphTitle.Text = "ХРОНОЛОГІЯ ВИСТУПУ (Білий = Успіх, Сірий = Погано, Чорний = Пропуск):"
+	graphTitle.Text = "PERFORMANCE TIMELINE (White = Perfect, Gray = Okay, Black = Miss):"
 	graphTitle.Parent = contentFrame
 
 	local graphBg = Instance.new("Frame")
@@ -955,9 +955,9 @@ local function showResultsScreen(finalAccuracy, rewards)
 	missTitle.BackgroundTransparency = 1
 	missTitle.TextColor3 = Color3.fromRGB(160, 160, 160)
 	missTitle.TextSize = 14
-	missTitle.Font = Enum.Font.SourceSansBold
+	missTitle.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	missTitle.TextXAlignment = Enum.TextXAlignment.Left
-	missTitle.Text = "СЕКУНДИ З ПОМИЛКАМИ:"
+	missTitle.Text = "MISSED SECONDS:"
 	missTitle.Parent = contentFrame
 
 	local missScroll = Instance.new("ScrollingFrame")
@@ -972,7 +972,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 
 	local missListText = ""
 	if #missSeconds == 0 then
-		missListText = "Без помилок! Ідеальний виступ! 🎉"
+		missListText = "Perfect! No mistakes! 🎉"
 	else
 		local secsStr = {}
 		for _, sec in ipairs(missSeconds) do
@@ -986,7 +986,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	missTxtLabel.BackgroundTransparency = 1
 	missTxtLabel.TextColor3 = #missSeconds == 0 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 190, 190)
 	missTxtLabel.TextSize = 14
-	missTxtLabel.Font = Enum.Font.SourceSans
+	missTxtLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	missTxtLabel.TextWrapped = true
 	missTxtLabel.TextXAlignment = Enum.TextXAlignment.Left
 	missTxtLabel.TextYAlignment = Enum.TextYAlignment.Top
@@ -999,8 +999,8 @@ local function showResultsScreen(finalAccuracy, rewards)
 	continueBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 26)
 	continueBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	continueBtn.TextSize = 18
-	continueBtn.Font = Enum.Font.FredokaOne
-	continueBtn.Text = "ПРОДОВЖИТИ"
+	continueBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+	continueBtn.Text = "CONTINUE"
 	continueBtn.Parent = contentFrame
 
 	local cCorner = Instance.new("UICorner")
@@ -1067,11 +1067,11 @@ local function endSong(failed)
 	end
 	
 	if failed then
-		feedbackLabel.Text = "ГРУ ПРОВАЛЕНО!"
+		feedbackLabel.Text = "GAME OVER!"
 		feedbackLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
 		finalAccuracy = 0
 	else
-		feedbackLabel.Text = "ПІСНЮ ЗАВЕРШЕНО!"
+		feedbackLabel.Text = "SONG COMPLETED!"
 		feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	end
 
@@ -1349,7 +1349,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 		-- Оновлення статус-панелі
 		local currentAcc = (notesTotal > 0) and math.round((notesHit / notesTotal) * 100) or 100
-		accuracyLabel.Text = string.format("Точність: %d%%", currentAcc)
+		accuracyLabel.Text = string.format("Accuracy: %d%%", currentAcc)
 
 		-- Відображення таймера до появи наступної ноти
 		local nextNote = currentSong.Notes[spawnedNoteIndex]

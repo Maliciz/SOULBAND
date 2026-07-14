@@ -41,8 +41,8 @@ loadingText.Position = UDim2.new(0, 0, 0.82, 0)
 loadingText.BackgroundTransparency = 1
 loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
 loadingText.TextSize = 36
-loadingText.Font = Enum.Font.FredokaOne
-loadingText.Text = "ЗАВАНТАЖЕННЯ ГРИ..."
+loadingText.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+loadingText.Text = "LOADING GAME..."
 loadingText.Parent = loadingScreen
 
 -- 3. Чекаємо, поки завантажиться весь плейс

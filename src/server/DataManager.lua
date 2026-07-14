@@ -11,7 +11,9 @@ local DEFAULT_DATA = {
 	Level = 0,
 	XP = 0,
 	Gender = "Male", -- "Male" або "Female"
-	Hair = 0, -- 0 означає не вибрано (буде зарандомлено на старті)
+	Hair = 11103884344, -- Дефолтне волосся
+	SkinColor = "Normal", -- "Light", "Normal", "Tan", "Dark"
+	CharacterCreated = false, -- Чи завершено створення персонажа
 	OwnedClothing = {"default_outfit"},
 	OwnedGuitars = {"default_guitar"},
 	HiredMusicians = {}, -- { {Id = "drummer_takeshi", Level = 1, Clothing = "default_outfit"} }
@@ -72,7 +74,7 @@ function DataManager.SaveData(player)
 	end)
 
 	if not success then
-		warn("Не вдалося зберегти дані гравця " .. player.Name .. ": " .. tostring(err))
+		warn("Failed to save player data for " .. player.Name .. ": " .. tostring(err))
 	end
 end
 

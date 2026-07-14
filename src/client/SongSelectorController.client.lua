@@ -45,10 +45,10 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 50)
 title.Position = UDim2.new(0, 0, 0, 10)
 title.BackgroundTransparency = 1
-title.Text = "ВИБІР ПІСНІ (ВІЛЬНА ГРА)"
+title.Text = "SONG SELECTION (FREE PLAY)"
 title.TextColor3 = Color3.fromRGB(240, 240, 240)
 title.TextSize = 22
-title.Font = Enum.Font.FredokaOne
+title.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 title.Parent = panel
 
 -- Підзаголовок (гаряча клавіша)
@@ -56,10 +56,10 @@ local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(1, 0, 0, 20)
 subtitle.Position = UDim2.new(0, 0, 0, 55)
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "[ Натисніть клавішу 'G' для відкриття/закриття ]"
+subtitle.Text = "[ Press 'G' to Open/Close ]"
 subtitle.TextColor3 = Color3.fromRGB(140, 140, 140)
 subtitle.TextSize = 13
-subtitle.Font = Enum.Font.SourceSansItalic
+subtitle.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 subtitle.Parent = panel
 
 -- Кнопка закриття (✕)
@@ -71,7 +71,7 @@ closeButton.BackgroundTransparency = 1
 closeButton.Text = "✕"
 closeButton.TextColor3 = Color3.fromRGB(130, 130, 130)
 closeButton.TextSize = 22
-closeButton.Font = Enum.Font.SourceSansBold
+closeButton.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 closeButton.Parent = panel
 
 closeButton.MouseEnter:Connect(function()
@@ -146,13 +146,13 @@ local function populateSongList()
 		songTitle.Text = song.Title
 		songTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
 		songTitle.TextSize = 15
-		songTitle.Font = Enum.Font.FredokaOne
+		songTitle.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		songTitle.TextXAlignment = Enum.TextXAlignment.Left
 		songTitle.Parent = item
 		
 		-- Інфо (BPM / Складність / Тривалість)
 		local durationMins = string.format("%d:%02d", math.floor(song.Length / 60), song.Length % 60)
-		local infoText = string.format("Складність: %s | BPM: %d | Час: %s", song.Difficulty, song.Bpm, durationMins)
+		local infoText = string.format("Difficulty: %s | BPM: %d | Time: %s", song.Difficulty, song.Bpm, durationMins)
 		
 		local songInfo = Instance.new("TextLabel")
 		songInfo.Size = UDim2.new(0.6, 0, 0.35, 0)
@@ -161,7 +161,7 @@ local function populateSongList()
 		songInfo.Text = infoText
 		songInfo.TextColor3 = Color3.fromRGB(150, 150, 150)
 		songInfo.TextSize = 12
-		songInfo.Font = Enum.Font.SourceSansBold
+		songInfo.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		songInfo.TextXAlignment = Enum.TextXAlignment.Left
 		songInfo.Parent = item
 		
@@ -171,10 +171,10 @@ local function populateSongList()
 		playBtn.Size = UDim2.new(0.18, 0, 0.65, 0)
 		playBtn.Position = UDim2.new(0.78, 0, 0.175, 0)
 		playBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-		playBtn.Text = "ГРАТИ"
+		playBtn.Text = "PLAY"
 		playBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
 		playBtn.TextSize = 14
-		playBtn.Font = Enum.Font.FredokaOne
+		playBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		playBtn.Parent = item
 		
 		local playCorner = Instance.new("UICorner")
@@ -192,10 +192,10 @@ local function populateSongList()
 		recordBtn.Size = UDim2.new(0.18, 0, 0.65, 0)
 		recordBtn.Position = UDim2.new(0.58, 0, 0.175, 0)
 		recordBtn.BackgroundColor3 = Color3.fromRGB(45, 25, 25)
-		recordBtn.Text = "ЗАПИС"
+		recordBtn.Text = "RECORD"
 		recordBtn.TextColor3 = Color3.fromRGB(255, 180, 180)
 		recordBtn.TextSize = 13
-		recordBtn.Font = Enum.Font.FredokaOne
+		recordBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		recordBtn.Parent = item
 		
 		local recordCorner = Instance.new("UICorner")
@@ -270,10 +270,10 @@ hintStroke.Parent = hintFrame
 local hintText = Instance.new("TextLabel")
 hintText.Size = UDim2.new(1, 0, 1, 0)
 hintText.BackgroundTransparency = 1
-hintText.Text = "Натисніть 'G' для вибору пісні"
+hintText.Text = "Press 'G' to select song"
 hintText.TextColor3 = Color3.fromRGB(200, 200, 200)
 hintText.TextSize = 14
-hintText.Font = Enum.Font.FredokaOne
+hintText.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 hintText.Parent = hintFrame
 
 -- Потік для автоматичного приховання підказки під час гри або відкритому меню

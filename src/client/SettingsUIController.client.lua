@@ -44,7 +44,7 @@ openButton.BackgroundTransparency = 0.4
 openButton.Text = "⚙️"
 openButton.TextColor3 = Color3.fromRGB(220, 220, 220)
 openButton.TextSize = 24
-openButton.Font = Enum.Font.FredokaOne
+openButton.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 openButton.Parent = screenGui
 
 local openCorner = Instance.new("UICorner")
@@ -90,10 +90,10 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 50)
 title.Position = UDim2.new(0, 0, 0, 10)
 title.BackgroundTransparency = 1
-title.Text = "НАЛАШТУВАННЯ КЛАВІШ"
+title.Text = "KEYBINDS SETTINGS"
 title.TextColor3 = Color3.fromRGB(240, 240, 240)
 title.TextSize = 20
-title.Font = Enum.Font.FredokaOne
+title.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 title.Parent = panel
 
 -- Кнопка закриття
@@ -105,7 +105,7 @@ closeButton.BackgroundTransparency = 1
 closeButton.Text = "✕"
 closeButton.TextColor3 = Color3.fromRGB(130, 130, 130)
 closeButton.TextSize = 20
-closeButton.Font = Enum.Font.SourceSansBold
+closeButton.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 closeButton.Parent = panel
 
 closeButton.MouseEnter:Connect(function()
@@ -126,7 +126,7 @@ openButton.MouseButton1Click:Connect(function()
 end)
 
 -- Доріжки та налаштування бінду
-local laneNames = { "Доріжка 1 (Ліва)", "Доріжка 2", "Доріжка 3", "Доріжка 4 (Права)" }
+local laneNames = { "Lane 1 (Left)", "Lane 2", "Lane 3", "Lane 4 (Right)" }
 local bindButtons = {}
 local isBinding = nil
 
@@ -165,7 +165,7 @@ for i = 1, 4 do
 	textLabel.Text = laneNames[i]
 	textLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 	textLabel.TextSize = 15
-	textLabel.Font = Enum.Font.FredokaOne
+	textLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
 	textLabel.Parent = container
 	
@@ -177,7 +177,7 @@ for i = 1, 4 do
 	bindBtn.Text = currentKeybinds[i]
 	bindBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
 	bindBtn.TextSize = 16
-	bindBtn.Font = Enum.Font.FredokaOne
+	bindBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	bindBtn.Parent = container
 	
 	local btnCorner = Instance.new("UICorner")
@@ -194,7 +194,7 @@ for i = 1, 4 do
 	bindBtn.MouseButton1Click:Connect(function()
 		if isBinding then return end
 		isBinding = i
-		bindBtn.Text = "[ Натисніть ]"
+		bindBtn.Text = "[ Press Key ]"
 		bindBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	end)
 end
@@ -205,10 +205,10 @@ resetBtn.Name = "ResetButton"
 resetBtn.Size = UDim2.new(0.9, 0, 0, 45)
 resetBtn.Position = UDim2.new(0.05, 0, 0, 350)
 resetBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-resetBtn.Text = "СКИДАННЯ"
+resetBtn.Text = "RESET"
 resetBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
 resetBtn.TextSize = 15
-resetBtn.Font = Enum.Font.FredokaOne
+resetBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 resetBtn.Parent = panel
 
 local resetCorner = Instance.new("UICorner")
