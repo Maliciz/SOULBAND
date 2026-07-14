@@ -58,6 +58,11 @@ function ContractManager.StartContract(player, contractId)
 	data.LastContractTimes[contractId] = currentTime
 	DataManager.Set(player, "LastContractTimes", data.LastContractTimes)
 
+	-- Надсилаємо подію запуску пісні клієнту
+	local remotes = ReplicatedStorage:WaitForChild("Remotes")
+	local startSongEvent = remotes:WaitForChild("StartSong")
+	startSongEvent:FireClient(player, selectedSong, contract.Name)
+
 	return true, {
 		Song = selectedSong,
 		ContractName = contract.Name
