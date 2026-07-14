@@ -22,9 +22,7 @@ local SkinColors = {
 	Dark = Color3.fromRGB(141, 85, 36)
 }
 
--- Cleanup old UI
-local oldUI = PlayerGui:FindFirstChild("CharacterCreationUI")
-if oldUI then oldUI:Destroy() end
+local screenGui = script.Parent
 
 -- Check if player needs character creation
 local success, data = pcall(function()
@@ -33,20 +31,17 @@ end)
 
 if not success or not data then
 	warn("Не вдалося завантажити дані гравця для редактора персонажа.")
+	screenGui:Destroy()
 	return
 end
 
 print("DEBUG: character creation data received. CharacterCreated =", data.CharacterCreated)
 if data.CharacterCreated then
-	-- Already created, do nothing!
+	screenGui:Destroy()
 	return
 end
 
--- Create ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CharacterCreationUI"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = PlayerGui
 
 -- Disable Roblox CoreGUI HUD features during creation (like chat and player list)
 local StarterGui = game:GetService("StarterGui")
