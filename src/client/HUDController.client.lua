@@ -4,18 +4,40 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
-local MainHUD = PlayerGui:WaitForChild("MainHUD")
 
--- Пошук фреймів
-local FansFrame = MainHUD:WaitForChild("Fans_Frame")
-local LevelFrame = MainHUD:WaitForChild("Level_Frame")
-local MoneyFrame = MainHUD:WaitForChild("Money_Frame")
+-- Рекурсивний пошук MainHUD на випадок, якщо він лежить всередині папок інтерфейсу
+local function findHUD()
+	local hud = PlayerGui:FindFirstChild("MainHUD", true)
+	if hud then return hud end
+	
+	for i = 1, 20 do
+		hud = PlayerGui:FindFirstChild("MainHUD", true)
+		if hud then return hud end
+		task.wait(0.5)
+	end
+	return nil
+end
+
+local MainHUD = findHUD()
+if not MainHUD then
+	warn("⚠️ MainHUD не знайдено в PlayerGui! Перевірте назву та розташування GUI.")
+	return
+end
+
+-- Пошук фреймів (теж рекурсивний на випадок змін ієрархії)
+local FansFrame = MainHUD:FindFirstChild("Fans_Frame", true)
+local LevelFrame = MainHUD:FindFirstChild("Level_Frame", true)
+local MoneyFrame = MainHUD:FindFirstChild("Money_Frame", true)
+
+if not (FansFrame and LevelFrame and MoneyFrame) then
+	warn("⚠️ Один з фреймів (Fans_Frame, Level_Frame або Money_Frame) не знайдено в MainHUD!")
+	return
+end
 
 -- Допоміжна функція для отримання або створення TextLabel всередині фрейму
 local function getValueLabel(frame)
 	local label = frame:FindFirstChildWhichIsA("TextLabel")
 	if not label then
-		-- Створюємо лейбл програмно, якщо користувач створив лише порожній фрейм
 		label = Instance.new("TextLabel")
 		label.Name = "ValueLabel"
 		label.Size = UDim2.new(1, -20, 1, 0)
