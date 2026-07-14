@@ -65,13 +65,15 @@ local notePool = {}
 
 -- Звукові ефекти
 local soundDefect = Instance.new("Sound")
-soundDefect.SoundId = "rbxassetid://8536551061" -- Робочий клік/помилка
+soundDefect.SoundId = "rbxassetid://876939830" -- Гарантований клік від Roblox
 soundDefect.Volume = 0.5
+soundDefect.PlaybackSpeed = 0.7 -- Нижчий тон для помилки
 soundDefect.Parent = game.Workspace.CurrentCamera
 
 local soundPerfect = Instance.new("Sound")
-soundPerfect.SoundId = "rbxassetid://6897148560" -- Робочий звук влучання
-soundPerfect.Volume = 0.3
+soundPerfect.SoundId = "rbxassetid://876939830" -- Гарантований клік від Roblox
+soundPerfect.Volume = 0.4
+soundPerfect.PlaybackSpeed = 1.4 -- Вищий тон для влучання
 soundPerfect.Parent = game.Workspace.CurrentCamera
 
 -- Завантаження налаштувань гравця
@@ -853,18 +855,26 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 							if tStroke then tStroke.Transparency = 0.98 end
 						end
 					else
-						note.Gui.BackgroundTransparency = 0.65
+						note.Gui.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+						note.Gui.BackgroundTransparency = 0.25
+						
 						local stroke = note.Gui:FindFirstChildWhichIsA("UIStroke")
-						if stroke then stroke.Transparency = 0 end
+						if stroke then
+							stroke.Color = trackColor
+							stroke.Transparency = 0
+						end
 						
 						local core = note.Gui:FindFirstChild("Core")
 						if core then
-							core.BackgroundColor3 = trackColor
-							core.BackgroundTransparency = 0.5
+							core.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+							core.BackgroundTransparency = 0.4
 						end
 						
 						local reflection = note.Gui:FindFirstChild("Reflection")
-						if reflection then reflection.BackgroundTransparency = 0.3 end
+						if reflection then
+							reflection.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+							reflection.BackgroundTransparency = 0.3
+						end
 					end
 				end
 			end
