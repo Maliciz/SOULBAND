@@ -168,8 +168,8 @@ local function populateSongList()
 		-- Кнопка Грати (Play)
 		local playBtn = Instance.new("TextButton")
 		playBtn.Name = "PlayButton"
-		playBtn.Size = UDim2.new(0.28, 0, 0.65, 0)
-		playBtn.Position = UDim2.new(0.68, 0, 0.175, 0)
+		playBtn.Size = UDim2.new(0.18, 0, 0.65, 0)
+		playBtn.Position = UDim2.new(0.78, 0, 0.175, 0)
 		playBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 		playBtn.Text = "ГРАТИ"
 		playBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
@@ -186,6 +186,27 @@ local function populateSongList()
 		playStroke.Thickness = 1
 		playStroke.Parent = playBtn
 		
+		-- Кнопка Запис (Record)
+		local recordBtn = Instance.new("TextButton")
+		recordBtn.Name = "RecordButton"
+		recordBtn.Size = UDim2.new(0.18, 0, 0.65, 0)
+		recordBtn.Position = UDim2.new(0.58, 0, 0.175, 0)
+		recordBtn.BackgroundColor3 = Color3.fromRGB(45, 25, 25)
+		recordBtn.Text = "ЗАПИС"
+		recordBtn.TextColor3 = Color3.fromRGB(255, 180, 180)
+		recordBtn.TextSize = 13
+		recordBtn.Font = Enum.Font.FredokaOne
+		recordBtn.Parent = item
+		
+		local recordCorner = Instance.new("UICorner")
+		recordCorner.CornerRadius = UDim.new(0, 4)
+		recordCorner.Parent = recordBtn
+		
+		local recordStroke = Instance.new("UIStroke")
+		recordStroke.Color = Color3.fromRGB(120, 60, 60)
+		recordStroke.Thickness = 1
+		recordStroke.Parent = recordBtn
+		
 		-- Анімація наведення
 		playBtn.MouseEnter:Connect(function()
 			TweenService:Create(playBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 60), TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
@@ -196,10 +217,31 @@ local function populateSongList()
 			TweenService:Create(playStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(100, 100, 105)}):Play()
 		end)
 		
+		recordBtn.MouseEnter:Connect(function()
+			TweenService:Create(recordBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(65, 35, 35), TextColor3 = Color3.fromRGB(255, 220, 220)}):Play()
+			TweenService:Create(recordStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(200, 100, 100)}):Play()
+		end)
+		recordBtn.MouseLeave:Connect(function()
+			TweenService:Create(recordBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 25, 25), TextColor3 = Color3.fromRGB(255, 180, 180)}):Play()
+			TweenService:Create(recordStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(120, 60, 60)}):Play()
+		end)
+		
 		-- Клік по кнопці PLAY
 		playBtn.MouseButton1Click:Connect(function()
 			panel.Visible = false -- Приховуємо меню
 			RequestStartSongEvent:FireServer(song.Id) -- Запускаємо гру
+		end)
+		
+		-- Клік по кнопці RECORD
+		recordBtn.MouseButton1Click:Connect(function()
+			panel.Visible = false
+			local startRecordingEvent = ReplicatedStorage.Remotes:FindFirstChild("StartRecordingSong")
+			if not startRecordingEvent then
+				startRecordingEvent = Instance.new("BindableEvent")
+				startRecordingEvent.Name = "StartRecordingSong"
+				startRecordingEvent.Parent = ReplicatedStorage.Remotes
+			end
+			startRecordingEvent:Fire(song)
 		end)
 	end
 end
