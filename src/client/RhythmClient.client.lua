@@ -31,6 +31,14 @@ local currentHp = 100
 local hpLossPerMiss = 5
 local heldTracks = {false, false, false, false} -- Масив для відстеження затиснутих клавіш (блокує Windows KeyRepeat)
 
+-- Кастомна палітра кольорів для доріжок (Rhythm Game Theme)
+local TrackColors = {
+	Color3.fromRGB(0, 255, 255),   -- 1 доріжка: Неоновий Блакитний (Cyan)
+	Color3.fromRGB(255, 0, 128),   -- 2 доріжка: Неоновий Рожевий (Pink)
+	Color3.fromRGB(255, 215, 0),   -- 3 доріжка: Неонове Золото (Gold)
+	Color3.fromRGB(170, 85, 255)   -- 4 доріжка: Неоновий Фіолетовий (Purple)
+}
+
 -- GUI Елементи
 local screenGui = nil
 local rhythmFrame = nil
@@ -44,13 +52,11 @@ local customLanes = {}       -- {x, c, n, m}
 local customActiveFrames = {} -- {x_active, c_active, n_active, m_active}
 local originalParent = nil
 
--- Примусово приховуємо інтерфейс гри при запуску клієнта
-task.spawn(function()
-	local customGui = PlayerGui:WaitForChild("MainGui--inGame", 10)
-	if customGui then
-		customGui.Enabled = false
-	end
-end)
+-- Синхронно приховуємо інтерфейс гри при запуску клієнта (усуває рассинхронізацію та баг зникнення)
+local startupGui = PlayerGui:FindFirstChild("MainGui--inGame", true)
+if startupGui then
+	startupGui.Enabled = false
+end
 
 -- Оптимізація: Пул об'єктів для нот (Object Pooling)
 local NOTE_POOL_SIZE = 30
@@ -86,11 +92,11 @@ local function createNotePool()
 	notePool = {}
 	
 	for i = 1, NOTE_POOL_SIZE do
-		-- Кругла біла нота
+		-- Красива кругла неонова нота
 		local noteObj = Instance.new("Frame")
 		noteObj.Name = "NoteNode"
 		noteObj.BorderSizePixel = 0
-		noteObj.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		noteObj.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Біла основа для градієнту
 		noteObj.AnchorPoint = Vector2.new(0.5, 0.5)
 		noteObj.Visible = false
 		
@@ -98,11 +104,23 @@ local function createNotePool()
 		uiCorner.CornerRadius = UDim.new(0.5, 0)
 		uiCorner.Parent = noteObj
 		
-		-- Обводка
+		-- Обводка (неонове кільце)
 		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(255, 255, 255)
-		stroke.Thickness = 2
+		stroke.Thickness = 3
 		stroke.Parent = noteObj
+		
+		-- Внутрішнє неонове ядро (Core) для 3D глибини
+		local core = Instance.new("Frame")
+		core.Name = "Core"
+		core.Size = UDim2.new(0.4, 0, 0.4, 0)
+		core.Position = UDim2.new(0.3, 0, 0.3, 0)
+		core.BorderSizePixel = 0
+		core.ZIndex = noteObj.ZIndex + 1
+		core.Parent = noteObj
+		
+		local coreCorner = Instance.new("UICorner")
+		coreCorner.CornerRadius = UDim.new(0.5, 0)
+		coreCorner.Parent = core
 		
 		-- Шлейф для затискання (Hold Trail)
 		local trail = Instance.new("Frame")
@@ -110,8 +128,6 @@ local function createNotePool()
 		trail.AnchorPoint = Vector2.new(0.5, 1)
 		trail.Position = UDim2.new(0.5, 0, 0.5, 0)
 		trail.Size = UDim2.new(0, 24, 0, 0)
-		trail.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		trail.BackgroundTransparency = 0.75
 		trail.BorderSizePixel = 0
 		trail.Visible = false
 		trail.ZIndex = noteObj.ZIndex - 1
@@ -122,8 +138,7 @@ local function createNotePool()
 		trailCorner.Parent = trail
 		
 		local trailStroke = Instance.new("UIStroke")
-		trailStroke.Color = Color3.fromRGB(255, 255, 255)
-		trailStroke.Thickness = 1
+		trailStroke.Thickness = 1.5
 		trailStroke.Parent = trail
 		
 		noteObj.Parent = screenGui
@@ -154,17 +169,26 @@ local function getNoteFromPool(track, targetTime, duration)
 		uiCorner.Parent = noteObj
 		
 		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(255, 255, 255)
-		stroke.Thickness = 2
+		stroke.Thickness = 3
 		stroke.Parent = noteObj
+		
+		local core = Instance.new("Frame")
+		core.Name = "Core"
+		core.Size = UDim2.new(0.4, 0, 0.4, 0)
+		core.Position = UDim2.new(0.3, 0, 0.3, 0)
+		core.BorderSizePixel = 0
+		core.ZIndex = noteObj.ZIndex + 1
+		core.Parent = noteObj
+		
+		local coreCorner = Instance.new("UICorner")
+		coreCorner.CornerRadius = UDim.new(0.5, 0)
+		coreCorner.Parent = core
 		
 		local trail = Instance.new("Frame")
 		trail.Name = "Trail"
 		trail.AnchorPoint = Vector2.new(0.5, 1)
 		trail.Position = UDim2.new(0.5, 0, 0.5, 0)
 		trail.Size = UDim2.new(0, 24, 0, 0)
-		trail.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		trail.BackgroundTransparency = 0.75
 		trail.BorderSizePixel = 0
 		trail.Visible = false
 		trail.ZIndex = noteObj.ZIndex - 1
@@ -175,18 +199,30 @@ local function getNoteFromPool(track, targetTime, duration)
 		trailCorner.Parent = trail
 		
 		local trailStroke = Instance.new("UIStroke")
-		trailStroke.Color = Color3.fromRGB(255, 255, 255)
-		trailStroke.Thickness = 1
+		trailStroke.Thickness = 1.5
 		trailStroke.Parent = trail
 		
 		noteObj.Parent = screenGui
 		table.insert(notePool, noteObj)
 	end
 	
-	-- Скидання прозорості ноти при отриманні з пулу
-	noteObj.BackgroundTransparency = 0
+	-- Скидання прозорості ноти та налаштування кольорів відповідно до її доріжки
+	local trackColor = TrackColors[track] or Color3.fromRGB(255, 255, 255)
+	
+	noteObj.BackgroundTransparency = 0.1 -- Скляний ефект
+	noteObj.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	
 	local stroke = noteObj:FindFirstChildWhichIsA("UIStroke")
-	if stroke then stroke.Transparency = 0 end
+	if stroke then
+		stroke.Color = trackColor
+		stroke.Transparency = 0
+	end
+	
+	local core = noteObj:FindFirstChild("Core")
+	if core then
+		core.BackgroundColor3 = trackColor
+		core.BackgroundTransparency = 0
+	end
 	
 	-- Налаштування позиціонування під кастомні кнопки
 	local targetButton = customGuiMode and customLanes[track]
@@ -212,10 +248,15 @@ local function getNoteFromPool(track, targetTime, duration)
 				local totalHeightPixels = (duration / 2.0) * pathLengthScale * screenHeight
 				
 				trail.Size = UDim2.new(0, 24, 0, totalHeightPixels)
+				trail.BackgroundColor3 = trackColor
+				trail.BackgroundTransparency = 0.75 -- М'який кольоровий хвіст
 				trail.Visible = true
-				trail.BackgroundTransparency = 0.75
+				
 				local tStroke = trail:FindFirstChildWhichIsA("UIStroke")
-				if tStroke then tStroke.Transparency = 0 end
+				if tStroke then
+					tStroke.Color = trackColor
+					tStroke.Transparency = 0.2
+				end
 			else
 				trail.Visible = false
 			end
@@ -231,8 +272,9 @@ local function getNoteFromPool(track, targetTime, duration)
 				local trackHeight = rhythmFrame.Size.Y.Offset - 85
 				local totalHeightPixels = (duration / 2.0) * trackHeight
 				trail.Size = UDim2.new(0, 24, 0, totalHeightPixels)
-				trail.Visible = true
+				trail.BackgroundColor3 = trackColor
 				trail.BackgroundTransparency = 0.75
+				trail.Visible = true
 			else
 				trail.Visible = false
 			end
@@ -575,6 +617,8 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 			local endY = targetButton and targetButton.Position.Y.Scale or 0.85
 			local pathLengthScale = endY - startY
 
+			local trackColor = TrackColors[note.Track] or Color3.fromRGB(255, 255, 255)
+
 			if note.IsHolding then
 				if targetButton then
 					local targetXScale = targetButton.Position.X.Scale
@@ -593,7 +637,6 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						local screenHeight = screenGui.AbsoluteSize.Y
 						if screenHeight == 0 then screenHeight = 800 end
 						
-						-- Розраховуємо висоту шлейфу, обмежуючи її знизу нулем
 						local currentHeightPixels = math.max(0, (timeLeft / spawnPreDelay) * pathLengthScale * screenHeight)
 						trail.Size = UDim2.new(0, 24, 0, currentHeightPixels)
 					end
@@ -608,7 +651,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						local activeFrame = customGuiMode and customActiveFrames[note.Track]
 						if activeFrame then
 							activeFrame.Visible = true
-							activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+							activeFrame.BackgroundColor3 = trackColor -- Світиться кольором своєї доріжки!
 							activeFrame.BackgroundTransparency = 0
 						end
 					end
@@ -669,6 +712,9 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						local stroke = note.Gui:FindFirstChildWhichIsA("UIStroke")
 						if stroke then stroke.Transparency = 0.6 end
 						
+						local core = note.Gui:FindFirstChild("Core")
+						if core then core.BackgroundTransparency = 0.6 end
+						
 						local trail = note.Gui:FindFirstChild("Trail")
 						if trail then
 							trail.BackgroundTransparency = 0.95
@@ -676,9 +722,11 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 							if tStroke then tStroke.Transparency = 0.95 end
 						end
 					else
-						note.Gui.BackgroundTransparency = 0
+						note.Gui.BackgroundTransparency = 0.1
 						local stroke = note.Gui:FindFirstChildWhichIsA("UIStroke")
 						if stroke then stroke.Transparency = 0 end
+						local core = note.Gui:FindFirstChild("Core")
+						if core then core.BackgroundTransparency = 0 end
 					end
 				end
 			end
@@ -708,10 +756,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if heldTracks[pressedTrack] then return end
 	heldTracks[pressedTrack] = true
 
+	local trackColor = TrackColors[pressedTrack] or Color3.fromRGB(255, 255, 255)
+
 	local activeFrame = customGuiMode and customActiveFrames[pressedTrack]
 	if activeFrame then
 		activeFrame.Visible = true
-		activeFrame.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+		activeFrame.BackgroundColor3 = trackColor -- Світиться кольором своєї доріжки!
 		activeFrame.BackgroundTransparency = 0
 	end
 
@@ -734,7 +784,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			bestNote.IsHolding = true
 			
 			if activeFrame then
-				activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+				activeFrame.BackgroundColor3 = trackColor
 				activeFrame.BackgroundTransparency = 0
 			end
 			feedbackLabel.Text = "HOLD START!"
@@ -750,7 +800,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				soundPerfect:Play()
 				
 				if activeFrame then
-					activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+					activeFrame.BackgroundColor3 = trackColor
 					activeFrame.BackgroundTransparency = 0
 				end
 			elseif minTimeDiff <= 0.15 then
@@ -760,7 +810,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				soundPerfect:Play()
 				
 				if activeFrame then
-					activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+					activeFrame.BackgroundColor3 = trackColor
 					activeFrame.BackgroundTransparency = 0
 				end
 			else
@@ -782,7 +832,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
 		
 		if activeFrame then
-			activeFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+			activeFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Червоний для BAD
 			activeFrame.BackgroundTransparency = 0
 		end
 
