@@ -207,7 +207,7 @@ SongData.Songs = {
 		Gender = "Universal",
 		Bpm = 125,
 		Length = 160,
-		AudioId = "rbxassetid://0"
+		AudioId = "rbxassetid://12997674282351"
 	},
 	{
 		Id = "laputa_panchiko",
@@ -217,7 +217,7 @@ SongData.Songs = {
 		Gender = "Universal",
 		Bpm = 120,
 		Length = 170,
-		AudioId = "rbxassetid://0"
+		AudioId = "rbxassetid://122914704082509"
 	},
 	{
 		Id = "kuuchuu_buranko",
