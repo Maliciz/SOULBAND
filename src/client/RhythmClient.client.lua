@@ -29,6 +29,7 @@ local notesHit = 0
 local notesTotal = 0
 local currentHp = 100
 local hpLossPerMiss = 5
+local heldTracks = {false, false, false, false} -- Масив для відстеження затиснутих клавіш (блокує Windows KeyRepeat)
 
 -- GUI Елементи
 local screenGui = nil
@@ -421,7 +422,7 @@ local function createRhythmGui()
 		loadingImage.Name = "LoadingImage"
 		loadingImage.Size = UDim2.new(1, 0, 1, 0)
 		loadingImage.BackgroundTransparency = 1
-		loadingImage.Image = "rbxassetid://0" -- Користувач може вставити свій Asset ID пізніше
+		loadingImage.Image = "rbxassetid://0"
 		loadingImage.ScaleType = Enum.ScaleType.Crop
 		loadingImage.BorderSizePixel = 0
 		loadingImage.Parent = loadingScreen
@@ -438,7 +439,6 @@ local function createRhythmGui()
 		loadingText.Parent = loadingScreen
 	end
 	
-	-- Скидаємо прозорість для екрану завантаження
 	loadingScreen.Visible = true
 	loadingScreen.BackgroundTransparency = 0
 	
@@ -490,6 +490,7 @@ local function endSong(failed)
 		returnNoteToPool(note)
 	end
 	activeNotes = {}
+	heldTracks = {false, false, false, false} -- Скидаємо статус утримання
 
 	task.wait(2)
 
@@ -543,6 +544,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	notesHit = 0
 	notesTotal = #song.Notes
 	currentHp = 100
+	heldTracks = {false, false, false, false} -- Скидаємо статус утримання при старті
 
 	if song.Difficulty == "Easy" then
 		hpLossPerMiss = 2
@@ -662,7 +664,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 				else
 					-- Затискання успішно завершено! Лінія зникає повністю!
 					note.IsHolding = false
-					if trail then trail.Visible = false end -- Явно вимикаємо лінію!
+					if trail then trail.Visible = false end
 					returnNoteToPool(note)
 					table.remove(activeNotes, i)
 					
@@ -731,6 +733,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 
 	if not pressedTrack then return end
+
+	-- Захист від Windows KeyRepeat: якщо клавіша вже затиснута, ігноруємо повторні події
+	if heldTracks[pressedTrack] then return end
+	heldTracks[pressedTrack] = true
 
 	local activeFrame = customGuiMode and customActiveFrames[pressedTrack]
 	if activeFrame then
@@ -829,6 +835,9 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 	end
 
 	if not releasedTrack then return end
+
+	-- Скидаємо статус утримання клавіші
+	heldTracks[releasedTrack] = false
 
 	local activeFrame = customGuiMode and customActiveFrames[releasedTrack]
 	if activeFrame then
