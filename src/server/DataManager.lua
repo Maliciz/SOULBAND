@@ -11,9 +11,7 @@ local DEFAULT_DATA = {
 	Level = 0,
 	XP = 0,
 	Gender = "Male", -- "Male" або "Female"
-	Hair = 11103884344, -- Дефолтне волосся
-	SkinColor = "Normal", -- "Light", "Normal", "Tan", "Dark"
-	CharacterCreated = false, -- Чи завершено створення персонажа
+	Hair = 0, -- 0 означає не вибрано (буде зарандомлено на старті)
 	OwnedClothing = {"default_outfit"},
 	OwnedGuitars = {"default_guitar"},
 	HiredMusicians = {}, -- { {Id = "drummer_takeshi", Level = 1, Clothing = "default_outfit"} }
