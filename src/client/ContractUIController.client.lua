@@ -37,12 +37,11 @@ end
 -- Шукаємо або створюємо кнопку закриття (X)
 local closeButton = ContractsGui:FindFirstChild("TextButton", true) or BackgroundFrame:FindFirstChild("TextButton", true)
 
--- Спочатку приховуємо інтерфейс
-ContractsGui.Enabled = false
-BackgroundFrame.Visible = false
+local originalParent = ContractsGui.Parent
 
 -- Логіка відкриття/закриття меню
 local function openMenu()
+	ContractsGui.Parent = PlayerGui -- Тимчасово виносимо у PlayerGui, щоб Roblox відрендерив інтерфейс!
 	ContractsGui.Enabled = true
 	BackgroundFrame.Visible = true
 	
@@ -67,6 +66,7 @@ local function closeMenu()
 	tween.Completed:Connect(function()
 		BackgroundFrame.Visible = false
 		ContractsGui.Enabled = false
+		ContractsGui.Parent = originalParent -- Повертаємо назад у вихідну папку
 	end)
 end
 

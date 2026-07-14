@@ -41,6 +41,7 @@ local accuracyLabel = nil
 local customGuiMode = false
 local customLanes = {}       -- {x, c, n, m}
 local customActiveFrames = {} -- {x_active, c_active, n_active, m_active}
+local originalParent = nil
 
 -- Оптимізація: Пул об'єктів для нот (Object Pooling)
 -- Запобігає лагам і мікро-фризам через постійний спавн/деструкцію інстансів
@@ -158,6 +159,8 @@ local function createRhythmGui()
 	if customGui then
 		print("🎨 Виявлено кастомний інтерфейс MainGui--inGame. Інтегруємо кнопки...")
 		screenGui = customGui
+		originalParent = customGui.Parent
+		customGui.Parent = PlayerGui -- Тимчасово виносимо в PlayerGui, щоб інтерфейс відображався!
 		screenGui.Enabled = true
 		customGuiMode = true
 		
@@ -371,6 +374,9 @@ local function endSong(failed)
 	if customGuiMode then
 		screenGui.Enabled = false
 		feedbackLabel.Text = ""
+		if originalParent then
+			screenGui.Parent = originalParent -- Повертаємо назад у вихідну папку
+		end
 	else
 		if screenGui then
 			screenGui:Destroy()
