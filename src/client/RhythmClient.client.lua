@@ -752,73 +752,71 @@ end
 local function showResultsScreen(finalAccuracy, rewards)
 	local resultsFrame = Instance.new("Frame")
 	resultsFrame.Name = "ResultsFrame"
-	resultsFrame.Size = UDim2.new(0, 520, 0, 520)
-	resultsFrame.Position = UDim2.new(0.5, -260, 0.5, -260)
-	resultsFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-	resultsFrame.BackgroundTransparency = 0.15
+	resultsFrame.Size = UDim2.new(1, 0, 1, 0)
+	resultsFrame.Position = UDim2.new(0, 0, 0, 0)
+	resultsFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 14)
+	resultsFrame.BackgroundTransparency = 0.08
 	resultsFrame.BorderSizePixel = 0
 	resultsFrame.Parent = screenGui
 
-	local uiCorner = Instance.new("UICorner")
-	uiCorner.CornerRadius = UDim.new(0, 12)
-	uiCorner.Parent = resultsFrame
-
-	local uiStroke = Instance.new("UIStroke")
-	uiStroke.Color = Color3.fromRGB(220, 220, 220)
-	uiStroke.Thickness = 2.5
-	uiStroke.Parent = resultsFrame
+	local contentFrame = Instance.new("Frame")
+	contentFrame.Name = "ContentFrame"
+	contentFrame.Size = UDim2.new(0, 600, 0, 520)
+	contentFrame.Position = UDim2.new(0.5, -300, 0.5, -260)
+	contentFrame.BackgroundTransparency = 1
+	contentFrame.Parent = resultsFrame
 
 	local title = Instance.new("TextLabel")
 	title.Size = UDim2.new(1, 0, 0, 45)
 	title.Position = UDim2.new(0, 0, 0, 15)
 	title.BackgroundTransparency = 1
 	title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	title.TextSize = 26
+	title.TextSize = 28
 	title.Font = Enum.Font.FredokaOne
 	title.Text = "СТАТИСТИКА ВИСТУПУ"
-	title.Parent = resultsFrame
+	title.Parent = contentFrame
 
 	local songTitle = Instance.new("TextLabel")
 	songTitle.Size = UDim2.new(1, 0, 0, 25)
 	songTitle.Position = UDim2.new(0, 0, 0, 55)
 	songTitle.BackgroundTransparency = 1
-	songTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+	songTitle.TextColor3 = Color3.fromRGB(160, 160, 160)
 	songTitle.TextSize = 18
 	songTitle.Font = Enum.Font.SourceSansBold
 	songTitle.Text = string.format("%s (%s)", currentSong.Title, currentSong.Difficulty)
-	songTitle.Parent = resultsFrame
+	songTitle.Parent = contentFrame
 
 	local accuracyVal = Instance.new("TextLabel")
 	accuracyVal.Size = UDim2.new(0.5, -20, 0, 70)
 	accuracyVal.Position = UDim2.new(0, 20, 0, 95)
 	accuracyVal.BackgroundTransparency = 1
 	accuracyVal.TextColor3 = Color3.fromRGB(255, 255, 255)
-	accuracyVal.TextSize = 52
+	accuracyVal.TextSize = 56
 	accuracyVal.Font = Enum.Font.FredokaOne
 	accuracyVal.Text = string.format("%d%%", finalAccuracy)
-	accuracyVal.Parent = resultsFrame
+	accuracyVal.Parent = contentFrame
 
 	local accuracyLabel = Instance.new("TextLabel")
 	accuracyLabel.Size = UDim2.new(0.5, -20, 0, 20)
 	accuracyLabel.Position = UDim2.new(0, 20, 0, 160)
 	accuracyLabel.BackgroundTransparency = 1
-	accuracyLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
+	accuracyLabel.TextColor3 = Color3.fromRGB(130, 130, 130)
 	accuracyLabel.TextSize = 15
 	accuracyLabel.Font = Enum.Font.SourceSansBold
 	accuracyLabel.Text = "ТОЧНІСТЬ"
-	accuracyLabel.Parent = resultsFrame
+	accuracyLabel.Parent = contentFrame
 
 	local ratingsFrame = Instance.new("Frame")
 	ratingsFrame.Size = UDim2.new(0.5, -20, 0, 100)
-	ratingsFrame.Position = UDim2.new(0.5, 0, 0, 90)
+	ratingsFrame.Position = UDim2.new(0.5, 20, 0, 90)
 	ratingsFrame.BackgroundTransparency = 1
-	ratingsFrame.Parent = resultsFrame
+	ratingsFrame.Parent = contentFrame
 
 	local ratings = {
 		{ name = "PERFECT", count = perfectCount, color = Color3.fromRGB(255, 255, 255) },
-		{ name = "GOOD", count = goodCount, color = Color3.fromRGB(200, 200, 200) },
+		{ name = "GOOD", count = goodCount, color = Color3.fromRGB(190, 190, 190) },
 		{ name = "BAD", count = badCount, color = Color3.fromRGB(120, 120, 120) },
-		{ name = "MISS", count = missCount, color = Color3.fromRGB(240, 80, 80) }
+		{ name = "MISS", count = missCount, color = Color3.fromRGB(70, 70, 70) }
 	}
 
 	for idx, r in ipairs(ratings) do
@@ -838,7 +836,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		val.Size = UDim2.new(0.4, 0, 0, 20)
 		val.Position = UDim2.new(0.6, 0, 0, yOffset)
 		val.BackgroundTransparency = 1
-		val.TextColor3 = Color3.fromRGB(240, 240, 240)
+		val.TextColor3 = Color3.fromRGB(220, 220, 220)
 		val.TextSize = 16
 		val.Font = Enum.Font.SourceSansBold
 		val.TextXAlignment = Enum.TextXAlignment.Right
@@ -849,13 +847,13 @@ local function showResultsScreen(finalAccuracy, rewards)
 	local rewardsFrame = Instance.new("Frame")
 	rewardsFrame.Size = UDim2.new(1, -40, 0, 55)
 	rewardsFrame.Position = UDim2.new(0, 20, 0, 195)
-	rewardsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-	rewardsFrame.BackgroundTransparency = 0.4
-	rewardsFrame.BorderSizePixel = 0
-	rewardsFrame.Parent = resultsFrame -- Parent directly to resultsFrame
+	rewardsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
+	rewardsFrame.BorderSizePixel = 1
+	rewardsFrame.BorderColor3 = Color3.fromRGB(60, 60, 60)
+	rewardsFrame.Parent = contentFrame
 
 	local rCorner = Instance.new("UICorner")
-	rCorner.CornerRadius = UDim.new(0, 8)
+	rCorner.CornerRadius = UDim.new(0, 6)
 	rCorner.Parent = rewardsFrame
 
 	local xpVal = rewards and rewards.XPEarned or 0
@@ -863,9 +861,9 @@ local function showResultsScreen(finalAccuracy, rewards)
 	local fansVal = rewards and rewards.FansEarned or 0
 
 	local rewardList = {
-		{ name = "XP", val = "+" .. tostring(xpVal), color = Color3.fromRGB(120, 200, 255) },
-		{ name = "Cash", val = "+" .. tostring(cashVal) .. "$", color = Color3.fromRGB(120, 255, 120) },
-		{ name = "Fans", val = "+" .. tostring(fansVal), color = Color3.fromRGB(255, 200, 120) }
+		{ name = "XP", val = "+" .. tostring(xpVal), color = Color3.fromRGB(240, 240, 240) },
+		{ name = "Cash", val = "+" .. tostring(cashVal) .. "$", color = Color3.fromRGB(255, 255, 255) },
+		{ name = "Fans", val = "+" .. tostring(fansVal), color = Color3.fromRGB(180, 180, 180) }
 	}
 
 	for idx, rew in ipairs(rewardList) do
@@ -890,7 +888,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		nameLbl.Size = UDim2.new(1, 0, 0.4, 0)
 		nameLbl.Position = UDim2.new(0, 0, 0.55, 0)
 		nameLbl.BackgroundTransparency = 1
-		nameLbl.TextColor3 = Color3.fromRGB(160, 160, 160)
+		nameLbl.TextColor3 = Color3.fromRGB(130, 130, 130)
 		nameLbl.TextSize = 13
 		nameLbl.Font = Enum.Font.SourceSansBold
 		nameLbl.Text = rew.name:upper()
@@ -901,19 +899,20 @@ local function showResultsScreen(finalAccuracy, rewards)
 	graphTitle.Size = UDim2.new(1, -40, 0, 20)
 	graphTitle.Position = UDim2.new(0, 20, 0, 260)
 	graphTitle.BackgroundTransparency = 1
-	graphTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+	graphTitle.TextColor3 = Color3.fromRGB(160, 160, 160)
 	graphTitle.TextSize = 14
 	graphTitle.Font = Enum.Font.SourceSansBold
 	graphTitle.TextXAlignment = Enum.TextXAlignment.Left
-	graphTitle.Text = "ХРОНОЛОГІЯ ВИСТУПУ (Зелений = Успіх, Червоний = Пропуск):"
-	graphTitle.Parent = resultsFrame
+	graphTitle.Text = "ХРОНОЛОГІЯ ВИСТУПУ (Білий = Успіх, Сірий = Погано, Чорний = Пропуск):"
+	graphTitle.Parent = contentFrame
 
 	local graphBg = Instance.new("Frame")
 	graphBg.Size = UDim2.new(1, -40, 0, 30)
 	graphBg.Position = UDim2.new(0, 20, 0, 285)
-	graphBg.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-	graphBg.BorderSizePixel = 0
-	graphBg.Parent = resultsFrame
+	graphBg.BackgroundColor3 = Color3.fromRGB(16, 16, 18)
+	graphBg.BorderSizePixel = 1
+	graphBg.BorderColor3 = Color3.fromRGB(50, 50, 50)
+	graphBg.Parent = contentFrame
 
 	local gCorner = Instance.new("UICorner")
 	gCorner.CornerRadius = UDim.new(0, 6)
@@ -922,7 +921,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	local gLine = Instance.new("Frame")
 	gLine.Size = UDim2.new(1, -20, 0, 2)
 	gLine.Position = UDim2.new(0, 10, 0.5, -1)
-	gLine.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+	gLine.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 	gLine.BorderSizePixel = 0
 	gLine.Parent = graphBg
 
@@ -936,11 +935,15 @@ local function showResultsScreen(finalAccuracy, rewards)
 		dot.BorderSizePixel = 0
 		
 		if note.rating == "PERFECT" or note.rating == "GOOD" then
-			dot.BackgroundColor3 = Color3.fromRGB(120, 255, 120)
+			dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		elseif note.rating == "BAD" then
-			dot.BackgroundColor3 = Color3.fromRGB(255, 230, 100)
+			dot.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
 		else
-			dot.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+			dot.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+			local dotStroke = Instance.new("UIStroke")
+			dotStroke.Thickness = 1
+			dotStroke.Color = Color3.fromRGB(100, 100, 100)
+			dotStroke.Parent = dot
 		end
 		
 		dot.Parent = gLine
@@ -950,12 +953,12 @@ local function showResultsScreen(finalAccuracy, rewards)
 	missTitle.Size = UDim2.new(1, -40, 0, 20)
 	missTitle.Position = UDim2.new(0, 20, 0, 325)
 	missTitle.BackgroundTransparency = 1
-	missTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+	missTitle.TextColor3 = Color3.fromRGB(160, 160, 160)
 	missTitle.TextSize = 14
 	missTitle.Font = Enum.Font.SourceSansBold
 	missTitle.TextXAlignment = Enum.TextXAlignment.Left
 	missTitle.Text = "СЕКУНДИ З ПОМИЛКАМИ:"
-	missTitle.Parent = resultsFrame
+	missTitle.Parent = contentFrame
 
 	local missScroll = Instance.new("ScrollingFrame")
 	missScroll.Size = UDim2.new(1, -40, 0, 80)
@@ -964,8 +967,8 @@ local function showResultsScreen(finalAccuracy, rewards)
 	missScroll.BorderSizePixel = 0
 	missScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 	missScroll.ScrollBarThickness = 4
-	missScroll.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
-	missScroll.Parent = resultsFrame
+	missScroll.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
+	missScroll.Parent = contentFrame
 
 	local missListText = ""
 	if #missSeconds == 0 then
@@ -981,7 +984,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	local missTxtLabel = Instance.new("TextLabel")
 	missTxtLabel.Size = UDim2.new(1, 0, 1, 0)
 	missTxtLabel.BackgroundTransparency = 1
-	missTxtLabel.TextColor3 = #missSeconds == 0 and Color3.fromRGB(120, 255, 120) or Color3.fromRGB(220, 220, 220)
+	missTxtLabel.TextColor3 = #missSeconds == 0 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 190, 190)
 	missTxtLabel.TextSize = 14
 	missTxtLabel.Font = Enum.Font.SourceSans
 	missTxtLabel.TextWrapped = true
@@ -991,33 +994,35 @@ local function showResultsScreen(finalAccuracy, rewards)
 	missTxtLabel.Parent = missScroll
 
 	local continueBtn = Instance.new("TextButton")
-	continueBtn.Size = UDim2.new(0, 200, 0, 45)
-	continueBtn.Position = UDim2.new(0.5, -100, 1, -65)
-	continueBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+	continueBtn.Size = UDim2.new(0, 220, 0, 45)
+	continueBtn.Position = UDim2.new(0.5, -110, 1, -65)
+	continueBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 26)
 	continueBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	continueBtn.TextSize = 18
 	continueBtn.Font = Enum.Font.FredokaOne
 	continueBtn.Text = "ПРОДОВЖИТИ"
-	continueBtn.Parent = resultsFrame
+	continueBtn.Parent = contentFrame
 
 	local cCorner = Instance.new("UICorner")
 	cCorner.CornerRadius = UDim.new(0, 8)
 	cCorner.Parent = continueBtn
 
 	local cStroke = Instance.new("UIStroke")
-	cStroke.Color = Color3.fromRGB(120, 255, 120)
+	cStroke.Color = Color3.fromRGB(200, 200, 200)
 	cStroke.Thickness = 1.5
 	cStroke.Parent = continueBtn
 
 	continueBtn.MouseEnter:Connect(function()
 		TweenService:Create(continueBtn, TweenInfo.new(0.15), {
-			BackgroundColor3 = Color3.fromRGB(70, 180, 100)
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			TextColor3 = Color3.fromRGB(12, 12, 14)
 		}):Play()
 	end)
 
 	continueBtn.MouseLeave:Connect(function()
 		TweenService:Create(continueBtn, TweenInfo.new(0.15), {
-			BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+			BackgroundColor3 = Color3.fromRGB(24, 24, 26),
+			TextColor3 = Color3.fromRGB(255, 255, 255)
 		}):Play()
 	end)
 
