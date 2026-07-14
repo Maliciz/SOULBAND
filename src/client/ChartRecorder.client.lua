@@ -183,10 +183,19 @@ stopRecording = function()
 	
 	print("⏹️ ЗАПИС ЗАВЕРШЕНО!")
 	
+	-- Сортуємо записані ноти за часом спавну
+	table.sort(recordedNotes, function(a, b)
+		return a.time < b.time
+	end)
+	
 	-- Створюємо Luau-код
 	local code = "Notes = {\n"
 	for i, note in ipairs(recordedNotes) do
-		code = code .. string.format("\t{ time = %.2f, track = %d },\n", note.time, note.track)
+		if note.duration and note.duration > 0 then
+			code = code .. string.format("\t{ time = %.2f, track = %d, duration = %.2f },\n", note.time, note.track, note.duration)
+		else
+			code = code .. string.format("\t{ time = %.2f, track = %d },\n", note.time, note.track)
+		end
 	end
 	code = code .. "}"
 	
@@ -207,6 +216,9 @@ startRecordingEvent.Event:Connect(function(song)
 	startRecording(song)
 end)
 
+-- Таблиця для відстеження активних утримань клавіш (холдів)
+local activeHolds = {}
+
 -- Слухаємо клавіші для фіксації нот
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
@@ -224,11 +236,48 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		
 		if pressedTrack then
 			local elapsed = os.clock() - startTime
-			table.insert(recordedNotes, {
-				time = math.round(elapsed * 100) / 100,
-				track = pressedTrack
-			})
-			print(string.format("🎵 Записано: %.2fs ➔ доріжка %d", elapsed, pressedTrack))
+			activeHolds[pressedTrack] = elapsed
+			print(string.format("🎵 Початок натискання: %.2fs ➔ доріжка %d", elapsed, pressedTrack))
+		end
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+	if not recording then return end
+	
+	local keybinds = GameSettings.DefaultKeybinds
+	local releasedTrack = nil
+	for trackIdx, bindName in ipairs(keybinds) do
+		if input.KeyCode == Enum.KeyCode[bindName] then
+			releasedTrack = trackIdx
+			break
+		end
+	end
+	
+	if releasedTrack then
+		local holdStart = activeHolds[releasedTrack]
+		if holdStart then
+			local elapsed = os.clock() - startTime
+			local duration = elapsed - holdStart
+			activeHolds[releasedTrack] = nil
+			
+			local timeVal = math.round(holdStart * 100) / 100
+			local durationVal = math.round(duration * 100) / 100
+			
+			if durationVal > 0.25 then
+				table.insert(recordedNotes, {
+					time = timeVal,
+					track = releasedTrack,
+					duration = durationVal
+				})
+				print(string.format("🎵 Записано HOLD: %.2fs (тривалість %.2fs) ➔ доріжка %d", timeVal, durationVal, releasedTrack))
+			else
+				table.insert(recordedNotes, {
+					time = timeVal,
+					track = releasedTrack
+				})
+				print(string.format("🎵 Записано TAP: %.2fs ➔ доріжка %d", timeVal, releasedTrack))
+			end
 		end
 	end
 end)

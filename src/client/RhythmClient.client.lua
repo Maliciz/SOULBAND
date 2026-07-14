@@ -65,9 +65,9 @@ local notePool = {}
 
 -- Звукові ефекти
 local soundDefect = Instance.new("Sound")
-soundDefect.SoundId = "rbxassetid://876939830" -- Гарантований клік від Roblox
-soundDefect.Volume = 0.5
-soundDefect.PlaybackSpeed = 0.7 -- Нижчий тон для помилки
+soundDefect.SoundId = "rbxassetid://1848228518" -- Гітарний скрип/помилка (Guitar Scratches від APM Music)
+soundDefect.Volume = 0.6
+soundDefect.PlaybackSpeed = 1.0
 soundDefect.Parent = game.Workspace.CurrentCamera
 
 local soundPerfect = Instance.new("Sound")
@@ -75,6 +75,31 @@ soundPerfect.SoundId = "rbxassetid://876939830" -- Гарантований кл
 soundPerfect.Volume = 0.4
 soundPerfect.PlaybackSpeed = 1.4 -- Вищий тон для влучання
 soundPerfect.Parent = game.Workspace.CurrentCamera
+
+-- Логіка приглушення музики на 0.3 сек при міссі
+local dimThread = nil
+local function triggerMiss()
+	soundDefect:Play()
+	
+	if activeSongSound and isPlaying then
+		pcall(function()
+			activeSongSound.Volume = 0.15 -- Приглушуємо гучність
+		end)
+		
+		if dimThread then
+			task.cancel(dimThread)
+		end
+		
+		dimThread = task.delay(0.3, function()
+			if activeSongSound and isPlaying then
+				pcall(function()
+					activeSongSound.Volume = 0.7 -- Відновлюємо гучність
+				end)
+			end
+			dimThread = nil
+		end)
+	end
+end
 
 -- Завантаження налаштувань гравця
 local function updateKeybinds()
@@ -459,13 +484,20 @@ local function createRhythmGui()
 		end
 		
 		hpBar = customGui:FindFirstChild("HPBar", true)
-		if not hpBar then
+		if hpBar then
+			hpBar.Visible = false
+			local bg = hpBar.Parent
+			if bg and bg:IsA("GuiObject") then
+				bg.Visible = false
+			end
+		else
 			local hpBackground = Instance.new("Frame")
 			hpBackground.Name = "HPBackground"
 			hpBackground.Size = UDim2.new(0.4, 0, 0, 12)
 			hpBackground.Position = UDim2.new(0.3, 0, 0.1, 0)
 			hpBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 			hpBackground.BorderSizePixel = 0
+			hpBackground.Visible = false -- Приховуємо
 			hpBackground.Parent = customGui
 			
 			local corner = Instance.new("UICorner")
@@ -475,13 +507,10 @@ local function createRhythmGui()
 			hpBar = Instance.new("Frame")
 			hpBar.Name = "HPBar"
 			hpBar.Size = UDim2.new(1, 0, 1, 0)
-			hpBar.BackgroundColor3 = Color3.fromRGB(220, 220, 220) -- Світло-сірий замість зеленого
+			hpBar.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
 			hpBar.BorderSizePixel = 0
+			hpBar.Visible = false -- Приховуємо
 			hpBar.Parent = hpBackground
-			
-			local barCorner = Instance.new("UICorner")
-			barCorner.CornerRadius = UDim.new(0.5, 0)
-			barCorner.Parent = hpBar
 		end
 	else
 		customGuiMode = false
@@ -539,12 +568,14 @@ local function createRhythmGui()
 		hpBackground.Size = UDim2.new(1, 0, 0, 15)
 		hpBackground.Position = UDim2.new(0, 0, 0, -25)
 		hpBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+		hpBackground.Visible = false -- Приховуємо
 		hpBackground.Parent = rhythmFrame
 
 		hpBar = Instance.new("Frame")
 		hpBar.Size = UDim2.new(1, 0, 1, 0)
 		hpBar.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
 		hpBar.BorderSizePixel = 0
+		hpBar.Visible = false -- Приховуємо
 		hpBar.Parent = hpBackground
 
 		feedbackLabel = Instance.new("TextLabel")
@@ -808,17 +839,9 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					-- Нота вийшла за межі доріжки
 					if not note.Hit then
 						-- Пропуск ноти (Miss) - тільки якщо по ній НЕ попали!
-						soundDefect:Play()
+						triggerMiss()
 						feedbackLabel.Text = "MISS!"
 						feedbackLabel.TextColor3 = Color3.fromRGB(120, 120, 120) -- Темно-сірий Miss
-						
-						currentHp = math.max(0, currentHp - hpLossPerMiss)
-						hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
-						
-						if currentHp <= 0 then
-							connection:Disconnect()
-							endSong(true)
-						end
 					end
 					
 					returnNoteToPool(note)
@@ -882,7 +905,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 		-- Оновлення статус-панелі
 		local currentAcc = (notesTotal > 0) and math.round((notesHit / notesTotal) * 100) or 100
-		accuracyLabel.Text = string.format("Точність: %d%% | HP: %d", currentAcc, currentHp)
+		accuracyLabel.Text = string.format("Точність: %d%%", currentAcc)
 	end)
 end)
 
@@ -968,36 +991,23 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				feedbackLabel.Text = "BAD!"
 				feedbackLabel.TextColor3 = Color3.fromRGB(120, 120, 120) -- Сірий
 				notesHit = notesHit + 0.25
-				soundDefect:Play()
+				triggerMiss()
 				spawnHitParticles(pressedTrack, "BAD!")
-				
-				currentHp = math.max(0, currentHp - (hpLossPerMiss / 2))
-				hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
 				
 				if activeFrame then
 					activeFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 					activeFrame.BackgroundTransparency = 0.5
 				end
-
-				if currentHp <= 0 then
-					endSong(true)
-				end
 			end
 		end
 	else
-		soundDefect:Play()
+		triggerMiss()
 		feedbackLabel.Text = "BAD!"
 		feedbackLabel.TextColor3 = Color3.fromRGB(120, 120, 120)
-		currentHp = math.max(0, currentHp - hpLossPerMiss)
-		hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
 		
 		if activeFrame then
 			activeFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 			activeFrame.BackgroundTransparency = 0.5
-		end
-
-		if currentHp <= 0 then
-			endSong(true)
 		end
 	end
 end)
@@ -1036,15 +1046,9 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 				if trail then trail.Visible = false end
 				returnNoteToPool(note)
 				
-				soundDefect:Play()
+				triggerMiss()
 				feedbackLabel.Text = "HOLD BREAK!"
 				feedbackLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
-				currentHp = math.max(0, currentHp - hpLossPerMiss)
-				hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
-				
-				if currentHp <= 0 then
-					endSong(true)
-				end
 			end
 		end
 	end
