@@ -74,6 +74,9 @@
         },
         "HUDController": {
           "$path": "src/client/HUDController.client.lua"
+        },
+        "ContractUIController": {
+          "$path": "src/client/ContractUIController.client.lua"
         }
       }
     }
