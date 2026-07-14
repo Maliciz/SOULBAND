@@ -1031,12 +1031,14 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 		local nextNote = currentSong.Notes[spawnedNoteIndex]
 		if nextNote and #activeNotes == 0 and countdownLabel then
 			local timeUntilSpawn = (nextNote.time - spawnPreDelay) - elapsed
-			if timeUntilSpawn > 2.0 then
-				countdownLabel.Visible = true
-				countdownLabel.Text = string.format("Наступна нота через: %.1f сек", timeUntilSpawn)
-				
-				-- Пульсуючий ефект прозорості
-				countdownLabel.TextTransparency = 0.15 + math.sin(os.clock() * 6.5) * 0.15
+			if timeUntilSpawn > 0.1 then
+				if timeUntilSpawn > 2.0 or countdownLabel.Visible then
+					countdownLabel.Visible = true
+					countdownLabel.Text = tostring(math.ceil(timeUntilSpawn))
+					
+					-- Пульсуючий ефект прозорості
+					countdownLabel.TextTransparency = 0.15 + math.sin(os.clock() * 6.5) * 0.15
+				end
 			else
 				countdownLabel.Visible = false
 			end
