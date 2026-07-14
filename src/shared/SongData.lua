@@ -227,7 +227,7 @@ SongData.Songs = {
 		Gender = "Universal",
 		Bpm = 140,
 		Length = 260,
-		AudioId = "rbxassetid://0"
+		AudioId = "rbxassetid://73479694911085"
 	},
 	{
 		Id = "black_hole_sun",
@@ -277,7 +277,7 @@ SongData.Songs = {
 		Gender = "Universal",
 		Bpm = 128,
 		Length = 280,
-		AudioId = "rbxassetid://0"
+		AudioId = "rbxassetid://103996773702588"
 	},
 	{
 		Id = "too_much",
