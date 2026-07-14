@@ -355,6 +355,7 @@ camera.CameraType = Enum.CameraType.Scriptable
 local camConnection
 if starterSkin then
 	camConnection = RunService.RenderStepped:Connect(function()
+		camera.CameraType = Enum.CameraType.Scriptable
 		local skinCF = starterSkin:GetPivot()
 		-- Place camera 8.5 studs in front of customizer rig and 4.8 studs high
 		local camPosition = (skinCF * CFrame.new(0, 4.8, -8.5)).Position
