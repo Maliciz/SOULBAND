@@ -2,6 +2,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local SongData = require(ReplicatedStorage:WaitForChild("SongData"))
+
 -- Підключення менеджерів
 local DataManager = require(script:WaitForChild("DataManager"))
 local ShopManager = require(script:WaitForChild("ShopManager"))
@@ -35,6 +37,7 @@ local HireMusicianFunc = getOrCreateRemote("RemoteFunction", "HireMusician")
 local UpgradeMusicianFunc = getOrCreateRemote("RemoteFunction", "UpgradeMusician")
 local EquipMusicianClothingFunc = getOrCreateRemote("RemoteFunction", "EquipMusicianClothing")
 local SetCustomKeybindsEvent = getOrCreateRemote("RemoteEvent", "SetCustomKeybinds")
+local RequestStartSongEvent = getOrCreateRemote("RemoteEvent", "RequestStartSong")
 local SetGenderFunc = getOrCreateRemote("RemoteFunction", "SetGender")
 local RequestPlayerDataFunc = getOrCreateRemote("RemoteFunction", "RequestPlayerData")
 
@@ -151,5 +154,12 @@ SetCustomKeybindsEvent.OnServerEvent:Connect(function(player, keybinds)
 	if type(keybinds) == "table" and #keybinds == 4 then
 		DataManager.Set(player, "Keybinds", keybinds)
 		print("Користувацькі клавіші збережено для " .. player.Name)
+	end
+end)
+
+RequestStartSongEvent.OnServerEvent:Connect(function(player, songId)
+	local song = SongData.GetSongById(songId)
+	if song then
+		StartSongEvent:FireClient(player, song, "Вільна гра: " .. song.Title)
 	end
 end)

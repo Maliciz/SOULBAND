@@ -45,6 +45,9 @@
         "SetCustomKeybinds": {
           "$className": "RemoteEvent"
         },
+        "RequestStartSong": {
+          "$className": "RemoteEvent"
+        },
         "SetGender": {
           "$className": "RemoteFunction"
         },
@@ -83,6 +86,9 @@
         },
         "SettingsUIController": {
           "$path": "src/client/SettingsUIController.client.lua"
+        },
+        "SongSelectorController": {
+          "$path": "src/client/SongSelectorController.client.lua"
         },
         "ContractUIController": {
           "$path": "src/client/ContractUIController.client.lua"
