@@ -37,7 +37,6 @@ local rhythmFrame = nil
 local hpBar = nil
 local feedbackLabel = nil
 local accuracyLabel = nil
-local loadingScreen = nil
 
 -- Елементи кастомного GUI (MainGui--inGame)
 local customGuiMode = false
@@ -104,7 +103,7 @@ local function createNotePool()
 		trail.Position = UDim2.new(0.5, 0, 0.5, 0)
 		trail.Size = UDim2.new(0, 24, 0, 0)
 		trail.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		trail.BackgroundTransparency = 0.75 -- Зроблено прозорішим (0.75 замість 0.45)
+		trail.BackgroundTransparency = 0.75
 		trail.BorderSizePixel = 0
 		trail.Visible = false
 		trail.ZIndex = noteObj.ZIndex - 1
@@ -157,7 +156,7 @@ local function getNoteFromPool(track, targetTime, duration)
 		trail.Position = UDim2.new(0.5, 0, 0.5, 0)
 		trail.Size = UDim2.new(0, 24, 0, 0)
 		trail.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		trail.BackgroundTransparency = 0.75 -- Прозоріший шлейф
+		trail.BackgroundTransparency = 0.75
 		trail.BorderSizePixel = 0
 		trail.Visible = false
 		trail.ZIndex = noteObj.ZIndex - 1
@@ -406,48 +405,6 @@ local function createRhythmGui()
 		accuracyLabel.Parent = rhythmFrame
 	end
 	
-	-- Створюємо або отримуємо Екран Завантаження (LoadingScreen)
-	loadingScreen = screenGui:FindFirstChild("LoadingScreen")
-	if not loadingScreen then
-		loadingScreen = Instance.new("Frame")
-		loadingScreen.Name = "LoadingScreen"
-		loadingScreen.Size = UDim2.new(1, 0, 1, 0)
-		loadingScreen.Position = UDim2.new(0, 0, 0, 0)
-		loadingScreen.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-		loadingScreen.BorderSizePixel = 0
-		loadingScreen.ZIndex = 100
-		loadingScreen.Parent = screenGui
-		
-		local loadingImage = Instance.new("ImageLabel")
-		loadingImage.Name = "LoadingImage"
-		loadingImage.Size = UDim2.new(1, 0, 1, 0)
-		loadingImage.BackgroundTransparency = 1
-		loadingImage.Image = "rbxassetid://0"
-		loadingImage.ScaleType = Enum.ScaleType.Crop
-		loadingImage.BorderSizePixel = 0
-		loadingImage.Parent = loadingScreen
-		
-		local loadingText = Instance.new("TextLabel")
-		loadingText.Name = "LoadingText"
-		loadingText.Size = UDim2.new(1, 0, 0, 60)
-		loadingText.Position = UDim2.new(0, 0, 0.82, 0)
-		loadingText.BackgroundTransparency = 1
-		loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-		loadingText.TextSize = 36
-		loadingText.Font = Enum.Font.FredokaOne
-		loadingText.Text = "ЗАВАНТАЖЕННЯ..."
-		loadingText.Parent = loadingScreen
-	end
-	
-	loadingScreen.Visible = true
-	loadingScreen.BackgroundTransparency = 0
-	
-	local loadingImage = loadingScreen:FindFirstChild("LoadingImage")
-	if loadingImage then loadingImage.ImageTransparency = 0 end
-	
-	local loadingText = loadingScreen:FindFirstChild("LoadingText")
-	if loadingText then loadingText.TextTransparency = 0 end
-	
 	createNotePool()
 end
 
@@ -558,30 +515,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 	createRhythmGui()
 
-	-- Очікування перед стартом пісні (поки висить екран завантаження)
-	task.wait(2.2)
-	
-	-- Плавне зникнення екрану завантаження
-	if loadingScreen then
-		local fadeInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		local tweenBg = TweenService:Create(loadingScreen, fadeInfo, {BackgroundTransparency = 1})
-		
-		local loadingImage = loadingScreen:FindFirstChild("LoadingImage")
-		local tweenImg = loadingImage and TweenService:Create(loadingImage, fadeInfo, {ImageTransparency = 1})
-		
-		local loadingText = loadingScreen:FindFirstChild("LoadingText")
-		local tweenTxt = loadingText and TweenService:Create(loadingText, fadeInfo, {TextTransparency = 1})
-		
-		tweenBg:Play()
-		if tweenImg then tweenImg:Play() end
-		if tweenTxt then tweenTxt:Play() end
-		
-		tweenBg.Completed:Connect(function()
-			loadingScreen.Visible = false
-		end)
-	end
-	
-	-- Записуємо початковий час пісні після завантаження!
+	-- Запускаємо пісню негайно без штучних затримок!
 	songStartTime = os.clock()
 
 	-- Ігровий цикл
