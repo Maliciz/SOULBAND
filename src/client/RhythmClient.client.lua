@@ -46,6 +46,7 @@ local rhythmFrame = nil
 local hpBar = nil
 local feedbackLabel = nil
 local accuracyLabel = nil
+local countdownLabel = nil
 
 -- Елементи кастомного GUI (MainGui--inGame)
 local customGuiMode = false
@@ -561,6 +562,26 @@ local function createRhythmGui()
 			accuracyLabel.Parent = customGui
 		end
 		
+		countdownLabel = customGui:FindFirstChild("CountdownLabel", true)
+		if not countdownLabel then
+			countdownLabel = Instance.new("TextLabel")
+			countdownLabel.Name = "CountdownLabel"
+			countdownLabel.Size = UDim2.new(0, 400, 0, 40)
+			countdownLabel.Position = UDim2.new(0.5, -200, 0.78, 0) -- Розмістимо в нижній частині екрана
+			countdownLabel.BackgroundTransparency = 1
+			countdownLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+			countdownLabel.TextSize = 24
+			countdownLabel.Font = Enum.Font.FredokaOne
+			countdownLabel.Text = ""
+			countdownLabel.Visible = false
+			countdownLabel.Parent = customGui
+			
+			local stroke = Instance.new("UIStroke")
+			stroke.Thickness = 2
+			stroke.Color = Color3.fromRGB(0, 0, 0)
+			stroke.Parent = countdownLabel
+		end
+		
 		hpBar = customGui:FindFirstChild("HPBar", true)
 		if hpBar then
 			hpBar.Visible = false
@@ -675,6 +696,23 @@ local function createRhythmGui()
 		accuracyLabel.Font = Enum.Font.SourceSansBold
 		accuracyLabel.Text = "Точність: 100% | HP: 100"
 		accuracyLabel.Parent = rhythmFrame
+		
+		countdownLabel = Instance.new("TextLabel")
+		countdownLabel.Name = "CountdownLabel"
+		countdownLabel.Size = UDim2.new(1, 0, 0, 40)
+		countdownLabel.Position = UDim2.new(0, 0, 1, 15) -- Трохи нижче за рамку гри
+		countdownLabel.BackgroundTransparency = 1
+		countdownLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+		countdownLabel.TextSize = 20
+		countdownLabel.Font = Enum.Font.FredokaOne
+		countdownLabel.Text = ""
+		countdownLabel.Visible = false
+		countdownLabel.Parent = rhythmFrame
+		
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 1.5
+		stroke.Color = Color3.fromRGB(0, 0, 0)
+		stroke.Parent = countdownLabel
 	end
 	
 	createNotePool()
@@ -739,6 +777,10 @@ local function endSong(failed)
 	if customGuiMode then
 		screenGui.Enabled = false
 		feedbackLabel.Text = ""
+		if countdownLabel then
+			countdownLabel.Text = ""
+			countdownLabel.Visible = false
+		end
 		if originalParent then
 			screenGui.Parent = originalParent
 		end
@@ -746,6 +788,7 @@ local function endSong(failed)
 		if screenGui then
 			screenGui:Destroy()
 			screenGui = nil
+			countdownLabel = nil
 		end
 	end
 
@@ -826,8 +869,8 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 		local elapsed = os.clock() - songStartTime
 
-		-- Перевірка завершення пісні за часом
-		if elapsed >= currentSong.Length then
+		-- Перевірка завершення пісні за часом (з додатковим запасом у 6 секунд для догравання останніх нот)
+		if elapsed >= currentSong.Length + 6 then
 			connection:Disconnect()
 			endSong(false)
 			return
@@ -983,6 +1026,23 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 		-- Оновлення статус-панелі
 		local currentAcc = (notesTotal > 0) and math.round((notesHit / notesTotal) * 100) or 100
 		accuracyLabel.Text = string.format("Точність: %d%%", currentAcc)
+
+		-- Відображення таймера до появи наступної ноти
+		local nextNote = currentSong.Notes[spawnedNoteIndex]
+		if nextNote and #activeNotes == 0 and countdownLabel then
+			local timeUntilSpawn = (nextNote.time - spawnPreDelay) - elapsed
+			if timeUntilSpawn > 2.0 then
+				countdownLabel.Visible = true
+				countdownLabel.Text = string.format("Наступна нота через: %.1f сек", timeUntilSpawn)
+				
+				-- Пульсуючий ефект прозорості
+				countdownLabel.TextTransparency = 0.15 + math.sin(os.clock() * 6.5) * 0.15
+			else
+				countdownLabel.Visible = false
+			end
+		elseif countdownLabel then
+			countdownLabel.Visible = false
+		end
 	end)
 end)
 
