@@ -40,11 +40,125 @@ local SetCustomKeybindsEvent = getOrCreateRemote("RemoteEvent", "SetCustomKeybin
 local RequestStartSongEvent = getOrCreateRemote("RemoteEvent", "RequestStartSong")
 local SetGenderFunc = getOrCreateRemote("RemoteFunction", "SetGender")
 local RequestPlayerDataFunc = getOrCreateRemote("RemoteFunction", "RequestPlayerData")
+local FinishCharacterCreationFunc = getOrCreateRemote("RemoteFunction", "FinishCharacterCreation")
+local PreviewHairEvent = getOrCreateRemote("RemoteEvent", "PreviewHair")
+
+local InsertService = game:GetService("InsertService")
+
+local function applyHairToModel(model, hairId)
+	if not model or not model:FindFirstChild("Humanoid") then return end
+	
+	-- Clean existing accessories on the model
+	for _, child in ipairs(model:GetChildren()) do
+		if child:IsA("Accessory") then
+			child:Destroy()
+		end
+	end
+	
+	-- Try loading the accessory via InsertService
+	local success, assetModel = pcall(function()
+		return InsertService:LoadAsset(hairId)
+	end)
+	
+	if success and assetModel then
+		local accessory = assetModel:FindFirstChildWhichIsA("Accessory")
+		if accessory then
+			accessory.Parent = model
+			model.Humanoid:AddAccessory(accessory)
+		end
+		assetModel:Destroy()
+	else
+		-- Fallback: create manual accessory mesh if asset fails to load
+		local accessory = Instance.new("Accessory")
+		accessory.Name = "CustomHair_" .. tostring(hairId)
+		
+		local handle = Instance.new("Part")
+		handle.Name = "Handle"
+		handle.Size = Vector3.new(1.2, 1.2, 1.2)
+		handle.Color = Color3.fromRGB(20, 20, 20) -- Default dark hair color
+		handle.Parent = accessory
+		
+		local mesh = Instance.new("SpecialMesh")
+		mesh.MeshId = "rbxassetid://" .. tostring(hairId)
+		mesh.Parent = handle
+		
+		local attachment = Instance.new("Attachment")
+		attachment.Name = "HairAttachment"
+		attachment.Parent = handle
+		
+		accessory.Parent = model
+		model.Humanoid:AddAccessory(accessory)
+	end
+end
+
+local function applyCustomCharacter(player, character)
+	local data = DataManager.Get(player)
+	if not data or not data.CharacterCreated then return end
+
+	-- Wait for humanoid
+	local humanoid = character:WaitForChild("Humanoid", 5)
+	if not humanoid then return end
+
+	-- Clear default Roblox accessories
+	for _, child in ipairs(character:GetChildren()) do
+		if child:IsA("Accessory") then
+			child:Destroy()
+		end
+	end
+
+	-- Apply clothes and body colors from Starter_Skin if available
+	local starterSkin = workspace:WaitForChild("NPC'S", 5)
+		and workspace.NPC'S:WaitForChild("NPC'S--Main", 5)
+		and workspace.NPC'S["NPC'S--Main"]:WaitForChild("Starter_Skin", 5)
+
+	if starterSkin then
+		-- Copy and set Body Colors according to selection
+		local SkinColors = {
+			Light = Color3.fromRGB(255, 230, 220),
+			Normal = Color3.fromRGB(253, 204, 168),
+			Tan = Color3.fromRGB(224, 172, 105),
+			Dark = Color3.fromRGB(141, 85, 36)
+		}
+		local color = SkinColors[data.SkinColor or "Normal"] or SkinColors.Normal
+		local bodyColors = character:FindFirstChildOfClass("BodyColors")
+		if not bodyColors then
+			bodyColors = Instance.new("BodyColors")
+			bodyColors.Parent = character
+		end
+		bodyColors.HeadColor3 = color
+		bodyColors.TorsoColor3 = color
+		bodyColors.LeftArmColor3 = color
+		bodyColors.RightArmColor3 = color
+		bodyColors.LeftLegColor3 = color
+		bodyColors.RightLegColor3 = color
+		-- Copy clothes
+		for _, child in ipairs(starterSkin:GetChildren()) do
+			if child:IsA("Shirt") or child:IsA("Pants") then
+				-- Remove existing
+				for _, oldChild in ipairs(character:GetChildren()) do
+					if oldChild.ClassName == child.ClassName then
+						oldChild:Destroy()
+					end
+				end
+				child:Clone().Parent = character
+			end
+		end
+	end
+
+	-- Apply saved hair accessory
+	if data.Hair and data.Hair > 0 then
+		applyHairToModel(character, data.Hair)
+	end
+end
 
 -- Події входу та виходу гравців
 Players.PlayerAdded:Connect(function(player)
 	local data = DataManager.LoadData(player)
 	print("Дані для гравця " .. player.Name .. " успішно завантажено. Баланс: " .. data.Cash)
+	
+	player.CharacterAdded:Connect(function(character)
+		applyCustomCharacter(player, character)
+	end)
 	
 	-- Створюємо папки лідерборду (для відображення фанів та грошей у списку гравців)
 	local leaderstats = Instance.new("Folder")
@@ -114,6 +228,30 @@ SetGenderFunc.OnServerInvoke = function(player, gender)
 	end
 	return false, "Невірна стать."
 end
+
+FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, skinColor)
+	if gender == "Male" or gender == "Female" then
+		DataManager.Set(player, "Gender", gender)
+		DataManager.Set(player, "Hair", hairId)
+		DataManager.Set(player, "SkinColor", skinColor or "Normal")
+		DataManager.Set(player, "CharacterCreated", true)
+		
+		-- Перевантажуємо персонажа, щоб застосувати вигляд
+		player:LoadCharacter()
+		return true, "Персонажа створено!"
+	end
+	return false, "Невірна стать."
+end
+
+PreviewHairEvent.OnServerEvent:Connect(function(player, hairId)
+	local starterSkin = workspace:WaitForChild("NPC'S", 5)
+		and workspace.NPC'S:WaitForChild("NPC'S--Main", 5)
+		and workspace.NPC'S["NPC'S--Main"]:WaitForChild("Starter_Skin", 5)
+	
+	if starterSkin then
+		applyHairToModel(starterSkin, hairId)
+	end
+end)
 
 AcceptContractFunc.OnServerInvoke = function(player, contractId)
 	local success, result = ContractManager.StartContract(player, contractId)
