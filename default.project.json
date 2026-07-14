@@ -92,6 +92,9 @@
         },
         "ContractUIController": {
           "$path": "src/client/ContractUIController.client.lua"
+        },
+        "ChartRecorder": {
+          "$path": "src/client/ChartRecorder.client.lua"
         }
       }
     }
