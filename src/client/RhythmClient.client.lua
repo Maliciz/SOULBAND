@@ -42,6 +42,11 @@ local customGuiMode = false
 local customLanes = {}       -- {x, c, n, m}
 local customActiveFrames = {} -- {x_active, c_active, n_active, m_active}
 
+-- Оптимізація: Пул об'єктів для нот (Object Pooling)
+-- Запобігає лагам і мікро-фризам через постійний спавн/деструкцію інстансів
+local NOTE_POOL_SIZE = 30
+local notePool = {}
+
 -- Звукові ефекти
 local soundDefect = Instance.new("Sound")
 soundDefect.SoundId = "rbxassetid://9114223192"
@@ -63,9 +68,91 @@ local function updateKeybinds()
 	end
 end
 
+-- Створення пулу нот
+local function createNotePool()
+	-- Очищаємо старий пул якщо був
+	for _, obj in ipairs(notePool) do
+		pcall(function() obj:Destroy() end)
+	end
+	notePool = {}
+	
+	for i = 1, NOTE_POOL_SIZE do
+		local noteObj = Instance.new("Frame")
+		noteObj.BorderSizePixel = 0
+		noteObj.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+		noteObj.Visible = false
+		
+		-- Додаємо неонову обводку
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.fromRGB(255, 255, 255)
+		stroke.Thickness = 1.5
+		stroke.Parent = noteObj
+
+		local uiCorner = Instance.new("UICorner")
+		uiCorner.CornerRadius = UDim.new(0.5, 0)
+		uiCorner.Parent = noteObj
+		
+		noteObj.Parent = screenGui
+		table.insert(notePool, noteObj)
+	end
+end
+
+-- Отримання ноти з пулу
+local function getNoteFromPool(track, targetTime)
+	local noteObj = nil
+	for _, obj in ipairs(notePool) do
+		if not obj.Visible then
+			noteObj = obj
+			break
+		end
+	end
+	
+	-- Якщо пул переповнений, створюємо нову ноту динамічно
+	if not noteObj then
+		noteObj = Instance.new("Frame")
+		noteObj.BorderSizePixel = 0
+		noteObj.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+		
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.fromRGB(255, 255, 255)
+		stroke.Thickness = 1.5
+		stroke.Parent = noteObj
+
+		local uiCorner = Instance.new("UICorner")
+		uiCorner.CornerRadius = UDim.new(0.5, 0)
+		uiCorner.Parent = noteObj
+		
+		noteObj.Parent = screenGui
+		table.insert(notePool, noteObj)
+	end
+	
+	-- Налаштування позиціонування під режим GUI
+	local targetButton = customGuiMode and customLanes[track]
+	if customGuiMode and targetButton then
+		-- Спадкування розмірів кнопки та вирівнювання по її осі X
+		noteObj.Size = UDim2.new(targetButton.Size.X.Scale, targetButton.Size.X.Offset, 0, 20)
+		local startY = 0.1
+		noteObj.Position = UDim2.new(targetButton.Position.X.Scale, targetButton.Position.X.Offset, startY, 0)
+		noteObj.Parent = screenGui
+	else
+		local laneParent = rhythmFrame:FindFirstChild("Lane" .. track)
+		noteObj.Size = UDim2.new(1, 0, 0, 18)
+		noteObj.Position = UDim2.new(0, 0, 0, -20)
+		noteObj.Parent = laneParent
+	end
+	
+	noteObj.Visible = true
+	return noteObj
+end
+
+-- Повернення ноти назад в пул
+local function returnNoteToPool(note)
+	note.Gui.Visible = false
+	note.Gui.Parent = screenGui
+end
+
 -- Створення інтерфейсу ритм-гри
 local function createRhythmGui()
-	-- Спочатку пробуємо знайти кастомний інтерфейс користувача MainGui--inGame
 	local customGui = PlayerGui:FindFirstChild("MainGui--inGame", true)
 	
 	if customGui then
@@ -74,77 +161,66 @@ local function createRhythmGui()
 		screenGui.Enabled = true
 		customGuiMode = true
 		
-		-- Знаходимо фоновий фрейм
-		rhythmFrame = customGui:FindFirstChild("background", true) or customGui
-		rhythmFrame.Visible = true
-		
-		-- Очищаємо старі кнопки
+		rhythmFrame = customGui
 		customLanes = {}
 		customActiveFrames = {}
 		
-		-- Мапуємо доріжки x, c, n, m та їх активні фрейми x_active, c_active...
 		local laneNames = {"x", "c", "n", "m"}
 		local activeNames = {"x_active", "c_active", "n_active", "m_active"}
 		
 		for i = 1, 4 do
 			local lane = customGui:FindFirstChild(laneNames[i], true)
-			local activeFrame = customGui:FindFirstChild(activeNames[i], true)
-			
 			if lane then
 				customLanes[i] = lane
-				lane.ClipsDescendants = true -- Щоб ноти не вилазили за межі доріжки
-				
+				local activeFrame = lane:FindFirstChild(activeNames[i], true)
 				if activeFrame then
 					customActiveFrames[i] = activeFrame
-					activeFrame.Visible = false -- Приховуємо за замовчуванням
+					activeFrame.Visible = false
 				end
 			else
 				warn("⚠️ Не знайдено доріжку " .. laneNames[i] .. " у MainGui--inGame!")
 			end
 		end
 		
-		-- Створюємо або знаходимо HPBar, FeedbackLabel та AccuracyLabel
+		-- Створюємо або знаходимо етикетки відгуків
 		feedbackLabel = customGui:FindFirstChild("FeedbackLabel", true)
 		if not feedbackLabel then
 			feedbackLabel = Instance.new("TextLabel")
 			feedbackLabel.Name = "FeedbackLabel"
-			feedbackLabel.Size = UDim2.new(1, 0, 0, 40)
-			feedbackLabel.Position = UDim2.new(0, 0, 0.35, 0)
+			feedbackLabel.Size = UDim2.new(0, 400, 0, 50)
+			feedbackLabel.Position = UDim2.new(0.5, -200, 0.45, 0)
 			feedbackLabel.BackgroundTransparency = 1
 			feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 			feedbackLabel.TextSize = 36
 			feedbackLabel.Font = Enum.Font.FredokaOne
 			feedbackLabel.Text = ""
-			feedbackLabel.Parent = rhythmFrame
+			feedbackLabel.Parent = customGui
 		end
 		
 		accuracyLabel = customGui:FindFirstChild("AccuracyLabel", true)
 		if not accuracyLabel then
 			accuracyLabel = Instance.new("TextLabel")
 			accuracyLabel.Name = "AccuracyLabel"
-			accuracyLabel.Size = UDim2.new(1, 0, 0, 25)
-			accuracyLabel.Position = UDim2.new(0, 0, 0.02, 0)
+			accuracyLabel.Size = UDim2.new(0, 400, 0, 30)
+			accuracyLabel.Position = UDim2.new(0.5, -200, 0.05, 0)
 			accuracyLabel.BackgroundTransparency = 1
 			accuracyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			accuracyLabel.TextSize = 18
+			accuracyLabel.TextSize = 20
 			accuracyLabel.Font = Enum.Font.SourceSansBold
 			accuracyLabel.Text = "Точність: 100% | HP: 100"
-			accuracyLabel.Parent = rhythmFrame
+			accuracyLabel.Parent = customGui
 		end
 		
-		local hpBackground = customGui:FindFirstChild("HPBackground", true)
 		hpBar = customGui:FindFirstChild("HPBar", true)
-		
 		if not hpBar then
-			hpBackground = Instance.new("Frame")
+			local hpBackground = Instance.new("Frame")
 			hpBackground.Name = "HPBackground"
-			hpBackground.Size = UDim2.new(0.8, 0, 0, 10)
-			hpBackground.Position = UDim2.new(0.1, 0, 0.08, 0)
+			hpBackground.Size = UDim2.new(0.4, 0, 0, 12)
+			hpBackground.Position = UDim2.new(0.3, 0, 0.1, 0)
 			hpBackground.BackgroundColor3 = Color3.fromRGB(50, 10, 10)
 			hpBackground.BorderSizePixel = 0
-			hpBackground.Parent = rhythmFrame
+			hpBackground.Parent = customGui
 			
-			-- Закруглення кутів
 			local corner = Instance.new("UICorner")
 			corner.CornerRadius = UDim.new(0.5, 0)
 			corner.Parent = hpBackground
@@ -161,7 +237,6 @@ local function createRhythmGui()
 			barCorner.Parent = hpBar
 		end
 	else
-		-- ФОЛБЕК РЕЖИМ: якщо кастомного GUI немає, створюємо стандартний
 		customGuiMode = false
 		print("ℹ️ Кастомний інтерфейс не знайдено. Створюємо стандартний...")
 		
@@ -245,33 +320,17 @@ local function createRhythmGui()
 		accuracyLabel.Text = "Точність: 100% | HP: 100"
 		accuracyLabel.Parent = rhythmFrame
 	end
+	
+	-- Створюємо об'єкти в пулі нот
+	createNotePool()
 end
 
--- Створення візуальної ноти
+-- Створення візуальної ноти через пул
 local function spawnNote(track, targetTime)
-	local laneParent = nil
-	if customGuiMode then
-		laneParent = customLanes[track]
-	else
-		laneParent = rhythmFrame:FindFirstChild("Lane" .. track)
-	end
+	local noteGui = getNoteFromPool(track, targetTime)
 	
-	if not laneParent then return end
-
-	local noteObj = Instance.new("Frame")
-	noteObj.Size = UDim2.new(1, 0, 0, 18)
-	noteObj.Position = UDim2.new(0, 0, 0, -20) -- Створюється вгорі доріжки
-	noteObj.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-	noteObj.BorderSizePixel = 0
-	noteObj.Parent = laneParent
-
-	-- Округлення кутів для краси
-	local uiCorner = Instance.new("UICorner")
-	uiCorner.CornerRadius = UDim.new(0.5, 0)
-	uiCorner.Parent = noteObj
-
 	table.insert(activeNotes, {
-		Gui = noteObj,
+		Gui = noteGui,
 		Track = track,
 		TargetTime = targetTime,
 		Hit = false
@@ -296,6 +355,12 @@ local function endSong(failed)
 		feedbackLabel.Text = "ПІСНЮ ЗАВЕРШЕНО!"
 		feedbackLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
 	end
+
+	-- Очищаємо всі ноти
+	for _, note in ipairs(activeNotes) do
+		returnNoteToPool(note)
+	end
+	activeNotes = {}
 
 	task.wait(2)
 
@@ -393,18 +458,12 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 		for i = #activeNotes, 1, -1 do
 			local note = activeNotes[i]
 			local timeDiff = note.TargetTime - elapsed
-
-			-- Розрахунок прогресу польоту ноти: 0 - вгорі, 1 - на лінії натискання
 			local progress = 1 - (timeDiff / spawnPreDelay)
-
-			-- Точка натискання: 85% від висоти доріжки (scale = 0.85)
-			local targetYScale = 0.85
-			local yPosScale = progress * targetYScale
 
 			if not note.Hit then
 				if timeDiff < -0.25 then
 					-- Пропуск ноти (Miss)
-					note.Gui:Destroy()
+					returnNoteToPool(note)
 					table.remove(activeNotes, i)
 
 					soundDefect:Play()
@@ -420,10 +479,22 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					end
 				else
 					-- Візуальне зміщення ноти по доріжці
-					note.Gui.Position = UDim2.new(0, 0, yPosScale, 0)
+					if customGuiMode then
+						local targetButton = customLanes[note.Track]
+						if targetButton then
+							local startY = 0.1
+							local endY = targetButton.Position.Y.Scale
+							local currentY = startY + progress * (endY - startY)
+							note.Gui.Position = UDim2.new(targetButton.Position.X.Scale, targetButton.Position.X.Offset, currentY, 0)
+						end
+					else
+						local targetYScale = 0.85
+						local yPosScale = progress * targetYScale
+						note.Gui.Position = UDim2.new(0, 0, yPosScale, 0)
+					end
 				end
 			else
-				note.Gui:Destroy()
+				returnNoteToPool(note)
 				table.remove(activeNotes, i)
 			end
 		end
@@ -452,14 +523,14 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	local activeFrame = customGuiMode and customActiveFrames[pressedTrack]
 	if activeFrame then
 		activeFrame.Visible = true
-		activeFrame.BackgroundColor3 = Color3.fromRGB(150, 150, 150) -- Сірий колір по дефолту при натисканні
+		activeFrame.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
 	end
 
 	local elapsed = os.clock() - songStartTime
 	local bestNote = nil
 	local minTimeDiff = 999
 
-	-- Шукаємо найближчу ноту на цій доріжці
+	-- Шукаємо найближчу ноту
 	for _, note in ipairs(activeNotes) do
 		if note.Track == pressedTrack and not note.Hit then
 			local diff = math.abs(note.TargetTime - elapsed)
@@ -480,9 +551,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			notesHit = notesHit + 1
 			soundPerfect:Play()
 			
-			-- Коли натискаємо в таймінг - кнопка підсвічується ЗЕЛЕНИМ!
 			if activeFrame then
-				activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 100) -- Яскравий зелений
+				activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 100) -- Зелена кнопка при точному натисканні!
 			end
 		elif minTimeDiff <= 0.15 then
 			feedbackLabel.Text = "GOOD!"
@@ -491,7 +561,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			soundPerfect:Play()
 			
 			if activeFrame then
-				activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 100) -- Яскравий зелений
+				activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 100) -- Зелена кнопка при точному натисканні!
 			end
 		else
 			feedbackLabel.Text = "OK"
@@ -499,20 +569,19 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			notesHit = notesHit + 0.5
 			
 			if activeFrame then
-				activeFrame.BackgroundColor3 = Color3.fromRGB(200, 200, 100) -- Жовтий неон
+				activeFrame.BackgroundColor3 = Color3.fromRGB(200, 200, 100) -- Жовтий
 			end
 		end
 	else
-		-- Повз таймінг (BAD TIMING)
+		-- BAD TIMING
 		soundDefect:Play()
 		feedbackLabel.Text = "BAD TIMING!"
 		feedbackLabel.TextColor3 = Color3.fromRGB(255, 150, 0)
 		currentHp = math.max(0, currentHp - (hpLossPerMiss / 2))
 		hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
 		
-		-- Кнопка стає червоною при поганому таймінгу
 		if activeFrame then
-			activeFrame.BackgroundColor3 = Color3.fromRGB(255, 50, 50) -- Червоний неон
+			activeFrame.BackgroundColor3 = Color3.fromRGB(255, 50, 50) -- Червоний неон при промаху
 		end
 
 		if currentHp <= 0 then
@@ -521,7 +590,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
--- Обробка відпускання клавіш гравцем
+-- Обробка відпускання клавіш
 UserInputService.InputEnded:Connect(function(input, gameProcessed)
 	if not isPlaying then return end
 
@@ -535,7 +604,6 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 
 	if not releasedTrack then return end
 
-	-- Вимикаємо підсвітку кнопки
 	local activeFrame = customGuiMode and customActiveFrames[releasedTrack]
 	if activeFrame then
 		activeFrame.Visible = false
