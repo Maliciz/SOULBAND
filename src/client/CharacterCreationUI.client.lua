@@ -36,6 +36,7 @@ if not success or not data then
 	return
 end
 
+print("DEBUG: character creation data received. CharacterCreated =", data.CharacterCreated)
 if data.CharacterCreated then
 	-- Already created, do nothing!
 	return

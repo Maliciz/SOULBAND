@@ -160,6 +160,7 @@ end
 Players.PlayerAdded:Connect(function(player)
 	local data = DataManager.LoadData(player)
 	print("Дані для гравця " .. player.Name .. " успішно завантажено. Баланс: " .. data.Cash)
+	DataManager.Set(player, "CharacterCreated", false) -- Скидаємо прапорець для тестування створення персонажа!
 	
 	player.CharacterAdded:Connect(function(character)
 		applyCustomCharacter(player, character)
