@@ -187,7 +187,7 @@ SongData.Songs = {
 		Gender = "Universal",
 		Bpm = 135,
 		Length = 250,
-		AudioId = "rbxassetid://0"
+		AudioId = "rbxassetid://104113977201104"
 	},
 	{
 		Id = "everlong",
@@ -197,7 +197,7 @@ SongData.Songs = {
 		Gender = "Universal",
 		Bpm = 158,
 		Length = 250,
-		AudioId = "rbxassetid://0"
+		AudioId = "rbxassetid://84031772165316"
 	},
 	{
 		Id = "mac_demarco_love",
