@@ -263,14 +263,10 @@ femaleBtn.MouseButton1Click:Connect(function()
 	updateGenderVisuals()
 end)
 
-local starterSkin = nil
-local npcsFolder = workspace:FindFirstChild("NPC'S")
-if npcsFolder then
-	local mainFolder = npcsFolder:FindFirstChild("NPC'S--Main")
-	if mainFolder then
-		starterSkin = mainFolder:FindFirstChild("Starter_Skin")
-	end
-end
+local npcsFolder = workspace:WaitForChild("NPC'S", 10)
+local mainFolder = npcsFolder and npcsFolder:WaitForChild("NPC'S--Main", 10)
+local starterSkin = mainFolder and mainFolder:WaitForChild("Starter_Skin", 10)
+print("DEBUG: starterSkin replicated successfully: ", tostring(starterSkin))
 
 -- Clean initial hair accessories locally on rig
 if starterSkin then
