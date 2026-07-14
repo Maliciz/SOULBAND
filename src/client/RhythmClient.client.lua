@@ -31,12 +31,12 @@ local currentHp = 100
 local hpLossPerMiss = 5
 local heldTracks = {false, false, false, false} -- Масив для відстеження затиснутих клавіш (блокує Windows KeyRepeat)
 
--- Кастомна палітра кольорів для доріжок (Rhythm Game Theme)
+-- Мінімалістична темно-біла палітра кольорів (Monochrome Theme)
 local TrackColors = {
-	Color3.fromRGB(0, 255, 255),   -- 1 доріжка: Блакитна бульбашка
-	Color3.fromRGB(255, 0, 128),   -- 2 доріжка: Рожева бульбашка
-	Color3.fromRGB(255, 215, 0),   -- 3 доріжка: Золота бульбашка
-	Color3.fromRGB(170, 85, 255)   -- 4 доріжка: Фіолетова бульбашка
+	Color3.fromRGB(240, 240, 240),   -- 1 доріжка: Чистий білий
+	Color3.fromRGB(200, 200, 200),   -- 2 доріжка: Світло-сірий
+	Color3.fromRGB(160, 160, 160),   -- 3 доріжка: Сірий
+	Color3.fromRGB(120, 120, 120)    -- 4 доріжка: Темно-сірий
 }
 
 -- GUI Елементи
@@ -83,16 +83,18 @@ local function updateKeybinds()
 	end
 end
 
--- Ефект вибуху частинок-бульбашок при успішному натисканні (Juice Effect)
+-- Ефект вибуху частинок-бульбашок при успішному натисканні (Juice Effect) - у монохромних кольорах
 local function spawnHitParticles(track, rating)
 	local targetButton = customLanes[track]
 	if not targetButton then return end
 
-	local trackColor = TrackColors[track] or Color3.fromRGB(255, 255, 255)
+	local trackColor = TrackColors[track] or Color3.fromRGB(240, 240, 240)
 	if rating == "PERFECT!" then
-		trackColor = Color3.fromRGB(0, 255, 255)
+		trackColor = Color3.fromRGB(255, 255, 255)
 	elseif rating == "GOOD!" then
-		trackColor = Color3.fromRGB(0, 255, 100)
+		trackColor = Color3.fromRGB(200, 200, 200)
+	elseif rating == "BAD!" then
+		trackColor = Color3.fromRGB(100, 100, 100)
 	end
 
 	local originX = targetButton.AbsolutePosition.X + targetButton.AbsoluteSize.X / 2
@@ -106,7 +108,7 @@ local function spawnHitParticles(track, rating)
 		particle.Position = UDim2.new(0, originX, 0, originY)
 		particle.AnchorPoint = Vector2.new(0.5, 0.5)
 		particle.BackgroundColor3 = trackColor
-		particle.BackgroundTransparency = 0.2
+		particle.BackgroundTransparency = 0.3
 		particle.BorderSizePixel = 0
 		particle.ZIndex = 1000
 		
@@ -158,7 +160,7 @@ local function createNotePool()
 		noteObj.Name = "NoteNode"
 		noteObj.BorderSizePixel = 0
 		noteObj.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		noteObj.BackgroundTransparency = 0.6 -- Напівпрозоре тіло бульбашки
+		noteObj.BackgroundTransparency = 0.65 -- Тіло бульбашки
 		noteObj.AnchorPoint = Vector2.new(0.5, 0.5)
 		noteObj.Visible = false
 		
@@ -172,7 +174,7 @@ local function createNotePool()
 		reflection.Size = UDim2.new(0.22, 0, 0.22, 0)
 		reflection.Position = UDim2.new(0.22, 0, 0.22, 0)
 		reflection.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		reflection.BackgroundTransparency = 0.2 -- Яскравий білий блік
+		reflection.BackgroundTransparency = 0.3
 		reflection.BorderSizePixel = 0
 		reflection.ZIndex = noteObj.ZIndex + 2
 		reflection.Parent = noteObj
@@ -181,9 +183,9 @@ local function createNotePool()
 		refCorner.CornerRadius = UDim.new(0.5, 0)
 		refCorner.Parent = reflection
 		
-		-- Обводка (кольоровий контур бульбашки)
+		-- Обводка (темно-білий контур бульбашки)
 		local stroke = Instance.new("UIStroke")
-		stroke.Thickness = 3
+		stroke.Thickness = 2.5
 		stroke.Parent = noteObj
 		
 		-- Кольорове м'яке ядро (Core) всередині
@@ -238,7 +240,7 @@ local function getNoteFromPool(track, targetTime, duration)
 		noteObj.Name = "NoteNode"
 		noteObj.BorderSizePixel = 0
 		noteObj.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		noteObj.BackgroundTransparency = 0.6
+		noteObj.BackgroundTransparency = 0.65
 		noteObj.AnchorPoint = Vector2.new(0.5, 0.5)
 		
 		local uiCorner = Instance.new("UICorner")
@@ -250,7 +252,7 @@ local function getNoteFromPool(track, targetTime, duration)
 		reflection.Size = UDim2.new(0.22, 0, 0.22, 0)
 		reflection.Position = UDim2.new(0.22, 0, 0.22, 0)
 		reflection.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		reflection.BackgroundTransparency = 0.2
+		reflection.BackgroundTransparency = 0.3
 		reflection.BorderSizePixel = 0
 		reflection.ZIndex = noteObj.ZIndex + 2
 		reflection.Parent = noteObj
@@ -260,7 +262,7 @@ local function getNoteFromPool(track, targetTime, duration)
 		refCorner.Parent = reflection
 		
 		local stroke = Instance.new("UIStroke")
-		stroke.Thickness = 3
+		stroke.Thickness = 2.5
 		stroke.Parent = noteObj
 		
 		local core = Instance.new("Frame")
@@ -297,10 +299,10 @@ local function getNoteFromPool(track, targetTime, duration)
 		table.insert(notePool, noteObj)
 	end
 	
-	local trackColor = TrackColors[track] or Color3.fromRGB(255, 255, 255)
+	local trackColor = TrackColors[track] or Color3.fromRGB(240, 240, 240)
 	
 	-- Відновлення прозорості бульбашки
-	noteObj.BackgroundTransparency = 0.6
+	noteObj.BackgroundTransparency = 0.65
 	
 	local stroke = noteObj:FindFirstChildWhichIsA("UIStroke")
 	if stroke then
@@ -311,12 +313,12 @@ local function getNoteFromPool(track, targetTime, duration)
 	local core = noteObj:FindFirstChild("Core")
 	if core then
 		core.BackgroundColor3 = trackColor
-		core.BackgroundTransparency = 0.4
+		core.BackgroundTransparency = 0.5
 	end
 	
 	local reflection = noteObj:FindFirstChild("Reflection")
 	if reflection then
-		reflection.BackgroundTransparency = 0.2
+		reflection.BackgroundTransparency = 0.3
 	end
 	
 	local targetButton = customGuiMode and customLanes[track]
@@ -343,13 +345,13 @@ local function getNoteFromPool(track, targetTime, duration)
 				
 				trail.Size = UDim2.new(0, 24, 0, totalHeightPixels)
 				trail.BackgroundColor3 = trackColor
-				trail.BackgroundTransparency = 0.75
+				trail.BackgroundTransparency = 0.8
 				trail.Visible = true
 				
 				local tStroke = trail:FindFirstChildWhichIsA("UIStroke")
 				if tStroke then
 					tStroke.Color = trackColor
-					tStroke.Transparency = 0.2
+					tStroke.Transparency = 0.3
 				end
 			else
 				trail.Visible = false
@@ -367,7 +369,7 @@ local function getNoteFromPool(track, targetTime, duration)
 				local totalHeightPixels = (duration / 2.0) * trackHeight
 				trail.Size = UDim2.new(0, 24, 0, totalHeightPixels)
 				trail.BackgroundColor3 = trackColor
-				trail.BackgroundTransparency = 0.75
+				trail.BackgroundTransparency = 0.8
 				trail.Visible = true
 			else
 				trail.Visible = false
@@ -395,9 +397,8 @@ local function createRhythmGui()
 		print("🎨 Виявлено кастомний інтерфейс MainGui--inGame. Інтегруємо кнопки...")
 		screenGui = customGui
 		originalParent = customGui.Parent
-		customGui.Parent = PlayerGui -- Репарент
+		customGui.Parent = PlayerGui
 		
-		-- ПРИМУСОВО ВВІМКНЕМО: Переконуємось, що GUI та всі його елементи увімкнені під час міні-гри
 		customGui.Enabled = true
 		screenGui.Enabled = true
 		customGuiMode = true
@@ -413,7 +414,7 @@ local function createRhythmGui()
 			local lane = customGui:FindFirstChild(laneNames[i], true)
 			if lane then
 				customLanes[i] = lane
-				lane.Visible = true -- Переконуємось, що доріжка видима!
+				lane.Visible = true
 				
 				local activeFrame = lane:FindFirstChild(activeNames[i], true)
 				if activeFrame then
@@ -459,7 +460,7 @@ local function createRhythmGui()
 			hpBackground.Name = "HPBackground"
 			hpBackground.Size = UDim2.new(0.4, 0, 0, 12)
 			hpBackground.Position = UDim2.new(0.3, 0, 0.1, 0)
-			hpBackground.BackgroundColor3 = Color3.fromRGB(50, 10, 10)
+			hpBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 			hpBackground.BorderSizePixel = 0
 			hpBackground.Parent = customGui
 			
@@ -470,7 +471,7 @@ local function createRhythmGui()
 			hpBar = Instance.new("Frame")
 			hpBar.Name = "HPBar"
 			hpBar.Size = UDim2.new(1, 0, 1, 0)
-			hpBar.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+			hpBar.BackgroundColor3 = Color3.fromRGB(220, 220, 220) -- Світло-сірий замість зеленого
 			hpBar.BorderSizePixel = 0
 			hpBar.Parent = hpBackground
 			
@@ -490,14 +491,14 @@ local function createRhythmGui()
 		rhythmFrame = Instance.new("Frame")
 		rhythmFrame.Size = UDim2.new(0, 400, 0, 600)
 		rhythmFrame.Position = UDim2.new(0.5, -200, 0.5, -300)
-		rhythmFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-		rhythmFrame.BorderSizePixel = 2
-		rhythmFrame.BorderColor3 = Color3.fromRGB(0, 170, 255)
+		rhythmFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+		rhythmFrame.BorderSizePixel = 1
+		rhythmFrame.BorderColor3 = Color3.fromRGB(180, 180, 180)
 		rhythmFrame.Parent = screenGui
 
 		local uiStroke = Instance.new("UIStroke")
-		uiStroke.Color = Color3.fromRGB(255, 0, 128)
-		uiStroke.Thickness = 3
+		uiStroke.Color = Color3.fromRGB(220, 220, 220)
+		uiStroke.Thickness = 2
 		uiStroke.Parent = rhythmFrame
 
 		for i = 1, 4 do
@@ -505,17 +506,17 @@ local function createRhythmGui()
 			lane.Name = "Lane" .. i
 			lane.Size = UDim2.new(0.25, 0, 1, -80)
 			lane.Position = UDim2.new(0.25 * (i - 1), 0, 0, 0)
-			lane.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+			lane.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 			lane.BackgroundTransparency = 0.8
 			lane.BorderSizePixel = 1
-			lane.BorderColor3 = Color3.fromRGB(50, 50, 50)
+			lane.BorderColor3 = Color3.fromRGB(60, 60, 60)
 			lane.Parent = rhythmFrame
 
 			local keyLabel = Instance.new("TextLabel")
 			keyLabel.Size = UDim2.new(1, 0, 0, 50)
 			keyLabel.Position = UDim2.new(0, 0, 1, 0)
-			keyLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-			keyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			keyLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+			keyLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 			keyLabel.TextSize = 20
 			keyLabel.Text = currentKeybinds[i]
 			keyLabel.Font = Enum.Font.FredokaOne
@@ -526,19 +527,19 @@ local function createRhythmGui()
 		targetLine.Name = "TargetLine"
 		targetLine.Size = UDim2.new(1, 0, 0, 5)
 		targetLine.Position = UDim2.new(0, 0, 1, -85)
-		targetLine.BackgroundColor3 = Color3.fromRGB(255, 0, 128)
+		targetLine.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
 		targetLine.BorderSizePixel = 0
 		targetLine.Parent = rhythmFrame
 
 		local hpBackground = Instance.new("Frame")
 		hpBackground.Size = UDim2.new(1, 0, 0, 15)
 		hpBackground.Position = UDim2.new(0, 0, 0, -25)
-		hpBackground.BackgroundColor3 = Color3.fromRGB(50, 10, 10)
+		hpBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 		hpBackground.Parent = rhythmFrame
 
 		hpBar = Instance.new("Frame")
 		hpBar.Size = UDim2.new(1, 0, 1, 0)
-		hpBar.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+		hpBar.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
 		hpBar.BorderSizePixel = 0
 		hpBar.Parent = hpBackground
 
@@ -593,11 +594,11 @@ local function endSong(failed)
 	
 	if failed then
 		feedbackLabel.Text = "ГРУ ПРОВАЛЕНО!"
-		feedbackLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+		feedbackLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
 		finalAccuracy = 0
 	else
 		feedbackLabel.Text = "ПІСНЮ ЗАВЕРШЕНО!"
-		feedbackLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+		feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	end
 
 	-- Очищаємо всі ноти
@@ -605,7 +606,7 @@ local function endSong(failed)
 		returnNoteToPool(note)
 	end
 	activeNotes = {}
-	heldTracks = {false, false, false, false} -- Скидаємо статус утримання
+	heldTracks = {false, false, false, false}
 
 	task.wait(2)
 
@@ -659,7 +660,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	notesHit = 0
 	notesTotal = #song.Notes
 	currentHp = 100
-	heldTracks = {false, false, false, false} -- Скидаємо статус утримання при старті
+	heldTracks = {false, false, false, false}
 
 	if song.Difficulty == "Easy" then
 		hpLossPerMiss = 2
@@ -716,7 +717,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 			local endY = targetButton and targetButton.Position.Y.Scale or 0.85
 			local pathLengthScale = endY - startY
 
-			local trackColor = TrackColors[note.Track] or Color3.fromRGB(255, 255, 255)
+			local trackColor = TrackColors[note.Track] or Color3.fromRGB(240, 240, 240)
 
 			if note.IsHolding then
 				if targetButton then
@@ -745,13 +746,13 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					if note.ScoreTicks % 10 == 0 then
 						notesHit = notesHit + 0.08
 						feedbackLabel.Text = "HOLDING..."
-						feedbackLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+						feedbackLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
 						
 						local activeFrame = customGuiMode and customActiveFrames[note.Track]
 						if activeFrame then
 							activeFrame.Visible = true
-							activeFrame.BackgroundColor3 = trackColor -- Світиться кольором своєї доріжки!
-							activeFrame.BackgroundTransparency = 0
+							activeFrame.BackgroundColor3 = trackColor
+							activeFrame.BackgroundTransparency = 0.3
 						end
 					end
 				else
@@ -763,7 +764,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					
 					soundPerfect:Play()
 					feedbackLabel.Text = "HOLD COMPLETE!"
-					feedbackLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
+					feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 					notesHit = notesHit + 1.2
 					
 					local activeFrame = customGuiMode and customActiveFrames[note.Track]
@@ -779,7 +780,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						-- Пропуск ноти (Miss) - тільки якщо по ній НЕ попали!
 						soundDefect:Play()
 						feedbackLabel.Text = "MISS!"
-						feedbackLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+						feedbackLabel.TextColor3 = Color3.fromRGB(120, 120, 120) -- Темно-сірий Miss
 						
 						currentHp = math.max(0, currentHp - hpLossPerMiss)
 						hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
@@ -807,7 +808,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					
 					-- Візуальний ефект для влученої ноти (стає напівпрозорою)
 					if note.Hit then
-						note.Gui.BackgroundTransparency = 0.95 -- Ще прозоріша після влучання (ефект лускання бульбашки)
+						note.Gui.BackgroundTransparency = 0.95
 						local stroke = note.Gui:FindFirstChildWhichIsA("UIStroke")
 						if stroke then stroke.Transparency = 0.95 end
 						
@@ -824,18 +825,18 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 							if tStroke then tStroke.Transparency = 0.98 end
 						end
 					else
-						note.Gui.BackgroundTransparency = 0.6 -- Звичайна напівпрозора бульбашка
+						note.Gui.BackgroundTransparency = 0.65
 						local stroke = note.Gui:FindFirstChildWhichIsA("UIStroke")
 						if stroke then stroke.Transparency = 0 end
 						
 						local core = note.Gui:FindFirstChild("Core")
 						if core then
 							core.BackgroundColor3 = trackColor
-							core.BackgroundTransparency = 0.4
+							core.BackgroundTransparency = 0.5
 						end
 						
 						local reflection = note.Gui:FindFirstChild("Reflection")
-						if reflection then reflection.BackgroundTransparency = 0.2 end
+						if reflection then reflection.BackgroundTransparency = 0.3 end
 					end
 				end
 			end
@@ -865,13 +866,13 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if heldTracks[pressedTrack] then return end
 	heldTracks[pressedTrack] = true
 
-	local trackColor = TrackColors[pressedTrack] or Color3.fromRGB(255, 255, 255)
+	local trackColor = TrackColors[pressedTrack] or Color3.fromRGB(240, 240, 240)
 
 	local activeFrame = customGuiMode and customActiveFrames[pressedTrack]
 	if activeFrame then
 		activeFrame.Visible = true
-		activeFrame.BackgroundColor3 = trackColor -- Світиться кольором своєї доріжки!
-		activeFrame.BackgroundTransparency = 0
+		activeFrame.BackgroundColor3 = trackColor
+		activeFrame.BackgroundTransparency = 0.3 -- Приглушене біле світіння
 	end
 
 	local elapsed = os.clock() - songStartTime
@@ -894,10 +895,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			
 			if activeFrame then
 				activeFrame.BackgroundColor3 = trackColor
-				activeFrame.BackgroundTransparency = 0
+				activeFrame.BackgroundTransparency = 0.3
 			end
 			feedbackLabel.Text = "HOLD START!"
-			feedbackLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
+			feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 			soundPerfect:Play()
 			spawnHitParticles(pressedTrack, "PERFECT!")
 		else
@@ -905,48 +906,56 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 
 			if minTimeDiff <= 0.08 then
 				feedbackLabel.Text = "PERFECT!"
-				feedbackLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
+				feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Білий
 				notesHit = notesHit + 1
 				soundPerfect:Play()
 				spawnHitParticles(pressedTrack, "PERFECT!")
 				
 				if activeFrame then
 					activeFrame.BackgroundColor3 = trackColor
-					activeFrame.BackgroundTransparency = 0
+					activeFrame.BackgroundTransparency = 0.3
 				end
-			elseif minTimeDiff <= 0.15 then
+			elseif minTimeDiff <= 0.18 then
 				feedbackLabel.Text = "GOOD!"
-				feedbackLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
+				feedbackLabel.TextColor3 = Color3.fromRGB(200, 200, 200) -- Світло-сірий
 				notesHit = notesHit + 0.75
 				soundPerfect:Play()
 				spawnHitParticles(pressedTrack, "GOOD!")
 				
 				if activeFrame then
 					activeFrame.BackgroundColor3 = trackColor
-					activeFrame.BackgroundTransparency = 0
+					activeFrame.BackgroundTransparency = 0.4
 				end
 			else
-				feedbackLabel.Text = "OK"
-				feedbackLabel.TextColor3 = Color3.fromRGB(200, 200, 100)
-				notesHit = notesHit + 0.5
-				spawnHitParticles(pressedTrack, "OK")
+				feedbackLabel.Text = "BAD!"
+				feedbackLabel.TextColor3 = Color3.fromRGB(120, 120, 120) -- Сірий
+				notesHit = notesHit + 0.25
+				soundDefect:Play()
+				spawnHitParticles(pressedTrack, "BAD!")
+				
+				currentHp = math.max(0, currentHp - (hpLossPerMiss / 2))
+				hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
 				
 				if activeFrame then
-					activeFrame.BackgroundColor3 = Color3.fromRGB(200, 200, 0)
-					activeFrame.BackgroundTransparency = 0
+					activeFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+					activeFrame.BackgroundTransparency = 0.5
+				end
+
+				if currentHp <= 0 then
+					endSong(true)
 				end
 			end
 		end
 	else
 		soundDefect:Play()
-		feedbackLabel.Text = "BAD TIMING!"
-		feedbackLabel.TextColor3 = Color3.fromRGB(255, 150, 0)
-		currentHp = math.max(0, currentHp - (hpLossPerMiss / 2))
+		feedbackLabel.Text = "BAD!"
+		feedbackLabel.TextColor3 = Color3.fromRGB(120, 120, 120)
+		currentHp = math.max(0, currentHp - hpLossPerMiss)
 		hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
 		
 		if activeFrame then
-			activeFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-			activeFrame.BackgroundTransparency = 0
+			activeFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+			activeFrame.BackgroundTransparency = 0.5
 		end
 
 		if currentHp <= 0 then
@@ -991,7 +1000,7 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 				
 				soundDefect:Play()
 				feedbackLabel.Text = "HOLD BREAK!"
-				feedbackLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+				feedbackLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
 				currentHp = math.max(0, currentHp - hpLossPerMiss)
 				hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
 				

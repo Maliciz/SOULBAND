@@ -34,15 +34,15 @@ screenGui.Name = "SettingsUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
--- Кнопка налаштувань (зліва зверху)
+-- Кнопка налаштувань (зліва зверху) - Темно-білий стиль
 local openButton = Instance.new("TextButton")
 openButton.Name = "OpenButton"
 openButton.Size = UDim2.new(0, 45, 0, 45)
 openButton.Position = UDim2.new(0, 15, 0, 15)
-openButton.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-openButton.BackgroundTransparency = 0.3
+openButton.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+openButton.BackgroundTransparency = 0.4
 openButton.Text = "⚙️"
-openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+openButton.TextColor3 = Color3.fromRGB(220, 220, 220)
 openButton.TextSize = 24
 openButton.Font = Enum.Font.FredokaOne
 openButton.Parent = screenGui
@@ -52,37 +52,37 @@ openCorner.CornerRadius = UDim.new(0.5, 0)
 openCorner.Parent = openButton
 
 local openStroke = Instance.new("UIStroke")
-openStroke.Color = Color3.fromRGB(0, 255, 255)
-openStroke.Thickness = 1.5
+openStroke.Color = Color3.fromRGB(180, 180, 180) -- Сірий контур
+openStroke.Thickness = 1.2
 openStroke.Parent = openButton
 
 -- Анімація наведення на кнопку
 openButton.MouseEnter:Connect(function()
-	TweenService:Create(openButton, TweenInfo.new(0.2), {BackgroundTransparency = 0.1, TextColor3 = Color3.fromRGB(0, 255, 255)}):Play()
-	TweenService:Create(openStroke, TweenInfo.new(0.2), {Thickness = 2.5}):Play()
+	TweenService:Create(openButton, TweenInfo.new(0.2), {BackgroundTransparency = 0.2, TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+	TweenService:Create(openStroke, TweenInfo.new(0.2), {Thickness = 2.0, Color = Color3.fromRGB(240, 240, 240)}):Play()
 end)
 openButton.MouseLeave:Connect(function()
-	TweenService:Create(openButton, TweenInfo.new(0.2), {BackgroundTransparency = 0.3, TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-	TweenService:Create(openStroke, TweenInfo.new(0.2), {Thickness = 1.5}):Play()
+	TweenService:Create(openButton, TweenInfo.new(0.2), {BackgroundTransparency = 0.4, TextColor3 = Color3.fromRGB(220, 220, 220)}):Play()
+	TweenService:Create(openStroke, TweenInfo.new(0.2), {Thickness = 1.2, Color = Color3.fromRGB(180, 180, 180)}):Play()
 end)
 
--- Панель налаштувань (центр)
+-- Панель налаштувань (центр) - Мінімалістичний темно-білий стиль
 local panel = Instance.new("Frame")
 panel.Name = "SettingsPanel"
 panel.Size = UDim2.new(0, 360, 0, 420)
 panel.Position = UDim2.new(0.5, -180, 0.5, -210)
-panel.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-panel.BackgroundTransparency = 0.15
+panel.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+panel.BackgroundTransparency = 0.2
 panel.Visible = false
 panel.Parent = screenGui
 
 local panelCorner = Instance.new("UICorner")
-panelCorner.CornerRadius = UDim.new(0, 12)
+panelCorner.CornerRadius = UDim.new(0, 10)
 panelCorner.Parent = panel
 
 local panelStroke = Instance.new("UIStroke")
-panelStroke.Color = Color3.fromRGB(170, 85, 255) -- Неоновий фіолетовий
-panelStroke.Thickness = 3
+panelStroke.Color = Color3.fromRGB(150, 150, 150) -- Чистий сірий/срібний контур
+panelStroke.Thickness = 2
 panelStroke.Parent = panel
 
 -- Заголовок
@@ -91,8 +91,8 @@ title.Size = UDim2.new(1, 0, 0, 50)
 title.Position = UDim2.new(0, 0, 0, 10)
 title.BackgroundTransparency = 1
 title.Text = "НАЛАШТУВАННЯ КЛАВІШ"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 22
+title.TextColor3 = Color3.fromRGB(240, 240, 240)
+title.TextSize = 20
 title.Font = Enum.Font.FredokaOne
 title.Parent = panel
 
@@ -103,16 +103,16 @@ closeButton.Size = UDim2.new(0, 30, 0, 30)
 closeButton.Position = UDim2.new(1, -40, 0, 10)
 closeButton.BackgroundTransparency = 1
 closeButton.Text = "✕"
-closeButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+closeButton.TextColor3 = Color3.fromRGB(130, 130, 130)
 closeButton.TextSize = 20
 closeButton.Font = Enum.Font.SourceSansBold
 closeButton.Parent = panel
 
 closeButton.MouseEnter:Connect(function()
-	closeButton.TextColor3 = Color3.fromRGB(255, 50, 50)
+	closeButton.TextColor3 = Color3.fromRGB(240, 240, 240)
 end)
 closeButton.MouseLeave:Connect(function()
-	closeButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+	closeButton.TextColor3 = Color3.fromRGB(130, 130, 130)
 end)
 closeButton.MouseButton1Click:Connect(function()
 	panel.Visible = false
@@ -131,17 +131,17 @@ local bindButtons = {}
 local isBinding = nil
 
 local TrackColors = {
-	Color3.fromRGB(0, 255, 255),
-	Color3.fromRGB(255, 0, 128),
-	Color3.fromRGB(255, 215, 0),
-	Color3.fromRGB(170, 85, 255)
+	Color3.fromRGB(240, 240, 240),
+	Color3.fromRGB(200, 200, 200),
+	Color3.fromRGB(160, 160, 160),
+	Color3.fromRGB(120, 120, 120)
 }
 
 -- Функція оновлення відображення кнопок
 local function refreshBindTexts()
 	for i = 1, 4 do
 		bindButtons[i].Text = currentKeybinds[i]
-		bindButtons[i].TextColor3 = Color3.fromRGB(255, 255, 255)
+		bindButtons[i].TextColor3 = Color3.fromRGB(240, 240, 240)
 	end
 end
 
@@ -149,13 +149,13 @@ for i = 1, 4 do
 	local container = Instance.new("Frame")
 	container.Size = UDim2.new(0.9, 0, 0, 60)
 	container.Position = UDim2.new(0.05, 0, 0, 60 + (i - 1) * 70)
-	container.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-	container.BackgroundTransparency = 0.5
+	container.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+	container.BackgroundTransparency = 0.6
 	container.BorderSizePixel = 0
 	container.Parent = panel
 	
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 8)
+	corner.CornerRadius = UDim.new(0, 6)
 	corner.Parent = container
 	
 	local textLabel = Instance.new("TextLabel")
@@ -163,8 +163,8 @@ for i = 1, 4 do
 	textLabel.Position = UDim2.new(0.05, 0, 0, 0)
 	textLabel.BackgroundTransparency = 1
 	textLabel.Text = laneNames[i]
-	textLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-	textLabel.TextSize = 16
+	textLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+	textLabel.TextSize = 15
 	textLabel.Font = Enum.Font.FredokaOne
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
 	textLabel.Parent = container
@@ -173,20 +173,20 @@ for i = 1, 4 do
 	bindBtn.Name = "BindButton" .. i
 	bindBtn.Size = UDim2.new(0.35, 0, 0.7, 0)
 	bindBtn.Position = UDim2.new(0.6, 0, 0.15, 0)
-	bindBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	bindBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
 	bindBtn.Text = currentKeybinds[i]
-	bindBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	bindBtn.TextSize = 18
+	bindBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+	bindBtn.TextSize = 16
 	bindBtn.Font = Enum.Font.FredokaOne
 	bindBtn.Parent = container
 	
 	local btnCorner = Instance.new("UICorner")
-	btnCorner.CornerRadius = UDim.new(0, 6)
+	btnCorner.CornerRadius = UDim.new(0, 4)
 	btnCorner.Parent = bindBtn
 	
 	local btnStroke = Instance.new("UIStroke")
 	btnStroke.Color = TrackColors[i]
-	btnStroke.Thickness = 1.5
+	btnStroke.Thickness = 1
 	btnStroke.Parent = bindBtn
 	
 	bindButtons[i] = bindBtn
@@ -195,7 +195,7 @@ for i = 1, 4 do
 		if isBinding then return end
 		isBinding = i
 		bindBtn.Text = "[ Натисніть ]"
-		bindBtn.TextColor3 = TrackColors[i]
+		bindBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	end)
 end
 
@@ -204,19 +204,19 @@ local resetBtn = Instance.new("TextButton")
 resetBtn.Name = "ResetButton"
 resetBtn.Size = UDim2.new(0.9, 0, 0, 45)
 resetBtn.Position = UDim2.new(0.05, 0, 0, 350)
-resetBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 20)
+resetBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 resetBtn.Text = "СКИДАННЯ"
-resetBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-resetBtn.TextSize = 16
+resetBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+resetBtn.TextSize = 15
 resetBtn.Font = Enum.Font.FredokaOne
 resetBtn.Parent = panel
 
 local resetCorner = Instance.new("UICorner")
-resetCorner.CornerRadius = UDim.new(0, 8)
+resetCorner.CornerRadius = UDim.new(0, 6)
 resetCorner.Parent = resetBtn
 
 local resetStroke = Instance.new("UIStroke")
-resetStroke.Color = Color3.fromRGB(255, 50, 50)
+resetStroke.Color = Color3.fromRGB(100, 100, 100)
 resetStroke.Thickness = 1
 resetStroke.Parent = resetBtn
 
