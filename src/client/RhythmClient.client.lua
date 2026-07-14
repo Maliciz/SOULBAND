@@ -44,6 +44,14 @@ local customLanes = {}       -- {x, c, n, m}
 local customActiveFrames = {} -- {x_active, c_active, n_active, m_active}
 local originalParent = nil
 
+-- Примусово приховуємо інтерфейс гри при запуску клієнта
+task.spawn(function()
+	local customGui = PlayerGui:WaitForChild("MainGui--inGame", 10)
+	if customGui then
+		customGui.Enabled = false
+	end
+end)
+
 -- Оптимізація: Пул об'єктів для нот (Object Pooling)
 local NOTE_POOL_SIZE = 30
 local notePool = {}
@@ -175,6 +183,11 @@ local function getNoteFromPool(track, targetTime, duration)
 		table.insert(notePool, noteObj)
 	end
 	
+	-- Скидання прозорості ноти при отриманні з пулу
+	noteObj.BackgroundTransparency = 0
+	local stroke = noteObj:FindFirstChildWhichIsA("UIStroke")
+	if stroke then stroke.Transparency = 0 end
+	
 	-- Налаштування позиціонування під кастомні кнопки
 	local targetButton = customGuiMode and customLanes[track]
 	local trail = noteObj:FindFirstChild("Trail")
@@ -200,6 +213,9 @@ local function getNoteFromPool(track, targetTime, duration)
 				
 				trail.Size = UDim2.new(0, 24, 0, totalHeightPixels)
 				trail.Visible = true
+				trail.BackgroundTransparency = 0.75
+				local tStroke = trail:FindFirstChildWhichIsA("UIStroke")
+				if tStroke then tStroke.Transparency = 0 end
 			else
 				trail.Visible = false
 			end
@@ -216,6 +232,7 @@ local function getNoteFromPool(track, targetTime, duration)
 				local totalHeightPixels = (duration / 2.0) * trackHeight
 				trail.Size = UDim2.new(0, 24, 0, totalHeightPixels)
 				trail.Visible = true
+				trail.BackgroundTransparency = 0.75
 			else
 				trail.Visible = false
 			end
@@ -242,7 +259,7 @@ local function createRhythmGui()
 		print("🎨 Виявлено кастомний інтерфейс MainGui--inGame. Інтегруємо кнопки...")
 		screenGui = customGui
 		originalParent = customGui.Parent
-		customGui.Parent = PlayerGui -- Репарент для рендерингу!
+		customGui.Parent = PlayerGui -- Репарент для відображення
 		screenGui.Enabled = true
 		customGuiMode = true
 		
@@ -515,7 +532,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 	createRhythmGui()
 
-	-- Запускаємо пісню негайно без штучних затримок!
+	-- Запускаємо пісню негайно
 	songStartTime = os.clock()
 
 	-- Ігровий цикл
@@ -612,25 +629,29 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						activeFrame.Visible = false
 					end
 				end
-			elseif not note.Hit then
+			else
+				-- Як звичайні, так і влучені ноти продовжують летіти вниз!
 				if timeDiff < -0.25 then
-					-- Пропуск ноти (Miss)
+					-- Нота вийшла за межі доріжки
+					if not note.Hit then
+						-- Пропуск ноти (Miss) - тільки якщо по ній НЕ попали!
+						soundDefect:Play()
+						feedbackLabel.Text = "MISS!"
+						feedbackLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+						
+						currentHp = math.max(0, currentHp - hpLossPerMiss)
+						hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
+						
+						if currentHp <= 0 then
+							connection:Disconnect()
+							endSong(true)
+						end
+					end
+					
 					returnNoteToPool(note)
 					table.remove(activeNotes, i)
-
-					soundDefect:Play()
-					feedbackLabel.Text = "MISS!"
-					feedbackLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-					
-					currentHp = math.max(0, currentHp - hpLossPerMiss)
-					hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
-					
-					if currentHp <= 0 then
-						connection:Disconnect()
-						endSong(true)
-					end
 				else
-					-- Рух ноти до кнопки
+					-- Рух ноти вниз
 					if customGuiMode and targetButton then
 						local targetXScale = targetButton.Position.X.Scale
 						local targetXOffset = targetButton.Position.X.Offset + (targetButton.AbsoluteSize.X / 2)
@@ -641,10 +662,25 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						local yPosScale = progress * 0.85
 						note.Gui.Position = UDim2.new(0.5, 0, yPosScale, 0)
 					end
+					
+					-- Візуальний ефект для влученої ноти (стає напівпрозорою)
+					if note.Hit then
+						note.Gui.BackgroundTransparency = 0.6
+						local stroke = note.Gui:FindFirstChildWhichIsA("UIStroke")
+						if stroke then stroke.Transparency = 0.6 end
+						
+						local trail = note.Gui:FindFirstChild("Trail")
+						if trail then
+							trail.BackgroundTransparency = 0.95
+							local tStroke = trail:FindFirstChildWhichIsA("UIStroke")
+							if tStroke then tStroke.Transparency = 0.95 end
+						end
+					else
+						note.Gui.BackgroundTransparency = 0
+						local stroke = note.Gui:FindFirstChildWhichIsA("UIStroke")
+						if stroke then stroke.Transparency = 0 end
+					end
 				end
-			else
-				returnNoteToPool(note)
-				table.remove(activeNotes, i)
 			end
 		end
 
