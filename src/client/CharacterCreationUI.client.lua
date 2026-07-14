@@ -292,6 +292,22 @@ end
 
 -- Create skin color buttons
 local skinButtons = {}
+local function selectSkinColor(name)
+	selectedSkinColor = name
+	setLocalRigSkinColor(name)
+	
+	-- Highlight chosen color button
+	for n, entry in pairs(skinButtons) do
+		if n == name then
+			entry.stroke.Color = Color3.fromRGB(255, 255, 255)
+			entry.stroke.Thickness = 2.5
+		else
+			entry.stroke.Color = Color3.fromRGB(80, 80, 80)
+			entry.stroke.Thickness = 1.5
+		end
+	end
+end
+
 for name, color in pairs(SkinColors) do
 	local sBtn = Instance.new("TextButton")
 	sBtn.Name = name
@@ -312,27 +328,13 @@ for name, color in pairs(SkinColors) do
 	skinButtons[name] = { btn = sBtn, stroke = sStroke }
 	
 	sBtn.MouseButton1Click:Connect(function()
-		selectedSkinColor = name
-		setLocalRigSkinColor(name)
-		
-		-- Highlight chosen color button
-		for n, entry in pairs(skinButtons) do
-			if n == name then
-				entry.stroke.Color = Color3.fromRGB(255, 255, 255)
-				entry.stroke.Thickness = 2.5
-			else
-				entry.stroke.Color = Color3.fromRGB(80, 80, 80)
-				entry.stroke.Thickness = 1.5
-			end
-		end
+		selectSkinColor(name)
 	end)
 end
 
 -- Trigger default selections
 updateGenderVisuals()
-if skinButtons[selectedSkinColor] then
-	skinButtons[selectedSkinColor].btn.MouseButton1Click:Invoke()
-end
+selectSkinColor(selectedSkinColor)
 
 -- Random Hair event hook
 randomHairBtn.MouseButton1Click:Connect(function()
