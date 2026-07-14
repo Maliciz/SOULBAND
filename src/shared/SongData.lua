@@ -207,7 +207,7 @@ SongData.Songs = {
 		Gender = "Universal",
 		Bpm = 125,
 		Length = 160,
-		AudioId = "rbxassetid://12997674282351"
+		AudioId = "rbxassetid://122997674282351"
 	},
 	{
 		Id = "laputa_panchiko",
