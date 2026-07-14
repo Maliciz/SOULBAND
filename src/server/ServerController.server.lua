@@ -82,6 +82,22 @@ Players.PlayerRemoving:Connect(function(player)
 	DataManager.RemovePlayer(player)
 end)
 
+-- Періодичне автозбереження даних для всіх онлайн-гравців (кожні 5 хвилин / 300 секунд)
+task.spawn(function()
+	while true do
+		task.wait(300)
+		for _, player in ipairs(Players:GetPlayers()) do
+			local data = DataManager.Get(player)
+			if data then
+				pcall(function()
+					DataManager.SaveData(player)
+				end)
+			end
+		end
+		print("💾 [Auto-Save] Дані всіх гравців успішно збережено!")
+	end
+end)
+
 -- Обробники запитів від клієнтів (Remote Functions)
 
 RequestPlayerDataFunc.OnServerInvoke = function(player)
