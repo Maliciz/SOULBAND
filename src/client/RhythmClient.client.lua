@@ -30,6 +30,7 @@ local notesTotal = 0
 local currentHp = 100
 local hpLossPerMiss = 5
 local heldTracks = {false, false, false, false} -- Масив для відстеження затиснутих клавіш (блокує Windows KeyRepeat)
+local activeSongSound = nil -- Об'єкт програвання поточної аудіодоріжки пісні
 
 -- Мінімалістична темно-біла палітра кольорів (Monochrome Theme)
 local TrackColors = {
@@ -587,6 +588,15 @@ local function endSong(failed)
 	if not isPlaying then return end
 	isPlaying = false
 
+	-- ЗУПИНЯЄМО І ВИДАЛЯЄМО ЗВУК ПІСНІ
+	if activeSongSound then
+		pcall(function()
+			activeSongSound:Stop()
+			activeSongSound:Destroy()
+		end)
+		activeSongSound = nil
+	end
+
 	local finalAccuracy = 0
 	if notesTotal > 0 and not failed then
 		finalAccuracy = math.round((notesHit / notesTotal) * 100)
@@ -661,6 +671,17 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	notesTotal = #song.Notes
 	currentHp = 100
 	heldTracks = {false, false, false, false}
+
+	-- СТВОРЕННЯ ТА ПРОГРАВАННЯ МУЗИЧНОЇ ДОРІЖКИ ПІСНІ
+	if song.AudioId and song.AudioId ~= "" and song.AudioId ~= "rbxassetid://0" then
+		pcall(function()
+			activeSongSound = Instance.new("Sound")
+			activeSongSound.SoundId = song.AudioId
+			activeSongSound.Volume = 0.5
+			activeSongSound.Parent = SoundService
+			activeSongSound:Play()
+		end)
+	end
 
 	if song.Difficulty == "Easy" then
 		hpLossPerMiss = 2

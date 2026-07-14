@@ -18,6 +18,7 @@ SongData.Songs = {
 		Gender = "Male",
 		Bpm = 120,
 		Length = 90, -- секунди
+		AudioId = "rbxassetid://0", -- Вставте сюди ID завантаженого аудіо-файлу з Roblox
 		-- Список нот: {час у секундах, трек (1-4)}
 		Notes = {
 			{time = 1.0, track = 1}, {time = 1.5, track = 2}, {time = 2.0, track = 3}, {time = 2.5, track = 4},
@@ -34,6 +35,7 @@ SongData.Songs = {
 		Gender = "Female",
 		Bpm = 120,
 		Length = 90,
+		AudioId = "rbxassetid://0", -- Вставте сюди ID завантаженого аудіо-файлу з Roblox
 		Notes = {
 			{time = 1.0, track = 4}, {time = 1.5, track = 3}, {time = 2.0, track = 2}, {time = 2.5, track = 1},
 			{time = 3.0, track = 3}, {time = 3.5, track = 2}, {time = 4.0, track = 4}, {time = 4.5, track = 1},
@@ -49,6 +51,7 @@ SongData.Songs = {
 		Gender = "Male",
 		Bpm = 130,
 		Length = 120,
+		AudioId = "rbxassetid://0",
 		Notes = {
 			{time = 0.8, track = 1}, {time = 1.2, track = 3}, {time = 1.6, track = 2}, {time = 2.0, track = 4},
 			{time = 2.4, track = 1}, {time = 2.8, track = 3}, {time = 3.2, track = 2}, {time = 3.6, track = 4},
@@ -64,6 +67,7 @@ SongData.Songs = {
 		Gender = "Female",
 		Bpm = 130,
 		Length = 120,
+		AudioId = "rbxassetid://0",
 		Notes = {
 			{time = 0.8, track = 4}, {time = 1.2, track = 2}, {time = 1.6, track = 3}, {time = 2.0, track = 1},
 			{time = 2.4, track = 4}, {time = 2.8, track = 2}, {time = 3.2, track = 3}, {time = 3.6, track = 1},
@@ -79,6 +83,7 @@ SongData.Songs = {
 		Gender = "Male",
 		Bpm = 145,
 		Length = 150,
+		AudioId = "rbxassetid://0",
 		Notes = {
 			{time = 0.5, track = 1}, {time = 0.7, track = 2}, {time = 0.9, track = 3}, {time = 1.1, track = 4},
 			{time = 1.5, track = 4}, {time = 1.7, track = 3}, {time = 1.9, track = 2}, {time = 2.1, track = 1},
@@ -94,6 +99,7 @@ SongData.Songs = {
 		Gender = "Female",
 		Bpm = 145,
 		Length = 150,
+		AudioId = "rbxassetid://0",
 		Notes = {
 			{time = 0.5, track = 4}, {time = 0.7, track = 3}, {time = 0.9, track = 2}, {time = 1.1, track = 1},
 			{time = 1.5, track = 1}, {time = 1.7, track = 2}, {time = 1.9, track = 3}, {time = 2.1, track = 4},
@@ -101,7 +107,6 @@ SongData.Songs = {
 			{time = 3.5, track = 4}, {time = 3.7, track = 1}, {time = 4.0, track = 3}, {time = 4.2, track = 2}
 		}
 	},
-	-- Можна легко розширити до 56 пісень за цією структурою
 }
 
 function SongData.GetSongById(songId)
