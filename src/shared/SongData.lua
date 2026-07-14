@@ -72,16 +72,6 @@ SongData.Songs = {
 		AudioId = "rbxassetid://99185739490618"
 	},
 	{
-		Id = "9_dean_blunt",
-		Title = "9 (Dean Blunt & Panda Bear)",
-		Difficulty = "Easy",
-		LevelRequired = 0,
-		Gender = "Universal",
-		Bpm = 115,
-		Length = 100,
-		AudioId = "rbxassetid://0"
-	},
-	{
 		Id = "deathmetal_panchiko",
 		Title = "DEATHMETAL (Panchiko)",
 		Difficulty = "Hard",
@@ -132,46 +122,6 @@ SongData.Songs = {
 		AudioId = "rbxassetid://73479694911085"
 	},
 	{
-		Id = "black_hole_sun",
-		Title = "Black Hole Sun (Soundgarden)",
-		Difficulty = "Hard",
-		LevelRequired = 0,
-		Gender = "Universal",
-		Bpm = 104,
-		Length = 318,
-		AudioId = "rbxassetid://0"
-	},
-	{
-		Id = "cause_for_sorrow",
-		Title = "Cause for Sorrow (Deadman Slowed)",
-		Difficulty = "Easy",
-		LevelRequired = 0,
-		Gender = "Universal",
-		Bpm = 95,
-		Length = 220,
-		AudioId = "rbxassetid://0"
-	},
-	{
-		Id = "stitches_nervepitch",
-		Title = "Stitches (Nervepitch loop)",
-		Difficulty = "Extreme",
-		LevelRequired = 0,
-		Gender = "Universal",
-		Bpm = 160,
-		Length = 165,
-		AudioId = "rbxassetid://0"
-	},
-	{
-		Id = "slide_plastic_tree",
-		Title = "Slide (Plastic Tree)",
-		Difficulty = "Medium",
-		LevelRequired = 0,
-		Gender = "Universal",
-		Bpm = 130,
-		Length = 140,
-		AudioId = "rbxassetid://0"
-	},
-	{
 		Id = "starting_over",
 		Title = "Starting Over (LSD & Search for God)",
 		Difficulty = "Medium",
@@ -180,16 +130,6 @@ SongData.Songs = {
 		Bpm = 128,
 		Length = 280,
 		AudioId = "rbxassetid://103996773702588"
-	},
-	{
-		Id = "too_much",
-		Title = "Too Much",
-		Difficulty = "Easy",
-		LevelRequired = 0,
-		Gender = "Universal",
-		Bpm = 100,
-		Length = 170,
-		AudioId = "rbxassetid://0"
 	}
 }
 
