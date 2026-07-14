@@ -36,6 +36,7 @@ local rhythmFrame = nil
 local hpBar = nil
 local feedbackLabel = nil
 local accuracyLabel = nil
+local loadingScreen = nil
 
 -- Елементи кастомного GUI (MainGui--inGame)
 local customGuiMode = false
@@ -81,15 +82,15 @@ local function createNotePool()
 		local noteObj = Instance.new("Frame")
 		noteObj.Name = "NoteNode"
 		noteObj.BorderSizePixel = 0
-		noteObj.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Біла нота
+		noteObj.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		noteObj.AnchorPoint = Vector2.new(0.5, 0.5)
 		noteObj.Visible = false
 		
 		local uiCorner = Instance.new("UICorner")
-		uiCorner.CornerRadius = UDim.new(0.5, 0) -- Кругла форма
+		uiCorner.CornerRadius = UDim.new(0.5, 0)
 		uiCorner.Parent = noteObj
 		
-		-- Обводка для неонового свічення
+		-- Обводка
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(255, 255, 255)
 		stroke.Thickness = 2
@@ -98,14 +99,14 @@ local function createNotePool()
 		-- Шлейф для затискання (Hold Trail)
 		local trail = Instance.new("Frame")
 		trail.Name = "Trail"
-		trail.AnchorPoint = Vector2.new(0.5, 1) -- Виходить вгору від ноти
+		trail.AnchorPoint = Vector2.new(0.5, 1)
 		trail.Position = UDim2.new(0.5, 0, 0.5, 0)
-		trail.Size = UDim2.new(0, 24, 0, 0) -- Ширина 24, висота задається динамічно
+		trail.Size = UDim2.new(0, 24, 0, 0)
 		trail.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		trail.BackgroundTransparency = 0.45 -- Напівпрозорий білий шлейф
+		trail.BackgroundTransparency = 0.75 -- Зроблено прозорішим (0.75 замість 0.45)
 		trail.BorderSizePixel = 0
 		trail.Visible = false
-		trail.ZIndex = noteObj.ZIndex - 1 -- За нотою
+		trail.ZIndex = noteObj.ZIndex - 1
 		trail.Parent = noteObj
 		
 		local trailCorner = Instance.new("UICorner")
@@ -113,8 +114,8 @@ local function createNotePool()
 		trailCorner.Parent = trail
 		
 		local trailStroke = Instance.new("UIStroke")
-		trailStroke.Color = Color3.fromRGB(200, 200, 255)
-		trailStroke.Thickness = 1.5
+		trailStroke.Color = Color3.fromRGB(255, 255, 255)
+		trailStroke.Thickness = 1
 		trailStroke.Parent = trail
 		
 		noteObj.Parent = screenGui
@@ -155,7 +156,7 @@ local function getNoteFromPool(track, targetTime, duration)
 		trail.Position = UDim2.new(0.5, 0, 0.5, 0)
 		trail.Size = UDim2.new(0, 24, 0, 0)
 		trail.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		trail.BackgroundTransparency = 0.45
+		trail.BackgroundTransparency = 0.75 -- Прозоріший шлейф
 		trail.BorderSizePixel = 0
 		trail.Visible = false
 		trail.ZIndex = noteObj.ZIndex - 1
@@ -166,8 +167,8 @@ local function getNoteFromPool(track, targetTime, duration)
 		trailCorner.Parent = trail
 		
 		local trailStroke = Instance.new("UIStroke")
-		trailStroke.Color = Color3.fromRGB(200, 200, 255)
-		trailStroke.Thickness = 1.5
+		trailStroke.Color = Color3.fromRGB(255, 255, 255)
+		trailStroke.Thickness = 1
 		trailStroke.Parent = trail
 		
 		noteObj.Parent = screenGui
@@ -179,10 +180,8 @@ local function getNoteFromPool(track, targetTime, duration)
 	local trail = noteObj:FindFirstChild("Trail")
 	
 	if customGuiMode and targetButton then
-		-- Нота стає ідеальним колом розміром 70x70
 		noteObj.Size = UDim2.new(0, 70, 0, 70)
 		
-		-- Центрування ноти відносно кнопки
 		local targetXScale = targetButton.Position.X.Scale
 		local targetXOffset = targetButton.Position.X.Offset + (targetButton.AbsoluteSize.X / 2)
 		local startY = 0.1
@@ -190,15 +189,13 @@ local function getNoteFromPool(track, targetTime, duration)
 		noteObj.Position = UDim2.new(targetXScale, targetXOffset, startY, 0)
 		noteObj.Parent = screenGui
 		
-		-- Якщо це затискання, налаштовуємо шлейф
 		if trail then
 			if duration and duration > 0 then
 				local endY = targetButton.Position.Y.Scale
 				local pathLengthScale = endY - startY
 				
-				-- Обчислення висоти шлейфу на основі екранних пікселів
 				local screenHeight = screenGui.AbsoluteSize.Y
-				if screenHeight == 0 then screenHeight = 800 end -- Фолбек
+				if screenHeight == 0 then screenHeight = 800 end
 				local totalHeightPixels = (duration / 2.0) * pathLengthScale * screenHeight
 				
 				trail.Size = UDim2.new(0, 24, 0, totalHeightPixels)
@@ -208,7 +205,6 @@ local function getNoteFromPool(track, targetTime, duration)
 			end
 		end
 	else
-		-- Стандартний фолбек режим
 		local laneParent = rhythmFrame:FindFirstChild("Lane" .. track)
 		noteObj.Size = UDim2.new(0, 70, 0, 70)
 		noteObj.Position = UDim2.new(0.5, 0, 0, -35)
@@ -409,6 +405,49 @@ local function createRhythmGui()
 		accuracyLabel.Parent = rhythmFrame
 	end
 	
+	-- Створюємо або отримуємо Екран Завантаження (LoadingScreen)
+	loadingScreen = screenGui:FindFirstChild("LoadingScreen")
+	if not loadingScreen then
+		loadingScreen = Instance.new("Frame")
+		loadingScreen.Name = "LoadingScreen"
+		loadingScreen.Size = UDim2.new(1, 0, 1, 0)
+		loadingScreen.Position = UDim2.new(0, 0, 0, 0)
+		loadingScreen.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+		loadingScreen.BorderSizePixel = 0
+		loadingScreen.ZIndex = 100
+		loadingScreen.Parent = screenGui
+		
+		local loadingImage = Instance.new("ImageLabel")
+		loadingImage.Name = "LoadingImage"
+		loadingImage.Size = UDim2.new(1, 0, 1, 0)
+		loadingImage.BackgroundTransparency = 1
+		loadingImage.Image = "rbxassetid://0" -- Користувач може вставити свій Asset ID пізніше
+		loadingImage.ScaleType = Enum.ScaleType.Crop
+		loadingImage.BorderSizePixel = 0
+		loadingImage.Parent = loadingScreen
+		
+		local loadingText = Instance.new("TextLabel")
+		loadingText.Name = "LoadingText"
+		loadingText.Size = UDim2.new(1, 0, 0, 60)
+		loadingText.Position = UDim2.new(0, 0, 0.82, 0)
+		loadingText.BackgroundTransparency = 1
+		loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+		loadingText.TextSize = 36
+		loadingText.Font = Enum.Font.FredokaOne
+		loadingText.Text = "ЗАВАНТАЖЕННЯ..."
+		loadingText.Parent = loadingScreen
+	end
+	
+	-- Скидаємо прозорість для екрану завантаження
+	loadingScreen.Visible = true
+	loadingScreen.BackgroundTransparency = 0
+	
+	local loadingImage = loadingScreen:FindFirstChild("LoadingImage")
+	if loadingImage then loadingImage.ImageTransparency = 0 end
+	
+	local loadingText = loadingScreen:FindFirstChild("LoadingText")
+	if loadingText then loadingText.TextTransparency = 0 end
+	
 	createNotePool()
 end
 
@@ -499,7 +538,6 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	currentSong = song
 	currentContractName = contractName
 	isPlaying = true
-	songStartTime = os.clock()
 	activeNotes = {}
 	spawnedNoteIndex = 1
 	notesHit = 0
@@ -517,6 +555,32 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	end
 
 	createRhythmGui()
+
+	-- Очікування перед стартом пісні (поки висить екран завантаження)
+	task.wait(2.2)
+	
+	-- Плавне зникнення екрану завантаження
+	if loadingScreen then
+		local fadeInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		local tweenBg = TweenService:Create(loadingScreen, fadeInfo, {BackgroundTransparency = 1})
+		
+		local loadingImage = loadingScreen:FindFirstChild("LoadingImage")
+		local tweenImg = loadingImage and TweenService:Create(loadingImage, fadeInfo, {ImageTransparency = 1})
+		
+		local loadingText = loadingScreen:FindFirstChild("LoadingText")
+		local tweenTxt = loadingText and TweenService:Create(loadingText, fadeInfo, {TextTransparency = 1})
+		
+		tweenBg:Play()
+		if tweenImg then tweenImg:Play() end
+		if tweenTxt then tweenTxt:Play() end
+		
+		tweenBg.Completed:Connect(function()
+			loadingScreen.Visible = false
+		end)
+	end
+	
+	-- Записуємо початковий час пісні після завантаження!
+	songStartTime = os.clock()
 
 	-- Ігровий цикл
 	local connection
@@ -553,13 +617,12 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 			local timeDiff = note.TargetTime - elapsed
 			local progress = 1 - (timeDiff / spawnPreDelay)
 
-			local targetButton = customGuiMode and customLanes[note.Track]
+			local targetButton = customLanes[note.Track]
 			local startY = 0.1
 			local endY = targetButton and targetButton.Position.Y.Scale or 0.85
 			local pathLengthScale = endY - startY
 
 			if note.IsHolding then
-				-- Якщо нота затиснута, вона фіксується по центру нашої кнопки-мішені
 				if targetButton then
 					local targetXScale = targetButton.Position.X.Scale
 					local targetXOffset = targetButton.Position.X.Offset + (targetButton.AbsoluteSize.X / 2)
@@ -568,7 +631,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					note.Gui.Position = UDim2.new(targetXScale, targetXOffset, targetYScale, 0)
 				end
 				
-				-- Шлейф скорочується відповідно до того, скільки часу затискання залишилось
+				-- Розрахунок залишку часу затискання
 				local timeLeft = (note.TargetTime + note.Duration) - elapsed
 				local trail = note.Gui:FindFirstChild("Trail")
 				
@@ -576,7 +639,9 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					if trail then
 						local screenHeight = screenGui.AbsoluteSize.Y
 						if screenHeight == 0 then screenHeight = 800 end
-						local currentHeightPixels = (timeLeft / spawnPreDelay) * pathLengthScale * screenHeight
+						
+						-- Розраховуємо висоту шлейфу, обмежуючи її знизу нулем
+						local currentHeightPixels = math.max(0, (timeLeft / spawnPreDelay) * pathLengthScale * screenHeight)
 						trail.Size = UDim2.new(0, 24, 0, currentHeightPixels)
 					end
 					
@@ -585,19 +650,19 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					if note.ScoreTicks % 10 == 0 then
 						notesHit = notesHit + 0.08
 						feedbackLabel.Text = "HOLDING..."
-						feedbackLabel.TextColor3 = Color3.fromRGB(255, 215, 0) -- Золотистий колір
+						feedbackLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
 						
-						-- Яскрава неонова зелена підсвітка при триманні
 						local activeFrame = customGuiMode and customActiveFrames[note.Track]
 						if activeFrame then
 							activeFrame.Visible = true
-							activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- Яскравий чистий зелений
-							activeFrame.BackgroundTransparency = 0 -- Робимо максимально яскравим
+							activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+							activeFrame.BackgroundTransparency = 0
 						end
 					end
 				else
-					-- Затискання завершено успішно!
+					-- Затискання успішно завершено! Лінія зникає повністю!
 					note.IsHolding = false
+					if trail then trail.Visible = false end -- Явно вимикаємо лінію!
 					returnNoteToPool(note)
 					table.remove(activeNotes, i)
 					
@@ -637,13 +702,11 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						
 						note.Gui.Position = UDim2.new(targetXScale, targetXOffset, currentYScale, 0)
 					else
-						-- Фолбек режим
 						local yPosScale = progress * 0.85
 						note.Gui.Position = UDim2.new(0.5, 0, yPosScale, 0)
 					end
 				end
 			else
-				-- Нота була влучена, але це була звичайна нота (не Hold)
 				returnNoteToPool(note)
 				table.remove(activeNotes, i)
 			end
@@ -669,11 +732,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 
 	if not pressedTrack then return end
 
-	-- Яскрава підсвітка кнопки-фрейму
 	local activeFrame = customGuiMode and customActiveFrames[pressedTrack]
 	if activeFrame then
 		activeFrame.Visible = true
-		activeFrame.BackgroundColor3 = Color3.fromRGB(200, 200, 200) -- Сірий під час натискання до оцінки таймінгу
+		activeFrame.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
 		activeFrame.BackgroundTransparency = 0
 	end
 
@@ -681,7 +743,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	local bestNote = nil
 	local minTimeDiff = 999
 
-	-- Шукаємо найближчу ноту на цій доріжці
 	for _, note in ipairs(activeNotes) do
 		if note.Track == pressedTrack and not note.Hit and not note.IsHolding then
 			local diff = math.abs(note.TargetTime - elapsed)
@@ -692,21 +753,18 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		end
 	end
 
-	-- Перевірка таймінгу влучання
 	if bestNote and minTimeDiff <= 0.25 then
 		if bestNote.Duration > 0 then
-			-- Початок утримання Hold-ноти
 			bestNote.IsHolding = true
 			
 			if activeFrame then
-				activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- Чистий яскравий зелений для старту
+				activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 				activeFrame.BackgroundTransparency = 0
 			end
 			feedbackLabel.Text = "HOLD START!"
 			feedbackLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
 			soundPerfect:Play()
 		else
-			-- Влучання у звичайну круглу ноту
 			bestNote.Hit = true
 
 			if minTimeDiff <= 0.08 then
@@ -716,7 +774,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				soundPerfect:Play()
 				
 				if activeFrame then
-					activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- Яскравий зелений
+					activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 					activeFrame.BackgroundTransparency = 0
 				end
 			elseif minTimeDiff <= 0.15 then
@@ -726,7 +784,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				soundPerfect:Play()
 				
 				if activeFrame then
-					activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- Яскравий зелений
+					activeFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 					activeFrame.BackgroundTransparency = 0
 				end
 			else
@@ -735,13 +793,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				notesHit = notesHit + 0.5
 				
 				if activeFrame then
-					activeFrame.BackgroundColor3 = Color3.fromRGB(200, 200, 0) -- Жовтий
+					activeFrame.BackgroundColor3 = Color3.fromRGB(200, 200, 0)
 					activeFrame.BackgroundTransparency = 0
 				end
 			end
 		end
 	else
-		-- Натискання повз ноту або у поганий таймінг (BAD TIMING)
 		soundDefect:Play()
 		feedbackLabel.Text = "BAD TIMING!"
 		feedbackLabel.TextColor3 = Color3.fromRGB(255, 150, 0)
@@ -749,7 +806,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		hpBar.Size = UDim2.new(currentHp / 100, 0, 1, 0)
 		
 		if activeFrame then
-			activeFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Яскравий червоний
+			activeFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 			activeFrame.BackgroundTransparency = 0
 		end
 
@@ -778,16 +835,16 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 		activeFrame.Visible = false
 	end
 
-	-- Перевірка чи не відпустили ми Hold-ноту занадто рано
 	local elapsed = os.clock() - songStartTime
 	for _, note in ipairs(activeNotes) do
 		if note.Track == releasedTrack and note.IsHolding then
 			local endHoldTime = note.TargetTime + note.Duration
 			
-			-- Якщо відпустили більше ніж за 0.15 сек до кінця
 			if elapsed < endHoldTime - 0.15 then
-				-- Ранній відпуск (Hold Break)
+				-- Ранній відпуск (Hold Break). Лінія зникає відразу!
 				note.IsHolding = false
+				local trail = note.Gui:FindFirstChild("Trail")
+				if trail then trail.Visible = false end
 				returnNoteToPool(note)
 				
 				soundDefect:Play()
