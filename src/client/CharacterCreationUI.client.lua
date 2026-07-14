@@ -261,10 +261,14 @@ femaleBtn.MouseButton1Click:Connect(function()
 	updateGenderVisuals()
 end)
 
--- Find Customizer Character Rig in Workspace
-local starterSkin = workspace:WaitForChild("NPC'S", 10)
-	and workspace.NPC'S:WaitForChild("NPC'S--Main", 10)
-	and workspace.NPC'S["NPC'S--Main"]:WaitForChild("Starter_Skin", 10)
+local starterSkin = nil
+local npcsFolder = workspace:FindFirstChild("NPC'S")
+if npcsFolder then
+	local mainFolder = npcsFolder:FindFirstChild("NPC'S--Main")
+	if mainFolder then
+		starterSkin = mainFolder:FindFirstChild("Starter_Skin")
+	end
+end
 
 -- Clean initial hair accessories locally on rig
 if starterSkin then

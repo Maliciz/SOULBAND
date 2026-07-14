@@ -47,7 +47,11 @@ function DataManager.LoadData(player)
 		-- Перевіряємо наявність нових полів (у разі оновлення гри)
 		for k, v in pairs(DEFAULT_DATA) do
 			if data[k] == nil then
-				data[k] = deepCopy(v)
+				if type(v) == "table" then
+					data[k] = deepCopy(v)
+				else
+					data[k] = v
+				end
 			end
 		end
 		sessionData[player] = data

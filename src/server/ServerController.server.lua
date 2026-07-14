@@ -107,9 +107,14 @@ local function applyCustomCharacter(player, character)
 	end
 
 	-- Apply clothes and body colors from Starter_Skin if available
-	local starterSkin = workspace:WaitForChild("NPC'S", 5)
-		and workspace.NPC'S:WaitForChild("NPC'S--Main", 5)
-		and workspace.NPC'S["NPC'S--Main"]:WaitForChild("Starter_Skin", 5)
+	local starterSkin = nil
+	local npcsFolder = workspace:FindFirstChild("NPC'S")
+	if npcsFolder then
+		local mainFolder = npcsFolder:FindFirstChild("NPC'S--Main")
+		if mainFolder then
+			starterSkin = mainFolder:FindFirstChild("Starter_Skin")
+		end
+	end
 
 	if starterSkin then
 		-- Copy and set Body Colors according to selection
@@ -218,7 +223,14 @@ end)
 -- Обробники запитів від клієнтів (Remote Functions)
 
 RequestPlayerDataFunc.OnServerInvoke = function(player)
-	return DataManager.Get(player)
+	local data = DataManager.Get(player)
+	local retries = 0
+	while not data and retries < 15 do
+		task.wait(0.2)
+		data = DataManager.Get(player)
+		retries = retries + 1
+	end
+	return data
 end
 
 SetGenderFunc.OnServerInvoke = function(player, gender)
@@ -244,9 +256,14 @@ FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, sk
 end
 
 PreviewHairEvent.OnServerEvent:Connect(function(player, hairId)
-	local starterSkin = workspace:WaitForChild("NPC'S", 5)
-		and workspace.NPC'S:WaitForChild("NPC'S--Main", 5)
-		and workspace.NPC'S["NPC'S--Main"]:WaitForChild("Starter_Skin", 5)
+	local starterSkin = nil
+	local npcsFolder = workspace:FindFirstChild("NPC'S")
+	if npcsFolder then
+		local mainFolder = npcsFolder:FindFirstChild("NPC'S--Main")
+		if mainFolder then
+			starterSkin = mainFolder:FindFirstChild("Starter_Skin")
+		end
+	end
 	
 	if starterSkin then
 		applyHairToModel(starterSkin, hairId)
