@@ -65,14 +65,14 @@ local notePool = {}
 
 -- Звукові ефекти
 local soundDefect = Instance.new("Sound")
-soundDefect.SoundId = "rbxassetid://9114223192"
+soundDefect.SoundId = "rbxassetid://8536551061" -- Робочий клік/помилка
 soundDefect.Volume = 0.5
-soundDefect.Parent = SoundService
+soundDefect.Parent = game.Workspace.CurrentCamera
 
 local soundPerfect = Instance.new("Sound")
-soundPerfect.SoundId = "rbxassetid://9113615177"
+soundPerfect.SoundId = "rbxassetid://6897148560" -- Робочий звук влучання
 soundPerfect.Volume = 0.3
-soundPerfect.Parent = SoundService
+soundPerfect.Parent = game.Workspace.CurrentCamera
 
 -- Завантаження налаштувань гравця
 local function updateKeybinds()
@@ -675,14 +675,19 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 	-- СТВОРЕННЯ ТА ПРОГРАВАННЯ МУЗИЧНОЇ ДОРІЖКИ ПІСНІ
 	if song.AudioId and song.AudioId ~= "" and song.AudioId ~= "rbxassetid://0" then
-		pcall(function()
-			print("🎵 Запуск відтворення обраної аудіодоріжки:", song.AudioId)
+		local success, err = pcall(function()
+			print("🎵 Спроба запуску аудіодоріжки:", song.AudioId)
 			activeSongSound = Instance.new("Sound")
 			activeSongSound.SoundId = song.AudioId
-			activeSongSound.Volume = 0.65 -- Трохи гучніше для чіткості
-			activeSongSound.Parent = workspace -- Надійніше розташування для клієнтського відтворення
+			activeSongSound.Volume = 0.7 -- Хороший рівень гучності
+			activeSongSound.Parent = game.Workspace.CurrentCamera -- 2D звук безпосередньо у вуха гравця
 			activeSongSound:Play()
 		end)
+		if not success then
+			warn("⚠️ Помилка створення або запуску звуку:", err)
+		end
+	else
+		warn("⚠️ Аудіодоріжку не запущено: ID порожній або rbxassetid://0")
 	end
 
 	if song.Difficulty == "Easy" then

@@ -42,7 +42,16 @@ function ContractManager.StartContract(player, contractId)
 	end
 
 	if #suitableSongs == 0 then
-		return false, "Не знайдено пісень для вашої статі зі складністю " .. contract.Difficulty
+		-- Резервний варіант: якщо пісень потрібної складності немає, обираємо будь-яку доступну пісню
+		for _, song in ipairs(SongData.Songs) do
+			if song.Gender == data.Gender or song.Gender == "Universal" then
+				table.insert(suitableSongs, song)
+			end
+		end
+	end
+
+	if #suitableSongs == 0 then
+		return false, "Не знайдено пісень для вашої статі."
 	end
 
 	local selectedSong = suitableSongs[math.random(1, #suitableSongs)]
