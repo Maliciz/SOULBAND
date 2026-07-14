@@ -23,7 +23,7 @@ SongData.Songs = {
 			{time = 1.0, track = 1}, {time = 1.5, track = 2}, {time = 2.0, track = 3}, {time = 2.5, track = 4},
 			{time = 3.0, track = 2}, {time = 3.5, track = 3}, {time = 4.0, track = 1}, {time = 4.5, track = 4},
 			{time = 5.0, track = 1}, {time = 5.2, track = 2}, {time = 5.4, track = 3}, {time = 5.6, track = 4},
-			{time = 7.0, track = 3}, {time = 8.0, track = 2}, {time = 9.0, track = 1}, {time = 10.0, track = 4}
+			{time = 7.0, track = 3, duration = 1.2}, {time = 9.0, track = 2, duration = 1.5}, {time = 11.0, track = 1, duration = 2.0}, {time = 14.0, track = 4}
 		}
 	},
 	{
@@ -38,7 +38,7 @@ SongData.Songs = {
 			{time = 1.0, track = 4}, {time = 1.5, track = 3}, {time = 2.0, track = 2}, {time = 2.5, track = 1},
 			{time = 3.0, track = 3}, {time = 3.5, track = 2}, {time = 4.0, track = 4}, {time = 4.5, track = 1},
 			{time = 5.0, track = 4}, {time = 5.2, track = 3}, {time = 5.4, track = 2}, {time = 5.6, track = 1},
-			{time = 7.0, track = 2}, {time = 8.0, track = 3}, {time = 9.0, track = 4}, {time = 10.0, track = 1}
+			{time = 7.0, track = 2, duration = 1.2}, {time = 9.0, track = 3, duration = 1.5}, {time = 11.0, track = 4, duration = 2.0}, {time = 14.0, track = 1}
 		}
 	},
 	{
