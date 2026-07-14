@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
@@ -364,7 +365,7 @@ if starterSkin then
 	camConnection = RunService.RenderStepped:Connect(function()
 		local skinCF = starterSkin:GetPivot()
 		-- Place camera 8.5 studs in front of customizer rig and 4.8 studs high
-		local camPosition = (skinCF * CFrame.new(0, 4.8, 8.5)).Position
+		local camPosition = (skinCF * CFrame.new(0, 4.8, -8.5)).Position
 		local lookAt = (skinCF * CFrame.new(0, 4.2, 0)).Position
 		camera.CFrame = CFrame.lookAt(camPosition, lookAt)
 	end)
