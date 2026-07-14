@@ -126,6 +126,56 @@ local function triggerMiss()
 	end)
 end
 
+-- Легке тремтіння камери (Camera Shake) для динаміки
+local function cameraShake(amount, duration)
+	local camera = workspace.CurrentCamera
+	if not camera then return end
+	
+	local startTime = os.clock()
+	local connection
+	connection = RunService.RenderStepped:Connect(function()
+		local elapsed = os.clock() - startTime
+		if elapsed >= duration or not isPlaying then
+			connection:Disconnect()
+			return
+		end
+		local dx = (math.random() - 0.5) * amount
+		local dy = (math.random() - 0.5) * amount
+		camera.CFrame = camera.CFrame * CFrame.new(dx, dy, 0)
+	end)
+end
+
+-- Ефектна анімація оцінки (Perfect/Good/Miss)
+local function popFeedback(text, color)
+	feedbackLabel.Text = text
+	feedbackLabel.TextColor3 = color
+	feedbackLabel.TextSize = 44
+	feedbackLabel.Rotation = math.random(-8, 8)
+	
+	-- Створюємо легкий рух тексту вгору
+	local originalPosition = customGuiMode and UDim2.new(0.5, -200, 0.45, 0) or UDim2.new(0, 0, 0.4, 0)
+	feedbackLabel.Position = originalPosition
+	
+	local tweenInfo = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	TweenService:Create(feedbackLabel, tweenInfo, {
+		TextSize = 32,
+		Rotation = 0
+	}):Play()
+end
+
+-- Пульсація кнопки при влучанні
+local function pulseButton(track)
+	local button = customLanes[track]
+	if not button then return end
+	
+	-- Створюємо швидкий ефект стиснення/розширення
+	local originalSize = UDim2.new(0, 85, 0, 79)
+	button.Size = UDim2.new(0, 95, 0, 88)
+	
+	local tweenInfo = TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(button, tweenInfo, {Size = originalSize}):Play()
+end
+
 -- Завантаження налаштувань гравця
 local function updateKeybinds()
 	local success, data = pcall(function()
@@ -153,15 +203,15 @@ local function spawnHitParticles(track, rating)
 	local originX = targetButton.AbsolutePosition.X + targetButton.AbsoluteSize.X / 2
 	local originY = targetButton.AbsolutePosition.Y + targetButton.AbsoluteSize.Y / 2
 
-	-- Створюємо 8 круглих частинок, що розлітаються в різні боки
-	for i = 1, 8 do
+	-- Створюємо 12 круглих частинок, що розлітаються швидше
+	for i = 1, 12 do
 		local particle = Instance.new("Frame")
 		particle.Name = "HitParticle"
-		particle.Size = UDim2.new(0, 10, 0, 10)
+		particle.Size = UDim2.new(0, math.random(8, 14), 0, math.random(8, 14))
 		particle.Position = UDim2.new(0, originX, 0, originY)
 		particle.AnchorPoint = Vector2.new(0.5, 0.5)
 		particle.BackgroundColor3 = trackColor
-		particle.BackgroundTransparency = 0.3
+		particle.BackgroundTransparency = 0.2
 		particle.BorderSizePixel = 0
 		particle.ZIndex = 1000
 		
@@ -171,25 +221,25 @@ local function spawnHitParticles(track, rating)
 		
 		local stroke = Instance.new("UIStroke")
 		stroke.Color = Color3.fromRGB(255, 255, 255)
-		stroke.Thickness = 1
+		stroke.Thickness = 1.5
 		stroke.Parent = particle
 		
 		particle.Parent = screenGui
 
 		local angle = math.rad(math.random(0, 360))
-		local distance = math.random(40, 100)
+		local distance = math.random(50, 140)
 		local targetX = originX + math.cos(angle) * distance
 		local targetY = originY + math.sin(angle) * distance
 
 		local tweenInfo = TweenInfo.new(
-			math.random(3, 6) / 10, -- 0.3 - 0.6 сек
+			math.random(2, 4) / 10, -- 0.2 - 0.4 сек
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.Out
 		)
 		
 		local tween = TweenService:Create(particle, tweenInfo, {
 			Position = UDim2.new(0, targetX, 0, targetY),
-			Size = UDim2.new(0, 0, 0, 0), -- Звуження до 0
+			Size = UDim2.new(0, 0, 0, 0),
 			BackgroundTransparency = 1
 		})
 		
@@ -215,6 +265,7 @@ local function createNotePool()
 		noteObj.BackgroundColor3 = Color3.fromRGB(25, 25, 25) -- Темно-чорне тіло
 		noteObj.BackgroundTransparency = 0.25 -- Менше прозорості для вираженого чорно-сірого вигляду
 		noteObj.AnchorPoint = Vector2.new(0.5, 0.5)
+		noteObj.ZIndex = 10
 		noteObj.Visible = false
 		
 		local uiCorner = Instance.new("UICorner")
@@ -295,6 +346,7 @@ local function getNoteFromPool(track, targetTime, duration)
 		noteObj.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 		noteObj.BackgroundTransparency = 0.25
 		noteObj.AnchorPoint = Vector2.new(0.5, 0.5)
+		noteObj.ZIndex = 10
 		
 		local uiCorner = Instance.new("UICorner")
 		uiCorner.CornerRadius = UDim.new(0.5, 0)
@@ -469,6 +521,7 @@ local function createRhythmGui()
 			if lane then
 				customLanes[i] = lane
 				lane.Visible = true
+				lane.BackgroundTransparency = 0.45 -- Робимо менш прозорим для кращої видимості
 				
 				local activeFrame = lane:FindFirstChild(activeNames[i], true)
 				if activeFrame then
@@ -809,9 +862,10 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 				if targetButton then
 					local targetXScale = targetButton.Position.X.Scale
 					local targetXOffset = targetButton.Position.X.Offset + (targetButton.AbsoluteSize.X / 2)
-					local targetYScale = targetButton.Position.Y.Scale + (targetButton.AbsoluteSize.Y / 2)
+					local targetYScale = targetButton.Position.Y.Scale
+					local targetYOffset = targetButton.Position.Y.Offset + (targetButton.AbsoluteSize.Y / 2)
 					
-					note.Gui.Position = UDim2.new(targetXScale, targetXOffset, targetYScale, 0)
+					note.Gui.Position = UDim2.new(targetXScale, targetXOffset, targetYScale, targetYOffset)
 				end
 				
 				-- Розрахунок залишку часу затискання
@@ -849,8 +903,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					table.remove(activeNotes, i)
 					
 					soundPerfect:Play()
-					feedbackLabel.Text = "HOLD COMPLETE!"
-					feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+					popFeedback("HOLD COMPLETE!", Color3.fromRGB(255, 255, 255))
 					notesHit = notesHit + 1.2
 					
 					local activeFrame = customGuiMode and customActiveFrames[note.Track]
@@ -865,8 +918,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					if not note.Hit then
 						-- Пропуск ноти (Miss) - тільки якщо по ній НЕ попали!
 						triggerMiss()
-						feedbackLabel.Text = "MISS!"
-						feedbackLabel.TextColor3 = Color3.fromRGB(120, 120, 120) -- Темно-сірий Miss
+						popFeedback("MISS!", Color3.fromRGB(120, 120, 120))
 					end
 					
 					returnNoteToPool(note)
@@ -983,38 +1035,40 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 				activeFrame.BackgroundColor3 = trackColor
 				activeFrame.BackgroundTransparency = 0.3
 			end
-			feedbackLabel.Text = "HOLD START!"
-			feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			popFeedback("HOLD START!", Color3.fromRGB(255, 255, 255))
 			soundPerfect:Play()
 			spawnHitParticles(pressedTrack, "PERFECT!")
+			pulseButton(pressedTrack)
+			cameraShake(0.04, 0.06)
 		else
 			bestNote.Hit = true
 
 			if minTimeDiff <= 0.08 then
-				feedbackLabel.Text = "PERFECT!"
-				feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Білий
+				popFeedback("PERFECT!", Color3.fromRGB(255, 255, 255))
 				notesHit = notesHit + 1
 				soundPerfect:Play()
 				spawnHitParticles(pressedTrack, "PERFECT!")
+				pulseButton(pressedTrack)
+				cameraShake(0.05, 0.08)
 				
 				if activeFrame then
 					activeFrame.BackgroundColor3 = trackColor
 					activeFrame.BackgroundTransparency = 0.3
 				end
 			elseif minTimeDiff <= 0.18 then
-				feedbackLabel.Text = "GOOD!"
-				feedbackLabel.TextColor3 = Color3.fromRGB(200, 200, 200) -- Світло-сірий
+				popFeedback("GOOD!", Color3.fromRGB(200, 200, 200))
 				notesHit = notesHit + 0.75
 				soundPerfect:Play()
 				spawnHitParticles(pressedTrack, "GOOD!")
+				pulseButton(pressedTrack)
+				cameraShake(0.02, 0.06)
 				
 				if activeFrame then
 					activeFrame.BackgroundColor3 = trackColor
 					activeFrame.BackgroundTransparency = 0.4
 				end
 			else
-				feedbackLabel.Text = "BAD!"
-				feedbackLabel.TextColor3 = Color3.fromRGB(120, 120, 120) -- Сірий
+				popFeedback("BAD!", Color3.fromRGB(120, 120, 120))
 				notesHit = notesHit + 0.25
 				triggerMiss()
 				spawnHitParticles(pressedTrack, "BAD!")
@@ -1027,8 +1081,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		end
 	else
 		triggerMiss()
-		feedbackLabel.Text = "BAD!"
-		feedbackLabel.TextColor3 = Color3.fromRGB(120, 120, 120)
+		popFeedback("BAD!", Color3.fromRGB(120, 120, 120))
 		
 		if activeFrame then
 			activeFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
@@ -1072,8 +1125,7 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 				returnNoteToPool(note)
 				
 				triggerMiss()
-				feedbackLabel.Text = "HOLD BREAK!"
-				feedbackLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
+				popFeedback("HOLD BREAK!", Color3.fromRGB(100, 100, 100))
 			end
 		end
 	end
