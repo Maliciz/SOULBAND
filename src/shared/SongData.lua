@@ -80,17 +80,6 @@ SongData.Songs = {
 		Bpm = 135,
 		Length = 250,
 		AudioId = "rbxassetid://104113977201104"
-	},
-	{
-		Id = "everlong",
-		Title = "Everlong (Foo Fighters)",
-		Difficulty = "Hard",
-		LevelRequired = 0,
-		Gender = "Universal",
-		Bpm = 158,
-		Length = 250,
-		AudioId = "rbxassetid://84031772165316"
-	},
 	{
 		Id = "mac_demarco_love",
 		Title = "The Way You'd Love Her",
