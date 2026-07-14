@@ -81,6 +81,9 @@
         "HUDController": {
           "$path": "src/client/HUDController.client.lua"
         },
+        "SettingsUIController": {
+          "$path": "src/client/SettingsUIController.client.lua"
+        },
         "ContractUIController": {
           "$path": "src/client/ContractUIController.client.lua"
         }
