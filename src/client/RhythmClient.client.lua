@@ -448,7 +448,7 @@ local function getNoteFromPool(track, targetTime, duration)
 				
 				local screenHeight = screenGui.AbsoluteSize.Y
 				if screenHeight == 0 then screenHeight = 800 end
-				local totalHeightPixels = (duration / 2.0) * pathLengthScale * screenHeight
+				local totalHeightPixels = (duration / 1.4) * pathLengthScale * screenHeight
 				
 				trail.Size = UDim2.new(0, 24, 0, totalHeightPixels)
 				trail.BackgroundColor3 = trackColor
@@ -473,7 +473,7 @@ local function getNoteFromPool(track, targetTime, duration)
 		if trail then
 			if duration and duration > 0 then
 				local trackHeight = rhythmFrame.Size.Y.Offset - 85
-				local totalHeightPixels = (duration / 2.0) * trackHeight
+				local totalHeightPixels = (duration / 1.4) * trackHeight
 				trail.Size = UDim2.new(0, 24, 0, totalHeightPixels)
 				trail.BackgroundColor3 = trackColor
 				trail.BackgroundTransparency = 0.8
@@ -869,15 +869,15 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 		local elapsed = os.clock() - songStartTime
 
-		-- Перевірка завершення пісні за часом (з додатковим запасом у 6 секунд для догравання останніх нот)
-		if elapsed >= currentSong.Length + 6 then
+		-- Перевірка завершення пісні за часом (з додатковим запасом у 9 секунд для догравання останніх нот)
+		if elapsed >= currentSong.Length + 9 then
 			connection:Disconnect()
 			endSong(false)
 			return
 		end
 
 		-- Спавн нот відповідно до розкладу
-		local spawnPreDelay = 2.0
+		local spawnPreDelay = 1.4
 		while spawnedNoteIndex <= #currentSong.Notes do
 			local note = currentSong.Notes[spawnedNoteIndex]
 			if note.time - spawnPreDelay <= elapsed then
