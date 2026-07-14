@@ -76,9 +76,15 @@ soundPerfect.Volume = 0.4
 soundPerfect.PlaybackSpeed = 1.4 -- Вищий тон для влучання
 soundPerfect.Parent = game.Workspace.CurrentCamera
 
--- Логіка приглушення музики на 0.3 сек при міссі
+-- Логіка приглушення музики на 0.3 сек та керування звуком помилки
 local dimThread = nil
+local missSoundThread = nil
 local function triggerMiss()
+	pcall(function()
+		soundDefect:Stop()
+		soundDefect.Volume = 0.6
+	end)
+	
 	soundDefect:Play()
 	
 	if activeSongSound and isPlaying then
@@ -99,6 +105,25 @@ local function triggerMiss()
 			dimThread = nil
 		end)
 	end
+	
+	-- Зупиняємо/затухаємо звук помилки через 0.2 сек
+	if missSoundThread then
+		task.cancel(missSoundThread)
+	end
+	
+	missSoundThread = task.delay(0.2, function()
+		-- Плавне затухання за 0.05 сек
+		for vol = 6, 0, -1 do
+			pcall(function()
+				soundDefect.Volume = vol / 10
+			end)
+			task.wait(0.01)
+		end
+		pcall(function()
+			soundDefect:Stop()
+		end)
+		missSoundThread = nil
+	end)
 end
 
 -- Завантаження налаштувань гравця
