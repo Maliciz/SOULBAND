@@ -160,8 +160,8 @@ local function createNotePool()
 		local noteObj = Instance.new("Frame")
 		noteObj.Name = "NoteNode"
 		noteObj.BorderSizePixel = 0
-		noteObj.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		noteObj.BackgroundTransparency = 0.65 -- Тіло бульбашки
+		noteObj.BackgroundColor3 = Color3.fromRGB(25, 25, 25) -- Темно-чорне тіло
+		noteObj.BackgroundTransparency = 0.25 -- Менше прозорості для вираженого чорно-сірого вигляду
 		noteObj.AnchorPoint = Vector2.new(0.5, 0.5)
 		noteObj.Visible = false
 		
@@ -240,8 +240,8 @@ local function getNoteFromPool(track, targetTime, duration)
 		noteObj = Instance.new("Frame")
 		noteObj.Name = "NoteNode"
 		noteObj.BorderSizePixel = 0
-		noteObj.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		noteObj.BackgroundTransparency = 0.65
+		noteObj.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+		noteObj.BackgroundTransparency = 0.25
 		noteObj.AnchorPoint = Vector2.new(0.5, 0.5)
 		
 		local uiCorner = Instance.new("UICorner")
@@ -303,7 +303,8 @@ local function getNoteFromPool(track, targetTime, duration)
 	local trackColor = TrackColors[track] or Color3.fromRGB(240, 240, 240)
 	
 	-- Відновлення прозорості бульбашки
-	noteObj.BackgroundTransparency = 0.65
+	noteObj.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	noteObj.BackgroundTransparency = 0.25
 	
 	local stroke = noteObj:FindFirstChildWhichIsA("UIStroke")
 	if stroke then
@@ -313,8 +314,8 @@ local function getNoteFromPool(track, targetTime, duration)
 	
 	local core = noteObj:FindFirstChild("Core")
 	if core then
-		core.BackgroundColor3 = trackColor
-		core.BackgroundTransparency = 0.5
+		core.BackgroundColor3 = Color3.fromRGB(150, 150, 150) -- Сіре ядро
+		core.BackgroundTransparency = 0.4
 	end
 	
 	local reflection = noteObj:FindFirstChild("Reflection")
@@ -675,10 +676,11 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	-- СТВОРЕННЯ ТА ПРОГРАВАННЯ МУЗИЧНОЇ ДОРІЖКИ ПІСНІ
 	if song.AudioId and song.AudioId ~= "" and song.AudioId ~= "rbxassetid://0" then
 		pcall(function()
+			print("🎵 Запуск відтворення обраної аудіодоріжки:", song.AudioId)
 			activeSongSound = Instance.new("Sound")
 			activeSongSound.SoundId = song.AudioId
-			activeSongSound.Volume = 0.5
-			activeSongSound.Parent = SoundService
+			activeSongSound.Volume = 0.65 -- Трохи гучніше для чіткості
+			activeSongSound.Parent = workspace -- Надійніше розташування для клієнтського відтворення
 			activeSongSound:Play()
 		end)
 	end

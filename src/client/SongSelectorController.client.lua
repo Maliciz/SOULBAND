@@ -206,6 +206,55 @@ end
 
 populateSongList()
 
+-- Створення постійної підказки "Натисніть G" на екрані (монохромний стиль)
+local hintFrame = Instance.new("Frame")
+hintFrame.Name = "GPlayHint"
+hintFrame.Size = UDim2.new(0, 300, 0, 32)
+hintFrame.Position = UDim2.new(0.5, -150, 0.92, 0) -- Внизу по центру
+hintFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+hintFrame.BackgroundTransparency = 0.3
+hintFrame.BorderSizePixel = 0
+hintFrame.Parent = screenGui
+
+local hintCorner = Instance.new("UICorner")
+hintCorner.CornerRadius = UDim.new(0, 6)
+hintCorner.Parent = hintFrame
+
+local hintStroke = Instance.new("UIStroke")
+hintStroke.Color = Color3.fromRGB(120, 120, 125)
+hintStroke.Thickness = 1
+hintStroke.Parent = hintFrame
+
+local hintText = Instance.new("TextLabel")
+hintText.Size = UDim2.new(1, 0, 1, 0)
+hintText.BackgroundTransparency = 1
+hintText.Text = "Натисніть 'G' для вибору пісні"
+hintText.TextColor3 = Color3.fromRGB(200, 200, 200)
+hintText.TextSize = 14
+hintText.Font = Enum.Font.FredokaOne
+hintText.Parent = hintFrame
+
+-- Потік для автоматичного приховання підказки під час гри або відкритому меню
+task.spawn(function()
+	while true do
+		local inGameUI = PlayerGui:FindFirstChild("MainGui--inGame", true)
+		local standardGameUI = PlayerGui:FindFirstChild("RhythmGameUI", true)
+		
+		local isGameActive = false
+		if (inGameUI and inGameUI.Enabled) or standardGameUI then
+			isGameActive = true
+		end
+		
+		if isGameActive or panel.Visible then
+			hintFrame.Visible = false
+		else
+			hintFrame.Visible = true
+		end
+		
+		task.wait(0.5)
+	end
+end)
+
 -- Прослуховувач клавіші 'G' для відкриття та закриття
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
