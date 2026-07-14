@@ -212,4 +212,5 @@ end
 
 -- Почекаємо повного завантаження світу
 task.wait(1.5)
+-- Force sync trigger: 1
 bindNpcPrompt()
