@@ -5,14 +5,8 @@ local useState = React.useState
 local useEffect = React.useEffect
 
 local HAIR_POOLS = {
-	Male = {
-		Vocalist = { 11103884344, 37819385 },
-		Guitarist = { 11103880280, 16630147 }
-	},
-	Female = {
-		Vocalist = { 18428787351, 6223444093 },
-		Guitarist = { 117475707430348, 1662442848 }
-	}
+	Male = { 11103884344, 37819385, 11103880280, 16630147 },
+	Female = { 18428787351, 6223444093, 117475707430348, 1662442848 }
 }
 
 local HAIR_NAMES = {
@@ -29,10 +23,9 @@ local HAIR_NAMES = {
 local function CharacterCreator(props)
 	local name, setName = useState("")
 	local gender, setGender = useState(props.initialGender or "Male")
-	local role, setRole = useState("Vocalist")
 
-	-- Initial hair ID
-	local initialPool = HAIR_POOLS[gender][role]
+	-- Initial hair ID from simplified pool
+	local initialPool = HAIR_POOLS[gender]
 	local hairId, setHairId = useState(initialPool[1])
 	local color, setColor = useState(Color3.fromRGB(255, 0, 255))
 
@@ -46,11 +39,11 @@ local function CharacterCreator(props)
 		Color3.fromRGB(255, 255, 0), -- Yellow
 	}
 
-	-- Update hair when gender or role changes
+	-- Update hair when gender changes
 	useEffect(function()
-		local pool = HAIR_POOLS[gender][role]
+		local pool = HAIR_POOLS[gender]
 		setHairId(pool[1])
-	end, {gender, role})
+	end, {gender})
 
 	-- Trigger preview change
 	useEffect(function()
@@ -60,7 +53,7 @@ local function CharacterCreator(props)
 	end, {gender, hairId, color})
 
 	local function rollHair()
-		local pool = HAIR_POOLS[gender][role]
+		local pool = HAIR_POOLS[gender]
 		local randomHair = pool[math.random(1, #pool)]
 		setHairId(randomHair)
 	end
@@ -114,7 +107,7 @@ local function CharacterCreator(props)
 		-- Gender Select (Male / Female)
 		GenderContainer = e("Frame", {
 			BackgroundTransparency = 1,
-			Position = UDim2.fromScale(0.5, 0.32),
+			Position = UDim2.fromScale(0.5, 0.35),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Size = UDim2.fromScale(0.8, 0.08),
 		}, {
@@ -143,42 +136,10 @@ local function CharacterCreator(props)
 			}, { Corner = e("UICorner", { CornerRadius = UDim.new(0, 8) }) })
 		}),
 
-		-- Role Select (Vocalist / Guitarist)
-		RoleContainer = e("Frame", {
-			BackgroundTransparency = 1,
-			Position = UDim2.fromScale(0.5, 0.44),
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Size = UDim2.fromScale(0.8, 0.08),
-		}, {
-			Layout = e("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				Padding = UDim.new(0, 20)
-			}),
-			VocalistBtn = e("TextButton", {
-				Text = "VOCALIST",
-				Font = Enum.Font.AmaticSC,
-				TextColor3 = role == "Vocalist" and Color3.fromRGB(20, 20, 25) or Color3.fromRGB(255, 255, 255),
-				TextSize = 36,
-				BackgroundColor3 = role == "Vocalist" and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(40, 40, 45),
-				Size = UDim2.fromOffset(100, 50),
-				[React.Event.Activated] = function() setRole("Vocalist") end
-			}, { Corner = e("UICorner", { CornerRadius = UDim.new(0, 8) }) }),
-			GuitaristBtn = e("TextButton", {
-				Text = "GUITARIST",
-				Font = Enum.Font.AmaticSC,
-				TextColor3 = role == "Guitarist" and Color3.fromRGB(20, 20, 25) or Color3.fromRGB(255, 255, 255),
-				TextSize = 36,
-				BackgroundColor3 = role == "Guitarist" and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(40, 40, 45),
-				Size = UDim2.fromOffset(100, 50),
-				[React.Event.Activated] = function() setRole("Guitarist") end
-			}, { Corner = e("UICorner", { CornerRadius = UDim.new(0, 8) }) })
-		}),
-
-		-- Roll Hair Button
+		-- Roll Hair Button (Removed 🎲 emoji from text as requested)
 		RollHairContainer = e("Frame", {
 			BackgroundTransparency = 1,
-			Position = UDim2.fromScale(0.5, 0.56),
+			Position = UDim2.fromScale(0.5, 0.50),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Size = UDim2.fromScale(0.8, 0.08),
 		}, {
@@ -188,7 +149,7 @@ local function CharacterCreator(props)
 				Padding = UDim.new(0, 5)
 			}),
 			RollBtn = e("TextButton", {
-				Text = "🎲 ROLL HAIR",
+				Text = "ROLL HAIR",
 				Font = Enum.Font.AmaticSC,
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 36,
@@ -209,7 +170,7 @@ local function CharacterCreator(props)
 		-- Color Picker
 		ColorPicker = e("Frame", {
 			BackgroundTransparency = 1,
-			Position = UDim2.fromScale(0.5, 0.7),
+			Position = UDim2.fromScale(0.5, 0.68),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Size = UDim2.fromScale(0.8, 0.1),
 		}, {

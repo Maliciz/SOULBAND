@@ -177,6 +177,17 @@ local function replaceSceneModel(gender, hairId, color)
 	local clone = previewModel:Clone()
 	clone.Name = "SCENE_MODEL"
 
+	-- Unanchor all parts except HumanoidRootPart to allow R15 animations to play on joints
+	for _, part in pairs(clone:GetDescendants()) do
+		if part:IsA("BasePart") then
+			if part.Name == "HumanoidRootPart" then
+				part.Anchored = true
+			else
+				part.Anchored = false
+			end
+		end
+	end
+
 	sceneModel:Destroy()
 	clone:PivotTo(transform)
 	clone.Parent = Workspace
