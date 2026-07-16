@@ -14,6 +14,7 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "StartupLoadingUI"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true -- Перекриває навіть верхню панель Roblox
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = PlayerGui
 
 local loadingScreen = Instance.new("Frame")
@@ -28,22 +29,24 @@ loadingScreen.Parent = screenGui
 local loadingText = Instance.new("TextLabel")
 loadingText.Name = "LoadingText"
 loadingText.Size = UDim2.new(1, 0, 0, 40)
-loadingText.Position = UDim2.new(0, 0, 0.87, 0)
+loadingText.Position = UDim2.new(0, 0, 0.85, 0)
 loadingText.BackgroundTransparency = 1
 loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
 loadingText.TextSize = 36
 loadingText.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 loadingText.Text = "LOADING GAME..."
+loadingText.ZIndex = 1000000
 loadingText.Parent = loadingScreen
 
 -- Progress Bar
 local barBackground = Instance.new("Frame")
 barBackground.Name = "BarBackground"
 barBackground.Size = UDim2.new(0.4, 0, 0, 8)
-barBackground.Position = UDim2.new(0.5, 0, 0.95, 0)
+barBackground.Position = UDim2.new(0.5, 0, 0.90, 0)
 barBackground.AnchorPoint = Vector2.new(0.5, 0.5)
-barBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+barBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 barBackground.BorderSizePixel = 0
+barBackground.ZIndex = 1000000
 barBackground.Parent = loadingScreen
 
 local barCornerBg = Instance.new("UICorner")
@@ -55,6 +58,7 @@ barFill.Name = "BarFill"
 barFill.Size = UDim2.new(0, 0, 1, 0)
 barFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Біла лінія
 barFill.BorderSizePixel = 0
+barFill.ZIndex = 1000001
 barFill.Parent = barBackground
 
 local barCornerFill = Instance.new("UICorner")

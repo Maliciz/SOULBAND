@@ -324,13 +324,17 @@ local function App()
 			end)
 			return function()
 				isMenu = false
-				stopCameraRig()
+				-- Do NOT call stopCameraRig() here to prevent state changes (Intro -> GenderSelect -> CharacterCreator) 
+				-- from prematurely cancelling active camera rig transitions.
 			end
 		else
 			local mainHUD = player.PlayerGui:FindFirstChild("MainHUD", true)
 			showUI(mainHUD)
 			local songSelector = player.PlayerGui:FindFirstChild("SongSelectorUI")
 			hideUI(songSelector)
+			
+			-- Only stop the rigs when the player completely finishes character creation!
+			stopCameraRig()
 		end
 	end, {appState})
 
