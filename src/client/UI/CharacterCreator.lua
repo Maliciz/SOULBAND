@@ -27,17 +27,7 @@ local function CharacterCreator(props)
 	-- Initial hair ID from simplified pool
 	local initialPool = HAIR_POOLS[gender]
 	local hairId, setHairId = useState(initialPool[1])
-	local color, setColor = useState(Color3.fromRGB(255, 0, 255))
-
-	local colorPresets = {
-		Color3.fromRGB(255, 255, 255),
-		Color3.fromRGB(200, 200, 200),
-		Color3.fromRGB(150, 150, 150),
-		Color3.fromRGB(100, 100, 100),
-		Color3.fromRGB(255, 0, 255), -- Pink
-		Color3.fromRGB(0, 255, 255), -- Cyan
-		Color3.fromRGB(255, 255, 0), -- Yellow
-	}
+	local color, setColor = useState(Color3.fromRGB(255, 255, 255)) -- Neutral white default color
 
 	-- Update hair when gender changes
 	useEffect(function()
@@ -136,10 +126,10 @@ local function CharacterCreator(props)
 			}, { Corner = e("UICorner", { CornerRadius = UDim.new(0, 8) }) })
 		}),
 
-		-- Roll Hair Button (Removed 🎲 emoji from text as requested)
+		-- Roll Hair Button
 		RollHairContainer = e("Frame", {
 			BackgroundTransparency = 1,
-			Position = UDim2.fromScale(0.5, 0.50),
+			Position = UDim2.fromScale(0.5, 0.52),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Size = UDim2.fromScale(0.8, 0.08),
 		}, {
@@ -165,38 +155,6 @@ local function CharacterCreator(props)
 				BackgroundTransparency = 1,
 				Size = UDim2.fromOffset(220, 20),
 			})
-		}),
-
-		-- Color Picker
-		ColorPicker = e("Frame", {
-			BackgroundTransparency = 1,
-			Position = UDim2.fromScale(0.5, 0.68),
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Size = UDim2.fromScale(0.8, 0.1),
-		}, {
-			Layout = e("UIListLayout", {
-				FillDirection = Enum.FillDirection.Horizontal,
-				HorizontalAlignment = Enum.HorizontalAlignment.Center,
-				Padding = UDim.new(0, 10)
-			}),
-			Colors = e(React.Fragment, nil, (function()
-				local btns = {}
-				for i, c in ipairs(colorPresets) do
-					btns["Color" .. i] = e("TextButton", {
-						Text = "",
-						BackgroundColor3 = c,
-						Size = UDim2.fromOffset(36, 36),
-						[React.Event.Activated] = function() setColor(c) end
-					}, {
-						Corner = e("UICorner", { CornerRadius = UDim.new(1, 0) }),
-						Stroke = color == c and e("UIStroke", {
-							Color = Color3.fromRGB(255, 255, 255),
-							Thickness = 2
-						})
-					})
-				end
-				return btns
-			end)())
 		}),
 
 		-- Finish Button
