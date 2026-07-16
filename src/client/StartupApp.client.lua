@@ -194,63 +194,14 @@ local function replaceSceneModel(gender, hairId, color, shirtId, pantsId)
 
 	local humanoid = clone:FindFirstChildOfClass("Humanoid")
 	if humanoid then
-		local desc = humanoid:GetAppliedDescription()
-		desc.HairAccessory = tostring(hairId)
-		desc.Shirt = 0
-		desc.Pants = 0
-		
-		-- Preserve skin colors of preview dummy
-		local head = previewModel:FindFirstChild("Head")
-		if head then
-			desc.HeadColor = head.Color
-			desc.TorsoColor = head.Color
-			desc.LeftArmColor = head.Color
-			desc.RightArmColor = head.Color
-			desc.LeftLegColor = head.Color
-			desc.RightLegColor = head.Color
+		local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
+		if animator then
+			local anim = Instance.new("Animation")
+			anim.AnimationId = "rbxassetid://103786020375484"
+			local track = animator:LoadAnimation(anim)
+			track.Looped = true
+			track:Play()
 		end
-		
-		task.spawn(function()
-			local success = pcall(function()
-				humanoid:ApplyDescription(desc)
-			end)
-			if success then
-				task.wait(0.1) -- Wait a moment for instances to initialize
-
-				-- Apply shirt and pants templates directly
-				if shirtId and shirtId > 0 then
-					local shirt = clone:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", clone)
-					shirt.ShirtTemplate = "rbxassetid://" .. tostring(shirtId)
-				end
-				if pantsId and pantsId > 0 then
-					local pants = clone:FindFirstChildOfClass("Pants") or Instance.new("Pants", clone)
-					pants.PantsTemplate = "rbxassetid://" .. tostring(pantsId)
-				end
-
-				for _, acc in pairs(clone:GetChildren()) do
-					if acc:IsA("Accessory") and acc.AccessoryType == Enum.AccessoryType.Hair then
-						local handle = acc:FindFirstChild("Handle")
-						if handle then
-							handle.Color = color
-							local mesh = handle:FindFirstChildOfClass("SpecialMesh")
-							if mesh then
-								mesh.VertexColor = Vector3.new(color.R, color.G, color.B)
-							end
-						end
-					end
-				end
-			end
-
-			-- Start animation AFTER ApplyDescription has completed to avoid it stopping the body joints track
-			local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
-			if animator then
-				local anim = Instance.new("Animation")
-				anim.AnimationId = "rbxassetid://103786020375484"
-				local track = animator:LoadAnimation(anim)
-				track.Looped = true
-				track:Play()
-			end
-		end)
 	end
 end
 

@@ -46,6 +46,36 @@ local FinishCharacterCreationFunc = getOrCreateRemote("RemoteFunction", "FinishC
 local SpawnCharacterEvent = getOrCreateRemote("RemoteEvent", "SpawnCharacter")
 local PreviewHairEvent = getOrCreateRemote("RemoteEvent", "PreviewHair")
 
+local templateCache = {}
+
+local function getTemplateFromCatalogId(catalogId, assetType)
+	if not catalogId or catalogId <= 0 then return nil end
+	if templateCache[catalogId] then
+		return templateCache[catalogId]
+	end
+	
+	local success, model = pcall(function()
+		return game:GetService("InsertService"):LoadAsset(catalogId)
+	end)
+	if success and model then
+		local template = nil
+		local item = model:FindFirstChildOfClass(assetType)
+		if item then
+			if assetType == "Shirt" then
+				template = item.ShirtTemplate
+			elseif assetType == "Pants" then
+				template = item.PantsTemplate
+			end
+		end
+		model:Destroy()
+		if template then
+			templateCache[catalogId] = template
+			return template
+		end
+	end
+	return nil
+end
+
 local function applyCustomCharacter(player, character)
 	local data = DataManager.Get(player)
 	if not data or not data.CharacterCreated then return end
@@ -94,8 +124,11 @@ local function applyCustomCharacter(player, character)
 		end
 
 		if data.Shirt and data.Shirt > 0 then
-			local shirt = character:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", character)
-			shirt.ShirtTemplate = "rbxassetid://" .. tostring(data.Shirt)
+			local template = getTemplateFromCatalogId(data.Shirt, "Shirt")
+			if template then
+				local shirt = character:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", character)
+				shirt.ShirtTemplate = template
+			end
 		elseif starterSkin then
 			local defaultShirt = starterSkin:FindFirstChildOfClass("Shirt")
 			if defaultShirt and defaultShirt.ShirtTemplate then
@@ -105,8 +138,11 @@ local function applyCustomCharacter(player, character)
 		end
 
 		if data.Pants and data.Pants > 0 then
-			local pants = character:FindFirstChildOfClass("Pants") or Instance.new("Pants", character)
-			pants.PantsTemplate = "rbxassetid://" .. tostring(data.Pants)
+			local template = getTemplateFromCatalogId(data.Pants, "Pants")
+			if template then
+				local pants = character:FindFirstChildOfClass("Pants") or Instance.new("Pants", character)
+				pants.PantsTemplate = template
+			end
 		elseif starterSkin then
 			local defaultPants = starterSkin:FindFirstChildOfClass("Pants")
 			if defaultPants and defaultPants.PantsTemplate then
@@ -291,12 +327,18 @@ PreviewHairEvent.OnServerEvent:Connect(function(player, gender, hairId, color, s
 			task.wait(0.1)
 			-- Apply shirt and pants templates directly
 			if shirtId and type(shirtId) == "number" then
-				local shirt = previewModel:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", previewModel)
-				shirt.ShirtTemplate = "rbxassetid://" .. tostring(shirtId)
+				local template = getTemplateFromCatalogId(shirtId, "Shirt")
+				if template then
+					local shirt = previewModel:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", previewModel)
+					shirt.ShirtTemplate = template
+				end
 			end
 			if pantsId and type(pantsId) == "number" then
-				local pants = previewModel:FindFirstChildOfClass("Pants") or Instance.new("Pants", previewModel)
-				pants.PantsTemplate = "rbxassetid://" .. tostring(pantsId)
+				local template = getTemplateFromCatalogId(pantsId, "Pants")
+				if template then
+					local pants = previewModel:FindFirstChildOfClass("Pants") or Instance.new("Pants", previewModel)
+					pants.PantsTemplate = template
+				end
 			end
 
 			for _, acc in pairs(previewModel:GetChildren()) do
