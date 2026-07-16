@@ -236,7 +236,7 @@ local function App()
 		end
 
 		replaceSceneModel(gender, hairId, color)
-		playCameraRig("CameraRig_Scene", "139506285558789", true) -- Updated to new scene camera animation ID
+		playCameraRig("CameraRig_Scene", "139506285558789", false) -- Set loop to false as requested
 		currentRigName = "CameraRig_Scene"
 
 		setAppState("None")
@@ -299,9 +299,7 @@ local function App()
 			local mainHUD = player.PlayerGui:FindFirstChild("MainHUD", true)
 			showUI(mainHUD)
 			local songSelector = player.PlayerGui:FindFirstChild("SongSelectorUI")
-			hideUI(songSelector)
-			
-			stopCameraRig()
+			showUI(songSelector) -- Keep song selector UI visible on appState None
 		end
 	end, {appState})
 
