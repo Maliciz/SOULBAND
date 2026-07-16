@@ -196,11 +196,18 @@ local function replaceSceneModel(gender, hairId, color, shirtId, pantsId)
 	if humanoid then
 		local desc = humanoid:GetAppliedDescription()
 		desc.HairAccessory = tostring(hairId)
-		if shirtId and shirtId > 0 then
-			desc.Shirt = shirtId
-		end
-		if pantsId and pantsId > 0 then
-			desc.Pants = pantsId
+		desc.Shirt = 0
+		desc.Pants = 0
+		
+		-- Preserve skin colors of preview dummy
+		local head = previewModel:FindFirstChild("Head")
+		if head then
+			desc.HeadColor = head.Color
+			desc.TorsoColor = head.Color
+			desc.LeftArmColor = head.Color
+			desc.RightArmColor = head.Color
+			desc.LeftLegColor = head.Color
+			desc.RightLegColor = head.Color
 		end
 		
 		task.spawn(function()
@@ -209,6 +216,17 @@ local function replaceSceneModel(gender, hairId, color, shirtId, pantsId)
 			end)
 			if success then
 				task.wait(0.1) -- Wait a moment for instances to initialize
+
+				-- Apply shirt and pants templates directly
+				if shirtId and shirtId > 0 then
+					local shirt = clone:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", clone)
+					shirt.ShirtTemplate = "rbxassetid://" .. tostring(shirtId)
+				end
+				if pantsId and pantsId > 0 then
+					local pants = clone:FindFirstChildOfClass("Pants") or Instance.new("Pants", clone)
+					pants.PantsTemplate = "rbxassetid://" .. tostring(pantsId)
+				end
+
 				for _, acc in pairs(clone:GetChildren()) do
 					if acc:IsA("Accessory") and acc.AccessoryType == Enum.AccessoryType.Hair then
 						local handle = acc:FindFirstChild("Handle")

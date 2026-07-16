@@ -73,39 +73,48 @@ local function applyCustomCharacter(player, character)
 	desc.LeftLegColor = color
 	desc.RightLegColor = color
 
-	local starterSkin = nil
-	local npcName = "NPC" .. string.char(39) .. "S"
-	local npcsFolder = workspace:FindFirstChild(npcName)
-	if npcsFolder then
-		local mainFolder = npcsFolder:FindFirstChild(npcName .. "--Main")
-		if mainFolder then
-			starterSkin = mainFolder:FindFirstChild("Starter_Skin_Man")
-		end
-	end
-
-	if data.Shirt and data.Shirt > 0 then
-		desc.Shirt = data.Shirt
-	elseif starterSkin then
-		local shirt = starterSkin:FindFirstChildOfClass("Shirt")
-		if shirt and shirt.ShirtTemplate then
-			desc.Shirt = tonumber(shirt.ShirtTemplate:match("%d+")) or 0
-		end
-	end
-
-	if data.Pants and data.Pants > 0 then
-		desc.Pants = data.Pants
-	elseif starterSkin then
-		local pants = starterSkin:FindFirstChildOfClass("Pants")
-		if pants and pants.PantsTemplate then
-			desc.Pants = tonumber(pants.PantsTemplate:match("%d+")) or 0
-		end
-	end
+	-- Remove shirt/pants from description so Roblox doesn't wipe them or fail loading catalog IDs
+	desc.Shirt = 0
+	desc.Pants = 0
 
 	local success, err = pcall(function()
 		humanoid:ApplyDescription(desc)
 	end)
 	
 	if success then
+		-- Apply custom clothing templates directly
+		local starterSkin = nil
+		local npcName = "NPC" .. string.char(39) .. "S"
+		local npcsFolder = workspace:FindFirstChild(npcName)
+		if npcsFolder then
+			local mainFolder = npcsFolder:FindFirstChild(npcName .. "--Main")
+			if mainFolder then
+				starterSkin = mainFolder:FindFirstChild("Starter_Skin_Man")
+			end
+		end
+
+		if data.Shirt and data.Shirt > 0 then
+			local shirt = character:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", character)
+			shirt.ShirtTemplate = "rbxassetid://" .. tostring(data.Shirt)
+		elseif starterSkin then
+			local defaultShirt = starterSkin:FindFirstChildOfClass("Shirt")
+			if defaultShirt and defaultShirt.ShirtTemplate then
+				local shirt = character:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", character)
+				shirt.ShirtTemplate = defaultShirt.ShirtTemplate
+			end
+		end
+
+		if data.Pants and data.Pants > 0 then
+			local pants = character:FindFirstChildOfClass("Pants") or Instance.new("Pants", character)
+			pants.PantsTemplate = "rbxassetid://" .. tostring(data.Pants)
+		elseif starterSkin then
+			local defaultPants = starterSkin:FindFirstChildOfClass("Pants")
+			if defaultPants and defaultPants.PantsTemplate then
+				local pants = character:FindFirstChildOfClass("Pants") or Instance.new("Pants", character)
+				pants.PantsTemplate = defaultPants.PantsTemplate
+			end
+		end
+
 		if data.HairColor and type(data.HairColor) == "table" then
 			task.wait(0.1)
 			local c = Color3.new(data.HairColor[1], data.HairColor[2], data.HairColor[3])
@@ -261,11 +270,18 @@ PreviewHairEvent.OnServerEvent:Connect(function(player, gender, hairId, color, s
 	if humanoid then
 		local desc = humanoid:GetAppliedDescription()
 		desc.HairAccessory = tostring(hairId)
-		if shirtId and type(shirtId) == "number" then
-			desc.Shirt = shirtId
-		end
-		if pantsId and type(pantsId) == "number" then
-			desc.Pants = pantsId
+		desc.Shirt = 0
+		desc.Pants = 0
+		
+		-- Preserve skin colors of preview dummy
+		local head = previewModel:FindFirstChild("Head")
+		if head then
+			desc.HeadColor = head.Color
+			desc.TorsoColor = head.Color
+			desc.LeftArmColor = head.Color
+			desc.RightArmColor = head.Color
+			desc.LeftLegColor = head.Color
+			desc.RightLegColor = head.Color
 		end
 		
 		local success = pcall(function()
@@ -273,6 +289,16 @@ PreviewHairEvent.OnServerEvent:Connect(function(player, gender, hairId, color, s
 		end)
 		if success then
 			task.wait(0.1)
+			-- Apply shirt and pants templates directly
+			if shirtId and type(shirtId) == "number" then
+				local shirt = previewModel:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", previewModel)
+				shirt.ShirtTemplate = "rbxassetid://" .. tostring(shirtId)
+			end
+			if pantsId and type(pantsId) == "number" then
+				local pants = previewModel:FindFirstChildOfClass("Pants") or Instance.new("Pants", previewModel)
+				pants.PantsTemplate = "rbxassetid://" .. tostring(pantsId)
+			end
+
 			for _, acc in pairs(previewModel:GetChildren()) do
 				if acc:IsA("Accessory") and acc.AccessoryType == Enum.AccessoryType.Hair then
 					local handle = acc:FindFirstChild("Handle")
