@@ -236,7 +236,7 @@ local function App()
 		end
 
 		replaceSceneModel(gender, hairId, color)
-		playCameraRig("CameraRig_Scene", "113449034260424", true)
+		playCameraRig("CameraRig_Scene", "139506285558789", true) -- Updated to new scene camera animation ID
 		currentRigName = "CameraRig_Scene"
 
 		setAppState("None")
@@ -324,8 +324,6 @@ local function App()
 			end)
 			return function()
 				isMenu = false
-				-- Do NOT call stopCameraRig() here to prevent state changes (Intro -> GenderSelect -> CharacterCreator) 
-				-- from prematurely cancelling active camera rig transitions.
 			end
 		else
 			local mainHUD = player.PlayerGui:FindFirstChild("MainHUD", true)
@@ -333,7 +331,6 @@ local function App()
 			local songSelector = player.PlayerGui:FindFirstChild("SongSelectorUI")
 			hideUI(songSelector)
 			
-			-- Only stop the rigs when the player completely finishes character creation!
 			stopCameraRig()
 		end
 	end, {appState})
