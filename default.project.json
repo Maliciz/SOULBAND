@@ -10,6 +10,9 @@
     },
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
+      "Packages": {
+        "$path": "Packages"
+      },
       "SongData": {
         "$path": "src/shared/SongData.lua"
       },
@@ -18,86 +21,45 @@
       },
       "Remotes": {
         "$className": "Folder",
-        "StartSong": {
-          "$className": "RemoteEvent"
-        },
-        "FinishSong": {
-          "$className": "RemoteFunction"
-        },
-        "AcceptContract": {
-          "$className": "RemoteFunction"
-        },
-        "BuyItem": {
-          "$className": "RemoteFunction"
-        },
-        "EquipItem": {
-          "$className": "RemoteFunction"
-        },
-        "HireMusician": {
-          "$className": "RemoteFunction"
-        },
-        "UpgradeMusician": {
-          "$className": "RemoteFunction"
-        },
-        "EquipMusicianClothing": {
-          "$className": "RemoteFunction"
-        },
-        "SetCustomKeybinds": {
-          "$className": "RemoteEvent"
-        },
-        "RequestStartSong": {
-          "$className": "RemoteEvent"
-        },
-        "SetGender": {
-          "$className": "RemoteFunction"
-        },
-        "RequestPlayerData": {
-          "$className": "RemoteFunction"
-        }
+        "StartSong": { "$className": "RemoteEvent" },
+        "FinishSong": { "$className": "RemoteFunction" },
+        "AcceptContract": { "$className": "RemoteFunction" },
+        "BuyItem": { "$className": "RemoteFunction" },
+        "EquipItem": { "$className": "RemoteFunction" },
+        "HireMusician": { "$className": "RemoteFunction" },
+        "UpgradeMusician": { "$className": "RemoteFunction" },
+        "EquipMusicianClothing": { "$className": "RemoteFunction" },
+        "SetCustomKeybinds": { "$className": "RemoteEvent" },
+        "RequestStartSong": { "$className": "RemoteEvent" },
+        "SetGender": { "$className": "RemoteFunction" },
+        "RequestPlayerData": { "$className": "RemoteFunction" },
+        "FinishCharacterCreation": { "$className": "RemoteFunction" },
+        "PreviewHair": { "$className": "RemoteEvent" }
       }
     },
     "ServerScriptService": {
       "$className": "ServerScriptService",
       "ServerController": {
         "$path": "src/server/ServerController.server.lua",
-        "DataManager": {
-          "$path": "src/server/DataManager.lua"
-        },
-        "ShopManager": {
-          "$path": "src/server/ShopManager.lua"
-        },
-        "BandManager": {
-          "$path": "src/server/BandManager.lua"
-        },
-        "ContractManager": {
-          "$path": "src/server/ContractManager.lua"
-        }
+        "DataManager": { "$path": "src/server/DataManager.lua" },
+        "ShopManager": { "$path": "src/server/ShopManager.lua" },
+        "BandManager": { "$path": "src/server/BandManager.lua" },
+        "ContractManager": { "$path": "src/server/ContractManager.lua" }
       }
     },
     "StarterPlayer": {
       "$className": "StarterPlayer",
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
-        "RhythmClient": {
-          "$path": "src/client/RhythmClient.client.lua"
-        },
-        "HUDController": {
-          "$path": "src/client/HUDController.client.lua"
-        },
-        "SettingsUIController": {
-          "$path": "src/client/SettingsUIController.client.lua"
-        },
-        "SongSelectorController": {
-          "$path": "src/client/SongSelectorController.client.lua"
-        },
-        "ContractUIController": {
-          "$path": "src/client/ContractUIController.client.lua"
-        },
-        "ChartRecorder": {
-          "$path": "src/client/ChartRecorder.client.lua"
-        }
+        "RhythmClient": { "$path": "src/client/RhythmClient.client.lua" },
+        "HUDController": { "$path": "src/client/HUDController.client.lua" },
+        "SettingsUIController": { "$path": "src/client/SettingsUIController.client.lua" },
+        "SongSelectorController": { "$path": "src/client/SongSelectorController.client.lua" },
+        "ContractUIController": { "$path": "src/client/ContractUIController.client.lua" },
+        "ChartRecorder": { "$path": "src/client/ChartRecorder.client.lua" },
+        "UI": { "$path": "src/client/UI" },
+        "StartupApp": { "$path": "src/client/StartupApp.client.lua" }
       }
     }
   }
 }
- 

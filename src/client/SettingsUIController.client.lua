@@ -44,7 +44,7 @@ openButton.BackgroundTransparency = 0.4
 openButton.Text = "⚙️"
 openButton.TextColor3 = Color3.fromRGB(220, 220, 220)
 openButton.TextSize = 24
-openButton.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+openButton.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json", Enum.FontWeight.Regular)
 openButton.Parent = screenGui
 
 local openCorner = Instance.new("UICorner")
@@ -92,8 +92,8 @@ title.Position = UDim2.new(0, 0, 0, 10)
 title.BackgroundTransparency = 1
 title.Text = "KEYBINDS SETTINGS"
 title.TextColor3 = Color3.fromRGB(240, 240, 240)
-title.TextSize = 20
-title.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+title.TextSize = 50
+title.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json", Enum.FontWeight.Regular)
 title.Parent = panel
 
 -- Кнопка закриття
@@ -104,8 +104,8 @@ closeButton.Position = UDim2.new(1, -40, 0, 10)
 closeButton.BackgroundTransparency = 1
 closeButton.Text = "✕"
 closeButton.TextColor3 = Color3.fromRGB(130, 130, 130)
-closeButton.TextSize = 20
-closeButton.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+closeButton.TextSize = 50
+closeButton.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json", Enum.FontWeight.Regular)
 closeButton.Parent = panel
 
 closeButton.MouseEnter:Connect(function()
@@ -164,8 +164,8 @@ for i = 1, 4 do
 	textLabel.BackgroundTransparency = 1
 	textLabel.Text = laneNames[i]
 	textLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-	textLabel.TextSize = 15
-	textLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+	textLabel.TextSize = 40
+	textLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json", Enum.FontWeight.Regular)
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
 	textLabel.Parent = container
 	
@@ -176,8 +176,8 @@ for i = 1, 4 do
 	bindBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
 	bindBtn.Text = currentKeybinds[i]
 	bindBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-	bindBtn.TextSize = 16
-	bindBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+	bindBtn.TextSize = 40
+	bindBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json", Enum.FontWeight.Regular)
 	bindBtn.Parent = container
 	
 	local btnCorner = Instance.new("UICorner")
@@ -207,8 +207,8 @@ resetBtn.Position = UDim2.new(0.05, 0, 0, 350)
 resetBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 resetBtn.Text = "RESET"
 resetBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-resetBtn.TextSize = 15
-resetBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
+resetBtn.TextSize = 40
+resetBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json", Enum.FontWeight.Regular)
 resetBtn.Parent = panel
 
 local resetCorner = Instance.new("UICorner")

@@ -17,7 +17,7 @@ local StartSongEvent = Remotes:WaitForChild("StartSong")
 local FinishSongFunc = Remotes:WaitForChild("FinishSong")
 local RequestPlayerDataFunc = Remotes:WaitForChild("RequestPlayerData")
 
--- Поточний стан гри
+-- ÐŸÐ¾Ñ‚Ð¾Ñ‡Ð½Ð¸Ð¹ ÑÑ‚Ð°Ð½ Ð³Ñ€Ð¸
 local isPlaying = false
 local currentSong = nil
 local currentContractName = ""
@@ -29,18 +29,18 @@ local notesHit = 0
 local notesTotal = 0
 local currentHp = 100
 local hpLossPerMiss = 5
-local heldTracks = {false, false, false, false} -- Масив для відстеження затиснутих клавіш (блокує Windows KeyRepeat)
-local activeSongSound = nil -- Об'єкт програвання поточної аудіодоріжки пісні
+local heldTracks = {false, false, false, false} -- ÐœÐ°ÑÐ¸Ð² Ð´Ð»Ñ Ð²Ñ–Ð´ÑÑ‚ÐµÐ¶ÐµÐ½Ð½Ñ Ð·Ð°Ñ‚Ð¸ÑÐ½ÑƒÑ‚Ð¸Ñ… ÐºÐ»Ð°Ð²Ñ–Ñˆ (Ð±Ð»Ð¾ÐºÑƒÑ” Windows KeyRepeat)
+local activeSongSound = nil -- ÐžÐ±'Ñ”ÐºÑ‚ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð²Ð°Ð½Ð½Ñ Ð¿Ð¾Ñ‚Ð¾Ñ‡Ð½Ð¾Ñ— Ð°ÑƒÐ´Ñ–Ð¾Ð´Ð¾Ñ€Ñ–Ð¶ÐºÐ¸ Ð¿Ñ–ÑÐ½Ñ–
 
--- Мінімалістична темно-біла палітра кольорів (Monochrome Theme)
+-- ÐœÑ–Ð½Ñ–Ð¼Ð°Ð»Ñ–ÑÑ‚Ð¸Ñ‡Ð½Ð° Ñ‚ÐµÐ¼Ð½Ð¾-Ð±Ñ–Ð»Ð° Ð¿Ð°Ð»Ñ–Ñ‚Ñ€Ð° ÐºÐ¾Ð»ÑŒÐ¾Ñ€Ñ–Ð² (Monochrome Theme)
 local TrackColors = {
-	Color3.fromRGB(240, 240, 240),   -- 1 доріжка: Чистий білий
-	Color3.fromRGB(200, 200, 200),   -- 2 доріжка: Світло-сірий
-	Color3.fromRGB(160, 160, 160),   -- 3 доріжка: Сірий
-	Color3.fromRGB(120, 120, 120)    -- 4 доріжка: Темно-сірий
+	Color3.fromRGB(240, 240, 240),   -- 1 Ð´Ð¾Ñ€Ñ–Ð¶ÐºÐ°: Ð§Ð¸ÑÑ‚Ð¸Ð¹ Ð±Ñ–Ð»Ð¸Ð¹
+	Color3.fromRGB(200, 200, 200),   -- 2 Ð´Ð¾Ñ€Ñ–Ð¶ÐºÐ°: Ð¡Ð²Ñ–Ñ‚Ð»Ð¾-ÑÑ–Ñ€Ð¸Ð¹
+	Color3.fromRGB(160, 160, 160),   -- 3 Ð´Ð¾Ñ€Ñ–Ð¶ÐºÐ°: Ð¡Ñ–Ñ€Ð¸Ð¹
+	Color3.fromRGB(120, 120, 120)    -- 4 Ð´Ð¾Ñ€Ñ–Ð¶ÐºÐ°: Ð¢ÐµÐ¼Ð½Ð¾-ÑÑ–Ñ€Ð¸Ð¹
 }
 
--- GUI Елементи
+-- GUI Ð•Ð»ÐµÐ¼ÐµÐ½Ñ‚Ð¸
 local screenGui = nil
 local rhythmFrame = nil
 local hpBar = nil
@@ -48,7 +48,7 @@ local feedbackLabel = nil
 local accuracyLabel = nil
 local countdownLabel = nil
 
--- Статистика для вікна результатів
+-- Ð¡Ñ‚Ð°Ñ‚Ð¸ÑÑ‚Ð¸ÐºÐ° Ð´Ð»Ñ Ð²Ñ–ÐºÐ½Ð° Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ñ–Ð²
 local perfectCount = 0
 local goodCount = 0
 local badCount = 0
@@ -56,36 +56,36 @@ local missCount = 0
 local missSeconds = {}
 local noteHistory = {}
 
--- Елементи кастомного GUI (MainGui--inGame)
+-- Ð•Ð»ÐµÐ¼ÐµÐ½Ñ‚Ð¸ ÐºÐ°ÑÑ‚Ð¾Ð¼Ð½Ð¾Ð³Ð¾ GUI (MainGui--inGame)
 local customGuiMode = false
 local customLanes = {}       -- {x, c, n, m}
 local customActiveFrames = {} -- {x_active, c_active, n_active, m_active}
 local originalParent = nil
 
--- Синхронно приховуємо інтерфейс гри при запуску клієнта (усуває рассинхронізацію та баг зникнення)
+-- Ð¡Ð¸Ð½Ñ…Ñ€Ð¾Ð½Ð½Ð¾ Ð¿Ñ€Ð¸Ñ…Ð¾Ð²ÑƒÑ”Ð¼Ð¾ Ñ–Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹Ñ Ð³Ñ€Ð¸ Ð¿Ñ€Ð¸ Ð·Ð°Ð¿ÑƒÑÐºÑƒ ÐºÐ»Ñ–Ñ”Ð½Ñ‚Ð° (ÑƒÑÑƒÐ²Ð°Ñ” Ñ€Ð°ÑÑÐ¸Ð½Ñ…Ñ€Ð¾Ð½Ñ–Ð·Ð°Ñ†Ñ–ÑŽ Ñ‚Ð° Ð±Ð°Ð³ Ð·Ð½Ð¸ÐºÐ½ÐµÐ½Ð½Ñ)
 local startupGui = PlayerGui:FindFirstChild("MainGui--inGame", true)
 if startupGui then
 	startupGui.Enabled = false
 end
 
--- Оптимізація: Пул об'єктів для нот (Object Pooling)
+-- ÐžÐ¿Ñ‚Ð¸Ð¼Ñ–Ð·Ð°Ñ†Ñ–Ñ: ÐŸÑƒÐ» Ð¾Ð±'Ñ”ÐºÑ‚Ñ–Ð² Ð´Ð»Ñ Ð½Ð¾Ñ‚ (Object Pooling)
 local NOTE_POOL_SIZE = 30
 local notePool = {}
 
--- Звукові ефекти
+-- Ð—Ð²ÑƒÐºÐ¾Ð²Ñ– ÐµÑ„ÐµÐºÑ‚Ð¸
 local soundDefect = Instance.new("Sound")
-soundDefect.SoundId = "rbxassetid://1848228518" -- Гітарний скрип/помилка (Guitar Scratches від APM Music)
+soundDefect.SoundId = "rbxassetid://1848228518" -- Ð“Ñ–Ñ‚Ð°Ñ€Ð½Ð¸Ð¹ ÑÐºÑ€Ð¸Ð¿/Ð¿Ð¾Ð¼Ð¸Ð»ÐºÐ° (Guitar Scratches Ð²Ñ–Ð´ APM Music)
 soundDefect.Volume = 0.6
 soundDefect.PlaybackSpeed = 1.0
 soundDefect.Parent = game.Workspace.CurrentCamera
 
 local soundPerfect = Instance.new("Sound")
-soundPerfect.SoundId = "rbxassetid://876939830" -- Гарантований клік від Roblox
+soundPerfect.SoundId = "rbxassetid://876939830" -- Ð“Ð°Ñ€Ð°Ð½Ñ‚Ð¾Ð²Ð°Ð½Ð¸Ð¹ ÐºÐ»Ñ–Ðº Ð²Ñ–Ð´ Roblox
 soundPerfect.Volume = 0.4
-soundPerfect.PlaybackSpeed = 1.4 -- Вищий тон для влучання
+soundPerfect.PlaybackSpeed = 1.4 -- Ð’Ð¸Ñ‰Ð¸Ð¹ Ñ‚Ð¾Ð½ Ð´Ð»Ñ Ð²Ð»ÑƒÑ‡Ð°Ð½Ð½Ñ
 soundPerfect.Parent = game.Workspace.CurrentCamera
 
--- Логіка приглушення музики на 0.3 сек та керування звуком помилки
+-- Ð›Ð¾Ð³Ñ–ÐºÐ° Ð¿Ñ€Ð¸Ð³Ð»ÑƒÑˆÐµÐ½Ð½Ñ Ð¼ÑƒÐ·Ð¸ÐºÐ¸ Ð½Ð° 0.3 ÑÐµÐº Ñ‚Ð° ÐºÐµÑ€ÑƒÐ²Ð°Ð½Ð½Ñ Ð·Ð²ÑƒÐºÐ¾Ð¼ Ð¿Ð¾Ð¼Ð¸Ð»ÐºÐ¸
 local dimThread = nil
 local missSoundThread = nil
 local function triggerMiss()
@@ -105,7 +105,7 @@ local function triggerMiss()
 	
 	if activeSongSound and isPlaying then
 		pcall(function()
-			activeSongSound.Volume = 0.15 -- Приглушуємо гучність
+			activeSongSound.Volume = 0.15 -- ÐŸÑ€Ð¸Ð³Ð»ÑƒÑˆÑƒÑ”Ð¼Ð¾ Ð³ÑƒÑ‡Ð½Ñ–ÑÑ‚ÑŒ
 		end)
 		
 		if dimThread then
@@ -115,20 +115,20 @@ local function triggerMiss()
 		dimThread = task.delay(0.3, function()
 			if activeSongSound and isPlaying then
 				pcall(function()
-					activeSongSound.Volume = 0.7 -- Відновлюємо гучність
+					activeSongSound.Volume = 0.7 -- Ð’Ñ–Ð´Ð½Ð¾Ð²Ð»ÑŽÑ”Ð¼Ð¾ Ð³ÑƒÑ‡Ð½Ñ–ÑÑ‚ÑŒ
 				end)
 			end
 			dimThread = nil
 		end)
 	end
 	
-	-- Зупиняємо/затухаємо звук помилки через 0.2 сек
+	-- Ð—ÑƒÐ¿Ð¸Ð½ÑÑ”Ð¼Ð¾/Ð·Ð°Ñ‚ÑƒÑ…Ð°Ñ”Ð¼Ð¾ Ð·Ð²ÑƒÐº Ð¿Ð¾Ð¼Ð¸Ð»ÐºÐ¸ Ñ‡ÐµÑ€ÐµÐ· 0.2 ÑÐµÐº
 	if missSoundThread then
 		task.cancel(missSoundThread)
 	end
 	
 	missSoundThread = task.delay(0.2, function()
-		-- Плавне затухання за 0.05 сек
+		-- ÐŸÐ»Ð°Ð²Ð½Ðµ Ð·Ð°Ñ‚ÑƒÑ…Ð°Ð½Ð½Ñ Ð·Ð° 0.05 ÑÐµÐº
 		for vol = 6, 0, -1 do
 			pcall(function()
 				soundDefect.Volume = vol / 10
@@ -142,7 +142,7 @@ local function triggerMiss()
 	end)
 end
 
--- Легке тремтіння камери (Camera Shake) для динаміки
+-- Ð›ÐµÐ³ÐºÐµ Ñ‚Ñ€ÐµÐ¼Ñ‚Ñ–Ð½Ð½Ñ ÐºÐ°Ð¼ÐµÑ€Ð¸ (Camera Shake) Ð´Ð»Ñ Ð´Ð¸Ð½Ð°Ð¼Ñ–ÐºÐ¸
 local function cameraShake(amount, duration)
 	local camera = workspace.CurrentCamera
 	if not camera then return end
@@ -161,30 +161,30 @@ local function cameraShake(amount, duration)
 	end)
 end
 
--- Ефектна анімація оцінки (Perfect/Good/Miss)
+-- Ð•Ñ„ÐµÐºÑ‚Ð½Ð° Ð°Ð½Ñ–Ð¼Ð°Ñ†Ñ–Ñ Ð¾Ñ†Ñ–Ð½ÐºÐ¸ (Perfect/Good/Miss)
 local function popFeedback(text, color)
 	feedbackLabel.Text = text
 	feedbackLabel.TextColor3 = color
-	feedbackLabel.TextSize = 44
+	feedbackLabel.TextSize = 88
 	feedbackLabel.Rotation = math.random(-8, 8)
 	
-	-- Створюємо легкий рух тексту вгору
+	-- Ð¡Ñ‚Ð²Ð¾Ñ€ÑŽÑ”Ð¼Ð¾ Ð»ÐµÐ³ÐºÐ¸Ð¹ Ñ€ÑƒÑ… Ñ‚ÐµÐºÑÑ‚Ñƒ Ð²Ð³Ð¾Ñ€Ñƒ
 	local originalPosition = customGuiMode and UDim2.new(0.5, -200, 0.45, 0) or UDim2.new(0, 0, 0.4, 0)
 	feedbackLabel.Position = originalPosition
 	
 	local tweenInfo = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 	TweenService:Create(feedbackLabel, tweenInfo, {
-		TextSize = 32,
+		TextSize = 76,
 		Rotation = 0
 	}):Play()
 end
 
--- Пульсація кнопки при влучанні
+-- ÐŸÑƒÐ»ÑŒÑÐ°Ñ†Ñ–Ñ ÐºÐ½Ð¾Ð¿ÐºÐ¸ Ð¿Ñ€Ð¸ Ð²Ð»ÑƒÑ‡Ð°Ð½Ð½Ñ–
 local function pulseButton(track)
 	local button = customLanes[track]
 	if not button then return end
 	
-	-- Створюємо швидкий ефект стиснення/розширення
+	-- Ð¡Ñ‚Ð²Ð¾Ñ€ÑŽÑ”Ð¼Ð¾ ÑˆÐ²Ð¸Ð´ÐºÐ¸Ð¹ ÐµÑ„ÐµÐºÑ‚ ÑÑ‚Ð¸ÑÐ½ÐµÐ½Ð½Ñ/Ñ€Ð¾Ð·ÑˆÐ¸Ñ€ÐµÐ½Ð½Ñ
 	local originalSize = UDim2.new(0, 85, 0, 79)
 	button.Size = UDim2.new(0, 95, 0, 88)
 	
@@ -192,7 +192,7 @@ local function pulseButton(track)
 	TweenService:Create(button, tweenInfo, {Size = originalSize}):Play()
 end
 
--- Завантаження налаштувань гравця
+-- Ð—Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶ÐµÐ½Ð½Ñ Ð½Ð°Ð»Ð°ÑˆÑ‚ÑƒÐ²Ð°Ð½ÑŒ Ð³Ñ€Ð°Ð²Ñ†Ñ
 local function updateKeybinds()
 	local success, data = pcall(function()
 		return RequestPlayerDataFunc:InvokeServer()
@@ -202,7 +202,7 @@ local function updateKeybinds()
 	end
 end
 
--- Ефект вибуху частинок-бульбашок при успішному натисканні (Juice Effect) - у монохромних кольорах
+-- Ð•Ñ„ÐµÐºÑ‚ Ð²Ð¸Ð±ÑƒÑ…Ñƒ Ñ‡Ð°ÑÑ‚Ð¸Ð½Ð¾Ðº-Ð±ÑƒÐ»ÑŒÐ±Ð°ÑˆÐ¾Ðº Ð¿Ñ€Ð¸ ÑƒÑÐ¿Ñ–ÑˆÐ½Ð¾Ð¼Ñƒ Ð½Ð°Ñ‚Ð¸ÑÐºÐ°Ð½Ð½Ñ– (Juice Effect) - Ñƒ Ð¼Ð¾Ð½Ð¾Ñ…Ñ€Ð¾Ð¼Ð½Ð¸Ñ… ÐºÐ¾Ð»ÑŒÐ¾Ñ€Ð°Ñ…
 local function spawnHitParticles(track, rating)
 	local targetButton = customLanes[track]
 	if not targetButton then return end
@@ -219,7 +219,7 @@ local function spawnHitParticles(track, rating)
 	local originX = targetButton.AbsolutePosition.X + targetButton.AbsoluteSize.X / 2
 	local originY = targetButton.AbsolutePosition.Y + targetButton.AbsoluteSize.Y / 2
 
-	-- Створюємо 12 круглих частинок, що розлітаються швидше
+	-- Ð¡Ñ‚Ð²Ð¾Ñ€ÑŽÑ”Ð¼Ð¾ 12 ÐºÑ€ÑƒÐ³Ð»Ð¸Ñ… Ñ‡Ð°ÑÑ‚Ð¸Ð½Ð¾Ðº, Ñ‰Ð¾ Ñ€Ð¾Ð·Ð»Ñ–Ñ‚Ð°ÑŽÑ‚ÑŒÑÑ ÑˆÐ²Ð¸Ð´ÑˆÐµ
 	for i = 1, 12 do
 		local particle = Instance.new("Frame")
 		particle.Name = "HitParticle"
@@ -248,7 +248,7 @@ local function spawnHitParticles(track, rating)
 		local targetY = originY + math.sin(angle) * distance
 
 		local tweenInfo = TweenInfo.new(
-			math.random(2, 4) / 10, -- 0.2 - 0.4 сек
+			math.random(2, 4) / 10, -- 0.2 - 0.4 ÑÐµÐº
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.Out
 		)
@@ -266,7 +266,7 @@ local function spawnHitParticles(track, rating)
 	end
 end
 
--- Створення пулу нот
+-- Ð¡Ñ‚Ð²Ð¾Ñ€ÐµÐ½Ð½Ñ Ð¿ÑƒÐ»Ñƒ Ð½Ð¾Ñ‚
 local function createNotePool()
 	for _, obj in ipairs(notePool) do
 		pcall(function() obj:Destroy() end)
@@ -274,12 +274,12 @@ local function createNotePool()
 	notePool = {}
 	
 	for i = 1, NOTE_POOL_SIZE do
-		-- Красива кругла нота у вигляді бульбашки (Glossy Bubble)
+		-- ÐšÑ€Ð°ÑÐ¸Ð²Ð° ÐºÑ€ÑƒÐ³Ð»Ð° Ð½Ð¾Ñ‚Ð° Ñƒ Ð²Ð¸Ð³Ð»ÑÐ´Ñ– Ð±ÑƒÐ»ÑŒÐ±Ð°ÑˆÐºÐ¸ (Glossy Bubble)
 		local noteObj = Instance.new("Frame")
 		noteObj.Name = "NoteNode"
 		noteObj.BorderSizePixel = 0
-		noteObj.BackgroundColor3 = Color3.fromRGB(25, 25, 25) -- Темно-чорне тіло
-		noteObj.BackgroundTransparency = 0.25 -- Менше прозорості для вираженого чорно-сірого вигляду
+		noteObj.BackgroundColor3 = Color3.fromRGB(25, 25, 25) -- Ð¢ÐµÐ¼Ð½Ð¾-Ñ‡Ð¾Ñ€Ð½Ðµ Ñ‚Ñ–Ð»Ð¾
+		noteObj.BackgroundTransparency = 0.25 -- ÐœÐµÐ½ÑˆÐµ Ð¿Ñ€Ð¾Ð·Ð¾Ñ€Ð¾ÑÑ‚Ñ– Ð´Ð»Ñ Ð²Ð¸Ñ€Ð°Ð¶ÐµÐ½Ð¾Ð³Ð¾ Ñ‡Ð¾Ñ€Ð½Ð¾-ÑÑ–Ñ€Ð¾Ð³Ð¾ Ð²Ð¸Ð³Ð»ÑÐ´Ñƒ
 		noteObj.AnchorPoint = Vector2.new(0.5, 0.5)
 		noteObj.ZIndex = 10
 		noteObj.Visible = false
@@ -288,7 +288,7 @@ local function createNotePool()
 		uiCorner.CornerRadius = UDim.new(0.5, 0)
 		uiCorner.Parent = noteObj
 		
-		-- Блискучий відблиск світла у верхньому лівому кутку (Bubble Reflection)
+		-- Ð‘Ð»Ð¸ÑÐºÑƒÑ‡Ð¸Ð¹ Ð²Ñ–Ð´Ð±Ð»Ð¸ÑÐº ÑÐ²Ñ–Ñ‚Ð»Ð° Ñƒ Ð²ÐµÑ€Ñ…Ð½ÑŒÐ¾Ð¼Ñƒ Ð»Ñ–Ð²Ð¾Ð¼Ñƒ ÐºÑƒÑ‚ÐºÑƒ (Bubble Reflection)
 		local reflection = Instance.new("Frame")
 		reflection.Name = "Reflection"
 		reflection.Size = UDim2.new(0.22, 0, 0.22, 0)
@@ -303,12 +303,12 @@ local function createNotePool()
 		refCorner.CornerRadius = UDim.new(0.5, 0)
 		refCorner.Parent = reflection
 		
-		-- Обводка (темно-білий контур бульбашки)
+		-- ÐžÐ±Ð²Ð¾Ð´ÐºÐ° (Ñ‚ÐµÐ¼Ð½Ð¾-Ð±Ñ–Ð»Ð¸Ð¹ ÐºÐ¾Ð½Ñ‚ÑƒÑ€ Ð±ÑƒÐ»ÑŒÐ±Ð°ÑˆÐºÐ¸)
 		local stroke = Instance.new("UIStroke")
 		stroke.Thickness = 2.5
 		stroke.Parent = noteObj
 		
-		-- Кольорове м'яке ядро (Core) всередині
+		-- ÐšÐ¾Ð»ÑŒÐ¾Ñ€Ð¾Ð²Ðµ Ð¼'ÑÐºÐµ ÑÐ´Ñ€Ð¾ (Core) Ð²ÑÐµÑ€ÐµÐ´Ð¸Ð½Ñ–
 		local core = Instance.new("Frame")
 		core.Name = "Core"
 		core.Size = UDim2.new(0.3, 0, 0.3, 0)
@@ -321,7 +321,7 @@ local function createNotePool()
 		coreCorner.CornerRadius = UDim.new(0.5, 0)
 		coreCorner.Parent = core
 		
-		-- Шлейф для затискання (Hold Trail)
+		-- Ð¨Ð»ÐµÐ¹Ñ„ Ð´Ð»Ñ Ð·Ð°Ñ‚Ð¸ÑÐºÐ°Ð½Ð½Ñ (Hold Trail)
 		local trail = Instance.new("Frame")
 		trail.Name = "Trail"
 		trail.AnchorPoint = Vector2.new(0.5, 1)
@@ -345,7 +345,7 @@ local function createNotePool()
 	end
 end
 
--- Отримання ноти з пулу
+-- ÐžÑ‚Ñ€Ð¸Ð¼Ð°Ð½Ð½Ñ Ð½Ð¾Ñ‚Ð¸ Ð· Ð¿ÑƒÐ»Ñƒ
 local function getNoteFromPool(track, targetTime, duration)
 	local noteObj = nil
 	for _, obj in ipairs(notePool) do
@@ -422,7 +422,7 @@ local function getNoteFromPool(track, targetTime, duration)
 	
 	local trackColor = TrackColors[track] or Color3.fromRGB(240, 240, 240)
 	
-	-- Відновлення прозорості бульбашки
+	-- Ð’Ñ–Ð´Ð½Ð¾Ð²Ð»ÐµÐ½Ð½Ñ Ð¿Ñ€Ð¾Ð·Ð¾Ñ€Ð¾ÑÑ‚Ñ– Ð±ÑƒÐ»ÑŒÐ±Ð°ÑˆÐºÐ¸
 	noteObj.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 	noteObj.BackgroundTransparency = 0.25
 	
@@ -434,7 +434,7 @@ local function getNoteFromPool(track, targetTime, duration)
 	
 	local core = noteObj:FindFirstChild("Core")
 	if core then
-		core.BackgroundColor3 = Color3.fromRGB(150, 150, 150) -- Сіре ядро
+		core.BackgroundColor3 = Color3.fromRGB(150, 150, 150) -- Ð¡Ñ–Ñ€Ðµ ÑÐ´Ñ€Ð¾
 		core.BackgroundTransparency = 0.4
 	end
 	
@@ -503,7 +503,7 @@ local function getNoteFromPool(track, targetTime, duration)
 	return noteObj
 end
 
--- Повернення ноти в пул
+-- ÐŸÐ¾Ð²ÐµÑ€Ð½ÐµÐ½Ð½Ñ Ð½Ð¾Ñ‚Ð¸ Ð² Ð¿ÑƒÐ»
 local function returnNoteToPool(note)
 	note.Gui.Visible = false
 	local trail = note.Gui:FindFirstChild("Trail")
@@ -511,12 +511,12 @@ local function returnNoteToPool(note)
 	note.Gui.Parent = screenGui
 end
 
--- Створення інтерфейсу ритм-гри
+-- Ð¡Ñ‚Ð²Ð¾Ñ€ÐµÐ½Ð½Ñ Ñ–Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹ÑÑƒ Ñ€Ð¸Ñ‚Ð¼-Ð³Ñ€Ð¸
 local function createRhythmGui()
 	local customGui = PlayerGui:FindFirstChild("MainGui--inGame", true)
 	
 	if customGui then
-		print("🎨 Виявлено кастомний інтерфейс MainGui--inGame. Інтегруємо кнопки...")
+		print("ðŸŽ¨ Ð’Ð¸ÑÐ²Ð»ÐµÐ½Ð¾ ÐºÐ°ÑÑ‚Ð¾Ð¼Ð½Ð¸Ð¹ Ñ–Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹Ñ MainGui--inGame. Ð†Ð½Ñ‚ÐµÐ³Ñ€ÑƒÑ”Ð¼Ð¾ ÐºÐ½Ð¾Ð¿ÐºÐ¸...")
 		screenGui = customGui
 		originalParent = customGui.Parent
 		customGui.Parent = PlayerGui
@@ -537,7 +537,7 @@ local function createRhythmGui()
 			if lane then
 				customLanes[i] = lane
 				lane.Visible = true
-				lane.BackgroundTransparency = 0.45 -- Робимо менш прозорим для кращої видимості
+				lane.BackgroundTransparency = 0.45 -- Ð Ð¾Ð±Ð¸Ð¼Ð¾ Ð¼ÐµÐ½Ñˆ Ð¿Ñ€Ð¾Ð·Ð¾Ñ€Ð¸Ð¼ Ð´Ð»Ñ ÐºÑ€Ð°Ñ‰Ð¾Ñ— Ð²Ð¸Ð´Ð¸Ð¼Ð¾ÑÑ‚Ñ–
 				
 				local activeFrame = lane:FindFirstChild(activeNames[i], true)
 				if activeFrame then
@@ -545,7 +545,7 @@ local function createRhythmGui()
 					activeFrame.Visible = false
 				end
 			else
-				warn("⚠️ Не знайдено доріжку " .. laneNames[i] .. " у MainGui--inGame!")
+				warn("âš ï¸ ÐÐµ Ð·Ð½Ð°Ð¹Ð´ÐµÐ½Ð¾ Ð´Ð¾Ñ€Ñ–Ð¶ÐºÑƒ " .. laneNames[i] .. " Ñƒ MainGui--inGame!")
 			end
 		end
 		
@@ -557,7 +557,7 @@ local function createRhythmGui()
 			feedbackLabel.Position = UDim2.new(0.5, -200, 0.45, 0)
 			feedbackLabel.BackgroundTransparency = 1
 			feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			feedbackLabel.TextSize = 36
+			feedbackLabel.TextSize = 80
 			feedbackLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 			feedbackLabel.Text = ""
 			feedbackLabel.Parent = customGui
@@ -571,7 +571,7 @@ local function createRhythmGui()
 			accuracyLabel.Position = UDim2.new(0.5, -200, 0.05, 0)
 			accuracyLabel.BackgroundTransparency = 1
 			accuracyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			accuracyLabel.TextSize = 20
+			accuracyLabel.TextSize = 64
 			accuracyLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 			accuracyLabel.Text = "Accuracy: 100% | HP: 100"
 			accuracyLabel.Parent = customGui
@@ -582,10 +582,10 @@ local function createRhythmGui()
 			countdownLabel = Instance.new("TextLabel")
 			countdownLabel.Name = "CountdownLabel"
 			countdownLabel.Size = UDim2.new(0, 400, 0, 40)
-			countdownLabel.Position = UDim2.new(0.5, -200, 0.78, 0) -- Розмістимо в нижній частині екрана
+			countdownLabel.Position = UDim2.new(0.5, -200, 0.78, 0) -- Ð Ð¾Ð·Ð¼Ñ–ÑÑ‚Ð¸Ð¼Ð¾ Ð² Ð½Ð¸Ð¶Ð½Ñ–Ð¹ Ñ‡Ð°ÑÑ‚Ð¸Ð½Ñ– ÐµÐºÑ€Ð°Ð½Ð°
 			countdownLabel.BackgroundTransparency = 1
 			countdownLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-			countdownLabel.TextSize = 24
+			countdownLabel.TextSize = 68
 			countdownLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 			countdownLabel.Text = ""
 			countdownLabel.Visible = false
@@ -611,7 +611,7 @@ local function createRhythmGui()
 			hpBackground.Position = UDim2.new(0.3, 0, 0.1, 0)
 			hpBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 			hpBackground.BorderSizePixel = 0
-			hpBackground.Visible = false -- Приховуємо
+			hpBackground.Visible = false -- ÐŸÑ€Ð¸Ñ…Ð¾Ð²ÑƒÑ”Ð¼Ð¾
 			hpBackground.Parent = customGui
 			
 			local corner = Instance.new("UICorner")
@@ -623,12 +623,12 @@ local function createRhythmGui()
 			hpBar.Size = UDim2.new(1, 0, 1, 0)
 			hpBar.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
 			hpBar.BorderSizePixel = 0
-			hpBar.Visible = false -- Приховуємо
+			hpBar.Visible = false -- ÐŸÑ€Ð¸Ñ…Ð¾Ð²ÑƒÑ”Ð¼Ð¾
 			hpBar.Parent = hpBackground
 		end
 	else
 		customGuiMode = false
-		print("ℹ️ Кастомний інтерфейс не знайдено. Створюємо стандартний...")
+		print("â„¹ï¸ ÐšÐ°ÑÑ‚Ð¾Ð¼Ð½Ð¸Ð¹ Ñ–Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹Ñ Ð½Ðµ Ð·Ð½Ð°Ð¹Ð´ÐµÐ½Ð¾. Ð¡Ñ‚Ð²Ð¾Ñ€ÑŽÑ”Ð¼Ð¾ ÑÑ‚Ð°Ð½Ð´Ð°Ñ€Ñ‚Ð½Ð¸Ð¹...")
 		
 		screenGui = Instance.new("ScreenGui")
 		screenGui.Name = "RhythmGameUI"
@@ -664,7 +664,7 @@ local function createRhythmGui()
 			keyLabel.Position = UDim2.new(0, 0, 1, 0)
 			keyLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
 			keyLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-			keyLabel.TextSize = 20
+			keyLabel.TextSize = 64
 			keyLabel.Text = currentKeybinds[i]
 			keyLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 			keyLabel.Parent = lane
@@ -682,14 +682,14 @@ local function createRhythmGui()
 		hpBackground.Size = UDim2.new(1, 0, 0, 15)
 		hpBackground.Position = UDim2.new(0, 0, 0, -25)
 		hpBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		hpBackground.Visible = false -- Приховуємо
+		hpBackground.Visible = false -- ÐŸÑ€Ð¸Ñ…Ð¾Ð²ÑƒÑ”Ð¼Ð¾
 		hpBackground.Parent = rhythmFrame
 
 		hpBar = Instance.new("Frame")
 		hpBar.Size = UDim2.new(1, 0, 1, 0)
 		hpBar.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
 		hpBar.BorderSizePixel = 0
-		hpBar.Visible = false -- Приховуємо
+		hpBar.Visible = false -- ÐŸÑ€Ð¸Ñ…Ð¾Ð²ÑƒÑ”Ð¼Ð¾
 		hpBar.Parent = hpBackground
 
 		feedbackLabel = Instance.new("TextLabel")
@@ -697,7 +697,7 @@ local function createRhythmGui()
 		feedbackLabel.Position = UDim2.new(0, 0, 0.4, 0)
 		feedbackLabel.BackgroundTransparency = 1
 		feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-		feedbackLabel.TextSize = 32
+		feedbackLabel.TextSize = 76
 		feedbackLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		feedbackLabel.Text = ""
 		feedbackLabel.Parent = rhythmFrame
@@ -707,7 +707,7 @@ local function createRhythmGui()
 		accuracyLabel.Position = UDim2.new(0, 0, 0, -60)
 		accuracyLabel.BackgroundTransparency = 1
 		accuracyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-		accuracyLabel.TextSize = 22
+		accuracyLabel.TextSize = 66
 		accuracyLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		accuracyLabel.Text = "Accuracy: 100% | HP: 100"
 		accuracyLabel.Parent = rhythmFrame
@@ -715,10 +715,10 @@ local function createRhythmGui()
 		countdownLabel = Instance.new("TextLabel")
 		countdownLabel.Name = "CountdownLabel"
 		countdownLabel.Size = UDim2.new(1, 0, 0, 40)
-		countdownLabel.Position = UDim2.new(0, 0, 1, 15) -- Трохи нижче за рамку гри
+		countdownLabel.Position = UDim2.new(0, 0, 1, 15) -- Ð¢Ñ€Ð¾Ñ…Ð¸ Ð½Ð¸Ð¶Ñ‡Ðµ Ð·Ð° Ñ€Ð°Ð¼ÐºÑƒ Ð³Ñ€Ð¸
 		countdownLabel.BackgroundTransparency = 1
 		countdownLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-		countdownLabel.TextSize = 20
+		countdownLabel.TextSize = 64
 		countdownLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		countdownLabel.Text = ""
 		countdownLabel.Visible = false
@@ -733,7 +733,7 @@ local function createRhythmGui()
 	createNotePool()
 end
 
--- Створення візуальної ноти через пул
+-- Ð¡Ñ‚Ð²Ð¾Ñ€ÐµÐ½Ð½Ñ Ð²Ñ–Ð·ÑƒÐ°Ð»ÑŒÐ½Ð¾Ñ— Ð½Ð¾Ñ‚Ð¸ Ñ‡ÐµÑ€ÐµÐ· Ð¿ÑƒÐ»
 local function spawnNote(track, targetTime, duration)
 	local noteGui = getNoteFromPool(track, targetTime, duration)
 	
@@ -748,7 +748,7 @@ local function spawnNote(track, targetTime, duration)
 	})
 end
 
--- Відображення результатів виступу
+-- Ð’Ñ–Ð´Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð½Ñ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ñ–Ð² Ð²Ð¸ÑÑ‚ÑƒÐ¿Ñƒ
 local function showResultsScreen(finalAccuracy, rewards)
 	local resultsFrame = Instance.new("Frame")
 	resultsFrame.Name = "ResultsFrame"
@@ -771,7 +771,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	title.Position = UDim2.new(0, 0, 0, 15)
 	title.BackgroundTransparency = 1
 	title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	title.TextSize = 28
+	title.TextSize = 72
 	title.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	title.Text = "PERFORMANCE STATS"
 	title.Parent = contentFrame
@@ -781,7 +781,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	songTitle.Position = UDim2.new(0, 0, 0, 55)
 	songTitle.BackgroundTransparency = 1
 	songTitle.TextColor3 = Color3.fromRGB(160, 160, 160)
-	songTitle.TextSize = 18
+	songTitle.TextSize = 62
 	songTitle.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	songTitle.Text = string.format("%s (%s)", currentSong.Title, currentSong.Difficulty)
 	songTitle.Parent = contentFrame
@@ -791,7 +791,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	accuracyVal.Position = UDim2.new(0, 20, 0, 95)
 	accuracyVal.BackgroundTransparency = 1
 	accuracyVal.TextColor3 = Color3.fromRGB(255, 255, 255)
-	accuracyVal.TextSize = 56
+	accuracyVal.TextSize = 100
 	accuracyVal.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	accuracyVal.Text = string.format("%d%%", finalAccuracy)
 	accuracyVal.Parent = contentFrame
@@ -801,7 +801,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	accuracyLabel.Position = UDim2.new(0, 20, 0, 160)
 	accuracyLabel.BackgroundTransparency = 1
 	accuracyLabel.TextColor3 = Color3.fromRGB(130, 130, 130)
-	accuracyLabel.TextSize = 15
+	accuracyLabel.TextSize = 59
 	accuracyLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	accuracyLabel.Text = "ACCURACY"
 	accuracyLabel.Parent = contentFrame
@@ -826,7 +826,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		label.Position = UDim2.new(0, 0, 0, yOffset)
 		label.BackgroundTransparency = 1
 		label.TextColor3 = r.color
-		label.TextSize = 16
+		label.TextSize = 60
 		label.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		label.TextXAlignment = Enum.TextXAlignment.Left
 		label.Text = r.name
@@ -837,7 +837,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		val.Position = UDim2.new(0.6, 0, 0, yOffset)
 		val.BackgroundTransparency = 1
 		val.TextColor3 = Color3.fromRGB(220, 220, 220)
-		val.TextSize = 16
+		val.TextSize = 60
 		val.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		val.TextXAlignment = Enum.TextXAlignment.Right
 		val.Text = tostring(r.count)
@@ -879,7 +879,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		valLbl.Position = UDim2.new(0, 0, 0.1, 0)
 		valLbl.BackgroundTransparency = 1
 		valLbl.TextColor3 = rew.color
-		valLbl.TextSize = 20
+		valLbl.TextSize = 64
 		valLbl.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		valLbl.Text = rew.val
 		valLbl.Parent = container
@@ -889,7 +889,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 		nameLbl.Position = UDim2.new(0, 0, 0.55, 0)
 		nameLbl.BackgroundTransparency = 1
 		nameLbl.TextColor3 = Color3.fromRGB(130, 130, 130)
-		nameLbl.TextSize = 13
+		nameLbl.TextSize = 57
 		nameLbl.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		nameLbl.Text = rew.name:upper()
 		nameLbl.Parent = container
@@ -900,7 +900,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	graphTitle.Position = UDim2.new(0, 20, 0, 260)
 	graphTitle.BackgroundTransparency = 1
 	graphTitle.TextColor3 = Color3.fromRGB(160, 160, 160)
-	graphTitle.TextSize = 14
+	graphTitle.TextSize = 58
 	graphTitle.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	graphTitle.TextXAlignment = Enum.TextXAlignment.Left
 	graphTitle.Text = "PERFORMANCE TIMELINE (White = Perfect, Gray = Okay, Black = Miss):"
@@ -954,7 +954,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	missTitle.Position = UDim2.new(0, 20, 0, 325)
 	missTitle.BackgroundTransparency = 1
 	missTitle.TextColor3 = Color3.fromRGB(160, 160, 160)
-	missTitle.TextSize = 14
+	missTitle.TextSize = 58
 	missTitle.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	missTitle.TextXAlignment = Enum.TextXAlignment.Left
 	missTitle.Text = "MISSED SECONDS:"
@@ -972,7 +972,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 
 	local missListText = ""
 	if #missSeconds == 0 then
-		missListText = "Perfect! No mistakes! 🎉"
+		missListText = "Perfect! No mistakes! ðŸŽ‰"
 	else
 		local secsStr = {}
 		for _, sec in ipairs(missSeconds) do
@@ -985,7 +985,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	missTxtLabel.Size = UDim2.new(1, 0, 1, 0)
 	missTxtLabel.BackgroundTransparency = 1
 	missTxtLabel.TextColor3 = #missSeconds == 0 and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(190, 190, 190)
-	missTxtLabel.TextSize = 14
+	missTxtLabel.TextSize = 58
 	missTxtLabel.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	missTxtLabel.TextWrapped = true
 	missTxtLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -998,7 +998,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	continueBtn.Position = UDim2.new(0.5, -110, 1, -65)
 	continueBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 26)
 	continueBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	continueBtn.TextSize = 18
+	continueBtn.TextSize = 62
 	continueBtn.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 	continueBtn.Text = "CONTINUE"
 	continueBtn.Parent = contentFrame
@@ -1027,6 +1027,7 @@ local function showResultsScreen(finalAccuracy, rewards)
 	end)
 
 	continueBtn.MouseButton1Click:Connect(function()
+		resultsFrame:Destroy() -- Ð’Ð˜Ð”ÐÐ›Ð¯Ð„ÐœÐž Ð’Ð†ÐšÐÐž Ð¡Ð¢ÐÐ¢Ð˜Ð¡Ð¢Ð˜ÐšÐ˜!
 		if customGuiMode then
 			screenGui.Enabled = false
 			feedbackLabel.Text = ""
@@ -1047,12 +1048,12 @@ local function showResultsScreen(finalAccuracy, rewards)
 	end)
 end
 
--- Завершення гри
+-- Ð—Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð½Ñ Ð³Ñ€Ð¸
 local function endSong(failed)
 	if not isPlaying then return end
 	isPlaying = false
 
-	-- ЗУПИНЯЄМО І ВИДАЛЯЄМО ЗВУК ПІСНІ
+	-- Ð—Ð£ÐŸÐ˜ÐÐ¯Ð„ÐœÐž Ð† Ð’Ð˜Ð”ÐÐ›Ð¯Ð„ÐœÐž Ð—Ð’Ð£Ðš ÐŸÐ†Ð¡ÐÐ†
 	if activeSongSound then
 		pcall(function()
 			activeSongSound:Stop()
@@ -1075,29 +1076,29 @@ local function endSong(failed)
 		feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	end
 
-	-- Очищаємо всі ноти
+	-- ÐžÑ‡Ð¸Ñ‰Ð°Ñ”Ð¼Ð¾ Ð²ÑÑ– Ð½Ð¾Ñ‚Ð¸
 	for _, note in ipairs(activeNotes) do
 		returnNoteToPool(note)
 	end
 	activeNotes = {}
 	heldTracks = {false, false, false, false}
 
-	-- Надсилаємо результати на сервер та отримуємо нагороди
+	-- ÐÐ°Ð´ÑÐ¸Ð»Ð°Ñ”Ð¼Ð¾ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ð¸ Ð½Ð° ÑÐµÑ€Ð²ÐµÑ€ Ñ‚Ð° Ð¾Ñ‚Ñ€Ð¸Ð¼ÑƒÑ”Ð¼Ð¾ Ð½Ð°Ð³Ð¾Ñ€Ð¾Ð´Ð¸
 	local success, rewards = FinishSongFunc:InvokeServer(finalAccuracy)
 
 	if not failed then
-		-- Приховуємо ігровий інтерфейс
+		-- ÐŸÑ€Ð¸Ñ…Ð¾Ð²ÑƒÑ”Ð¼Ð¾ Ñ–Ð³Ñ€Ð¾Ð²Ð¸Ð¹ Ñ–Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹Ñ
 		for _, child in ipairs(screenGui:GetChildren()) do
 			if child:IsA("GuiObject") and child.Name ~= "ResultsFrame" and child.Name ~= "FeedbackLabel" then
 				child.Visible = false
 			end
 		end
 		
-		-- Показуємо екран результатів
+		-- ÐŸÐ¾ÐºÐ°Ð·ÑƒÑ”Ð¼Ð¾ ÐµÐºÑ€Ð°Ð½ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ñ–Ð²
 		showResultsScreen(finalAccuracy, rewards)
 	else
 		task.wait(2)
-		-- Закриття/очищення інтерфейсу при провалі
+		-- Ð—Ð°ÐºÑ€Ð¸Ñ‚Ñ‚Ñ/Ð¾Ñ‡Ð¸Ñ‰ÐµÐ½Ð½Ñ Ñ–Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹ÑÑƒ Ð¿Ñ€Ð¸ Ð¿Ñ€Ð¾Ð²Ð°Ð»Ñ–
 		if customGuiMode then
 			screenGui.Enabled = false
 			feedbackLabel.Text = ""
@@ -1118,7 +1119,7 @@ local function endSong(failed)
 	end
 end
 
--- Початок ритм-гри
+-- ÐŸÐ¾Ñ‡Ð°Ñ‚Ð¾Ðº Ñ€Ð¸Ñ‚Ð¼-Ð³Ñ€Ð¸
 StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	updateKeybinds()
 	currentSong = song
@@ -1138,21 +1139,21 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	noteHistory = {}
 	local songEndTime = nil
 
-	-- СТВОРЕННЯ ТА ПРОГРАВАННЯ МУЗИЧНОЇ ДОРІЖКИ ПІСНІ
+	-- Ð¡Ð¢Ð’ÐžÐ Ð•ÐÐÐ¯ Ð¢Ð ÐŸÐ ÐžÐ“Ð ÐÐ’ÐÐÐÐ¯ ÐœÐ£Ð—Ð˜Ð§ÐÐžÐ‡ Ð”ÐžÐ Ð†Ð–ÐšÐ˜ ÐŸÐ†Ð¡ÐÐ†
 	if song.AudioId and song.AudioId ~= "" and song.AudioId ~= "rbxassetid://0" then
 		local success, err = pcall(function()
-			print("🎵 Спроба запуску аудіодоріжки:", song.AudioId)
+			print("ðŸŽµ Ð¡Ð¿Ñ€Ð¾Ð±Ð° Ð·Ð°Ð¿ÑƒÑÐºÑƒ Ð°ÑƒÐ´Ñ–Ð¾Ð´Ð¾Ñ€Ñ–Ð¶ÐºÐ¸:", song.AudioId)
 			activeSongSound = Instance.new("Sound")
 			activeSongSound.SoundId = song.AudioId
-			activeSongSound.Volume = 0.7 -- Хороший рівень гучності
-			activeSongSound.Parent = game.Workspace.CurrentCamera -- 2D звук безпосередньо у вуха гравця
+			activeSongSound.Volume = 0.7 -- Ð¥Ð¾Ñ€Ð¾ÑˆÐ¸Ð¹ Ñ€Ñ–Ð²ÐµÐ½ÑŒ Ð³ÑƒÑ‡Ð½Ð¾ÑÑ‚Ñ–
+			activeSongSound.Parent = game.Workspace.CurrentCamera -- 2D Ð·Ð²ÑƒÐº Ð±ÐµÐ·Ð¿Ð¾ÑÐµÑ€ÐµÐ´Ð½ÑŒÐ¾ Ñƒ Ð²ÑƒÑ…Ð° Ð³Ñ€Ð°Ð²Ñ†Ñ
 			activeSongSound:Play()
 		end)
 		if not success then
-			warn("⚠️ Помилка створення або запуску звуку:", err)
+			warn("âš ï¸ ÐŸÐ¾Ð¼Ð¸Ð»ÐºÐ° ÑÑ‚Ð²Ð¾Ñ€ÐµÐ½Ð½Ñ Ð°Ð±Ð¾ Ð·Ð°Ð¿ÑƒÑÐºÑƒ Ð·Ð²ÑƒÐºÑƒ:", err)
 		end
 	else
-		warn("⚠️ Аудіодоріжку не запущено: ID порожній або rbxassetid://0")
+		warn("âš ï¸ ÐÑƒÐ´Ñ–Ð¾Ð´Ð¾Ñ€Ñ–Ð¶ÐºÑƒ Ð½Ðµ Ð·Ð°Ð¿ÑƒÑ‰ÐµÐ½Ð¾: ID Ð¿Ð¾Ñ€Ð¾Ð¶Ð½Ñ–Ð¹ Ð°Ð±Ð¾ rbxassetid://0")
 	end
 
 	if song.Difficulty == "Easy" then
@@ -1167,10 +1168,10 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 	createRhythmGui()
 
-	-- Запускаємо пісню негайно
+	-- Ð—Ð°Ð¿ÑƒÑÐºÐ°Ñ”Ð¼Ð¾ Ð¿Ñ–ÑÐ½ÑŽ Ð½ÐµÐ³Ð°Ð¹Ð½Ð¾
 	songStartTime = os.clock()
 
-	-- Ігровий цикл
+	-- Ð†Ð³Ñ€Ð¾Ð²Ð¸Ð¹ Ñ†Ð¸ÐºÐ»
 	local connection
 	connection = RunService.RenderStepped:Connect(function()
 		if not isPlaying then
@@ -1180,7 +1181,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 
 		local elapsed = os.clock() - songStartTime
 
-		-- Динамічне завершення пісні після останньої ноти з затримкою в 3 секунди
+		-- Ð”Ð¸Ð½Ð°Ð¼Ñ–Ñ‡Ð½Ðµ Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð½Ñ Ð¿Ñ–ÑÐ½Ñ– Ð¿Ñ–ÑÐ»Ñ Ð¾ÑÑ‚Ð°Ð½Ð½ÑŒÐ¾Ñ— Ð½Ð¾Ñ‚Ð¸ Ð· Ð·Ð°Ñ‚Ñ€Ð¸Ð¼ÐºÐ¾ÑŽ Ð² 3 ÑÐµÐºÑƒÐ½Ð´Ð¸
 		if spawnedNoteIndex > #currentSong.Notes and #activeNotes == 0 then
 			if not songEndTime then
 				songEndTime = os.clock() + 3.0
@@ -1191,14 +1192,14 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 			end
 		end
 
-		-- Захисний ліміт на випадок багів (якщо ноти застрягли)
+		-- Ð—Ð°Ñ…Ð¸ÑÐ½Ð¸Ð¹ Ð»Ñ–Ð¼Ñ–Ñ‚ Ð½Ð° Ð²Ð¸Ð¿Ð°Ð´Ð¾Ðº Ð±Ð°Ð³Ñ–Ð² (ÑÐºÑ‰Ð¾ Ð½Ð¾Ñ‚Ð¸ Ð·Ð°ÑÑ‚Ñ€ÑÐ³Ð»Ð¸)
 		if elapsed >= currentSong.Length + 15 then
 			connection:Disconnect()
 			endSong(false)
 			return
 		end
 
-		-- Спавн нот відповідно до розкладу
+		-- Ð¡Ð¿Ð°Ð²Ð½ Ð½Ð¾Ñ‚ Ð²Ñ–Ð´Ð¿Ð¾Ð²Ñ–Ð´Ð½Ð¾ Ð´Ð¾ Ñ€Ð¾Ð·ÐºÐ»Ð°Ð´Ñƒ
 		local spawnPreDelay = 1.1
 		while spawnedNoteIndex <= #currentSong.Notes do
 			local note = currentSong.Notes[spawnedNoteIndex]
@@ -1210,7 +1211,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 			end
 		end
 
-		-- Оновлення позиції активних нот
+		-- ÐžÐ½Ð¾Ð²Ð»ÐµÐ½Ð½Ñ Ð¿Ð¾Ð·Ð¸Ñ†Ñ–Ñ— Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¸Ñ… Ð½Ð¾Ñ‚
 		for i = #activeNotes, 1, -1 do
 			local note = activeNotes[i]
 			local timeDiff = note.TargetTime - elapsed
@@ -1233,7 +1234,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					note.Gui.Position = UDim2.new(targetXScale, targetXOffset, targetYScale, targetYOffset)
 				end
 				
-				-- Розрахунок залишку часу затискання
+				-- Ð Ð¾Ð·Ñ€Ð°Ñ…ÑƒÐ½Ð¾Ðº Ð·Ð°Ð»Ð¸ÑˆÐºÑƒ Ñ‡Ð°ÑÑƒ Ð·Ð°Ñ‚Ð¸ÑÐºÐ°Ð½Ð½Ñ
 				local timeLeft = (note.TargetTime + note.Duration) - elapsed
 				local trail = note.Gui:FindFirstChild("Trail")
 				
@@ -1246,7 +1247,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						trail.Size = UDim2.new(0, 24, 0, currentHeightPixels)
 					end
 					
-					-- Очки за тримання (Hold tick)
+					-- ÐžÑ‡ÐºÐ¸ Ð·Ð° Ñ‚Ñ€Ð¸Ð¼Ð°Ð½Ð½Ñ (Hold tick)
 					note.ScoreTicks = note.ScoreTicks + 1
 					if note.ScoreTicks % 10 == 0 then
 						notesHit = notesHit + 0.08
@@ -1259,7 +1260,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						end
 					end
 				else
-					-- Затискання успішно завершено! Лінія зникає повністю!
+					-- Ð—Ð°Ñ‚Ð¸ÑÐºÐ°Ð½Ð½Ñ ÑƒÑÐ¿Ñ–ÑˆÐ½Ð¾ Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð¾! Ð›Ñ–Ð½Ñ–Ñ Ð·Ð½Ð¸ÐºÐ°Ñ” Ð¿Ð¾Ð²Ð½Ñ–ÑÑ‚ÑŽ!
 					note.IsHolding = false
 					if trail then trail.Visible = false end
 					returnNoteToPool(note)
@@ -1277,11 +1278,11 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					end
 				end
 			else
-				-- Як звичайні, так і влучені ноти продовжують летіти вниз!
+				-- Ð¯Ðº Ð·Ð²Ð¸Ñ‡Ð°Ð¹Ð½Ñ–, Ñ‚Ð°Ðº Ñ– Ð²Ð»ÑƒÑ‡ÐµÐ½Ñ– Ð½Ð¾Ñ‚Ð¸ Ð¿Ñ€Ð¾Ð´Ð¾Ð²Ð¶ÑƒÑŽÑ‚ÑŒ Ð»ÐµÑ‚Ñ–Ñ‚Ð¸ Ð²Ð½Ð¸Ð·!
 				if timeDiff < -0.25 then
-					-- Нота вийшла за межі доріжки
+					-- ÐÐ¾Ñ‚Ð° Ð²Ð¸Ð¹ÑˆÐ»Ð° Ð·Ð° Ð¼ÐµÐ¶Ñ– Ð´Ð¾Ñ€Ñ–Ð¶ÐºÐ¸
 					if not note.Hit then
-						-- Пропуск ноти (Miss) - тільки якщо по ній НЕ попали!
+						-- ÐŸÑ€Ð¾Ð¿ÑƒÑÐº Ð½Ð¾Ñ‚Ð¸ (Miss) - Ñ‚Ñ–Ð»ÑŒÐºÐ¸ ÑÐºÑ‰Ð¾ Ð¿Ð¾ Ð½Ñ–Ð¹ ÐÐ• Ð¿Ð¾Ð¿Ð°Ð»Ð¸!
 						triggerMiss()
 						popFeedback("MISS!", Color3.fromRGB(120, 120, 120))
 						missCount = missCount + 1
@@ -1291,7 +1292,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					returnNoteToPool(note)
 					table.remove(activeNotes, i)
 				else
-					-- Рух ноти вниз
+					-- Ð ÑƒÑ… Ð½Ð¾Ñ‚Ð¸ Ð²Ð½Ð¸Ð·
 					if customGuiMode and targetButton then
 						local targetXScale = targetButton.Position.X.Scale
 						local targetXOffset = targetButton.Position.X.Offset + (targetButton.AbsoluteSize.X / 2)
@@ -1303,7 +1304,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 						note.Gui.Position = UDim2.new(0.5, 0, yPosScale, 0)
 					end
 					
-					-- Візуальний ефект для влученої ноти (стає напівпрозорою)
+					-- Ð’Ñ–Ð·ÑƒÐ°Ð»ÑŒÐ½Ð¸Ð¹ ÐµÑ„ÐµÐºÑ‚ Ð´Ð»Ñ Ð²Ð»ÑƒÑ‡ÐµÐ½Ð¾Ñ— Ð½Ð¾Ñ‚Ð¸ (ÑÑ‚Ð°Ñ” Ð½Ð°Ð¿Ñ–Ð²Ð¿Ñ€Ð¾Ð·Ð¾Ñ€Ð¾ÑŽ)
 					if note.Hit then
 						note.Gui.BackgroundTransparency = 0.95
 						local stroke = note.Gui:FindFirstChildWhichIsA("UIStroke")
@@ -1347,11 +1348,11 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 			end
 		end
 
-		-- Оновлення статус-панелі
+		-- ÐžÐ½Ð¾Ð²Ð»ÐµÐ½Ð½Ñ ÑÑ‚Ð°Ñ‚ÑƒÑ-Ð¿Ð°Ð½ÐµÐ»Ñ–
 		local currentAcc = (notesTotal > 0) and math.round((notesHit / notesTotal) * 100) or 100
 		accuracyLabel.Text = string.format("Accuracy: %d%%", currentAcc)
 
-		-- Відображення таймера до появи наступної ноти
+		-- Ð’Ñ–Ð´Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð½Ñ Ñ‚Ð°Ð¹Ð¼ÐµÑ€Ð° Ð´Ð¾ Ð¿Ð¾ÑÐ²Ð¸ Ð½Ð°ÑÑ‚ÑƒÐ¿Ð½Ð¾Ñ— Ð½Ð¾Ñ‚Ð¸
 		local nextNote = currentSong.Notes[spawnedNoteIndex]
 		if nextNote and #activeNotes == 0 and countdownLabel then
 			local timeUntilSpawn = (nextNote.time - spawnPreDelay) - elapsed
@@ -1360,7 +1361,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 					countdownLabel.Visible = true
 					countdownLabel.Text = tostring(math.ceil(timeUntilSpawn))
 					
-					-- Пульсуючий ефект прозорості
+					-- ÐŸÑƒÐ»ÑŒÑÑƒÑŽÑ‡Ð¸Ð¹ ÐµÑ„ÐµÐºÑ‚ Ð¿Ñ€Ð¾Ð·Ð¾Ñ€Ð¾ÑÑ‚Ñ–
 					countdownLabel.TextTransparency = 0.15 + math.sin(os.clock() * 6.5) * 0.15
 				end
 			else
@@ -1372,7 +1373,7 @@ StartSongEvent.OnClientEvent:Connect(function(song, contractName)
 	end)
 end)
 
--- Обробка натискання клавіш
+-- ÐžÐ±Ñ€Ð¾Ð±ÐºÐ° Ð½Ð°Ñ‚Ð¸ÑÐºÐ°Ð½Ð½Ñ ÐºÐ»Ð°Ð²Ñ–Ñˆ
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed or not isPlaying then return end
 
@@ -1386,7 +1387,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 
 	if not pressedTrack then return end
 
-	-- Захист від Windows KeyRepeat: якщо клавіша вже затиснута, ігноруємо повторні події
+	-- Ð—Ð°Ñ…Ð¸ÑÑ‚ Ð²Ñ–Ð´ Windows KeyRepeat: ÑÐºÑ‰Ð¾ ÐºÐ»Ð°Ð²Ñ–ÑˆÐ° Ð²Ð¶Ðµ Ð·Ð°Ñ‚Ð¸ÑÐ½ÑƒÑ‚Ð°, Ñ–Ð³Ð½Ð¾Ñ€ÑƒÑ”Ð¼Ð¾ Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€Ð½Ñ– Ð¿Ð¾Ð´Ñ–Ñ—
 	if heldTracks[pressedTrack] then return end
 	heldTracks[pressedTrack] = true
 
@@ -1396,7 +1397,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if activeFrame then
 		activeFrame.Visible = true
 		activeFrame.BackgroundColor3 = trackColor
-		activeFrame.BackgroundTransparency = 0.3 -- Приглушене біле світіння
+		activeFrame.BackgroundTransparency = 0.3 -- ÐŸÑ€Ð¸Ð³Ð»ÑƒÑˆÐµÐ½Ðµ Ð±Ñ–Ð»Ðµ ÑÐ²Ñ–Ñ‚Ñ–Ð½Ð½Ñ
 	end
 
 	local elapsed = os.clock() - songStartTime
@@ -1486,7 +1487,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
--- Обробка відпускання клавіш
+-- ÐžÐ±Ñ€Ð¾Ð±ÐºÐ° Ð²Ñ–Ð´Ð¿ÑƒÑÐºÐ°Ð½Ð½Ñ ÐºÐ»Ð°Ð²Ñ–Ñˆ
 UserInputService.InputEnded:Connect(function(input, gameProcessed)
 	if not isPlaying then return end
 
@@ -1500,7 +1501,7 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 
 	if not releasedTrack then return end
 
-	-- Скидаємо статус утримання клавіші
+	-- Ð¡ÐºÐ¸Ð´Ð°Ñ”Ð¼Ð¾ ÑÑ‚Ð°Ñ‚ÑƒÑ ÑƒÑ‚Ñ€Ð¸Ð¼Ð°Ð½Ð½Ñ ÐºÐ»Ð°Ð²Ñ–ÑˆÑ–
 	heldTracks[releasedTrack] = false
 
 	local activeFrame = customGuiMode and customActiveFrames[releasedTrack]
@@ -1514,7 +1515,7 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 			local endHoldTime = note.TargetTime + note.Duration
 			
 			if elapsed < endHoldTime - 0.15 then
-				-- Ранній відпуск (Hold Break). Лінія зникає відразу!
+				-- Ð Ð°Ð½Ð½Ñ–Ð¹ Ð²Ñ–Ð´Ð¿ÑƒÑÐº (Hold Break). Ð›Ñ–Ð½Ñ–Ñ Ð·Ð½Ð¸ÐºÐ°Ñ” Ð²Ñ–Ð´Ñ€Ð°Ð·Ñƒ!
 				note.IsHolding = false
 				local trail = note.Gui:FindFirstChild("Trail")
 				if trail then trail.Visible = false end
@@ -1528,3 +1529,5 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
 		end
 	end
 end)
+
+

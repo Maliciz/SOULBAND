@@ -44,8 +44,8 @@ local function getValueLabel(frame)
 		label.Position = UDim2.new(0, 10, 0, 0)
 		label.BackgroundTransparency = 1
 		label.TextColor3 = Color3.fromRGB(255, 255, 255)
-		label.TextSize = 18
-		label.Font = Enum.Font.FredokaOne
+		label.TextSize = 50 -- Значно збільшено
+		label.FontFace = Font.new("rbxasset://fonts/families/AmaticSC.json")
 		label.TextXAlignment = Enum.TextXAlignment.Center
 		label.TextYAlignment = Enum.TextYAlignment.Center
 		label.Parent = frame

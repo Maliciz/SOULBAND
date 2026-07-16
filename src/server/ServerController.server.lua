@@ -1,5 +1,7 @@
 -- ServerScriptService/ServerController.server.lua
 local Players = game:GetService("Players")
+Players.CharacterAutoLoads = false -- Забороняємо автоматичний спавн
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
@@ -41,38 +43,9 @@ local RequestStartSongEvent = getOrCreateRemote("RemoteEvent", "RequestStartSong
 local SetGenderFunc = getOrCreateRemote("RemoteFunction", "SetGender")
 local RequestPlayerDataFunc = getOrCreateRemote("RemoteFunction", "RequestPlayerData")
 local FinishCharacterCreationFunc = getOrCreateRemote("RemoteFunction", "FinishCharacterCreation")
-local PreviewHairEvent = getOrCreateRemote("RemoteEvent", "PreviewHair")
+local SpawnCharacterEvent = getOrCreateRemote("RemoteEvent", "SpawnCharacter")
 
-local function applyHairToModel(model, hairId)
-	local humanoid = model:FindFirstChildOfClass("Humanoid")
-	if not humanoid then return end
 
-	local desc = Instance.new("HumanoidDescription")
-	desc.HairAccessory = tostring(hairId)
-
-	local bc = model:FindFirstChildOfClass("BodyColors")
-	if bc then
-		desc.HeadColor = bc.HeadColor3
-		desc.TorsoColor = bc.TorsoColor3
-		desc.LeftArmColor = bc.LeftArmColor3
-		desc.RightArmColor = bc.RightArmColor3
-		desc.LeftLegColor = bc.LeftLegColor3
-		desc.RightLegColor = bc.RightLegColor3
-	end
-	
-	local shirt = model:FindFirstChildOfClass("Shirt")
-	if shirt and shirt.ShirtTemplate then
-		desc.Shirt = tonumber(shirt.ShirtTemplate:match("%d+")) or 0
-	end
-	local pants = model:FindFirstChildOfClass("Pants")
-	if pants and pants.PantsTemplate then
-		desc.Pants = tonumber(pants.PantsTemplate:match("%d+")) or 0
-	end
-
-	pcall(function()
-		humanoid:ApplyDescription(desc)
-	end)
-end
 
 local function applyCustomCharacter(player, character)
 	local data = DataManager.Get(player)
@@ -107,7 +80,7 @@ local function applyCustomCharacter(player, character)
 	if npcsFolder then
 		local mainFolder = npcsFolder:FindFirstChild(npcName .. "--Main")
 		if mainFolder then
-			starterSkin = mainFolder:FindFirstChild("Starter_Skin")
+			starterSkin = mainFolder:FindFirstChild("Starter_Skin_Man")
 		end
 	end
 
@@ -136,8 +109,7 @@ Players.PlayerAdded:Connect(function(player)
 	local data = DataManager.LoadData(player)
 	print("Data for player " .. player.Name .. " loaded successfully. Balance: " .. data.Cash)
 	
-	-- Hook to reset for character creation testing
-	DataManager.Set(player, "CharacterCreated", false)
+	-- Hook to reset for character creation testing removed
 	
 	player.CharacterAdded:Connect(function(character)
 		applyCustomCharacter(player, character)
@@ -218,11 +190,23 @@ SetGenderFunc.OnServerInvoke = function(player, gender)
 	return false, "Invalid gender selection."
 end
 
-FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, skinColor)
+FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, skinColor, artistName)
 	if gender == "Male" or gender == "Female" then
+		local filteredName = player.Name
+		if artistName and type(artistName) == "string" and artistName ~= "" then
+			local success, filterResult = pcall(function()
+				local TextService = game:GetService("TextService")
+				return TextService:FilterStringAsync(artistName, player.UserId):GetNonChatStringForBroadcastAsync()
+			end)
+			if success and filterResult ~= "" then
+				filteredName = filterResult
+			end
+		end
+
 		DataManager.Set(player, "Gender", gender)
 		DataManager.Set(player, "Hair", hairId)
 		DataManager.Set(player, "SkinColor", skinColor or "Normal")
+		DataManager.Set(player, "ArtistName", filteredName)
 		DataManager.Set(player, "CharacterCreated", true)
 		
 		player:LoadCharacter()
@@ -231,21 +215,7 @@ FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, sk
 	return false, "Invalid gender selection."
 end
 
-PreviewHairEvent.OnServerEvent:Connect(function(player, hairId)
-	local starterSkin = nil
-	local npcName = "NPC" .. string.char(39) .. "S"
-	local npcsFolder = workspace:FindFirstChild(npcName)
-	if npcsFolder then
-		local mainFolder = npcsFolder:FindFirstChild(npcName .. "--Main")
-		if mainFolder then
-			starterSkin = mainFolder:FindFirstChild("Starter_Skin")
-		end
-	end
-	
-	if starterSkin then
-		applyHairToModel(starterSkin, hairId)
-	end
-end)
+
 
 AcceptContractFunc.OnServerInvoke = function(player, contractId)
 	local success, result = ContractManager.StartContract(player, contractId)
@@ -292,5 +262,11 @@ RequestStartSongEvent.OnServerEvent:Connect(function(player, songId)
 	local song = SongData.GetSongById(songId)
 	if song then
 		StartSongEvent:FireClient(player, song, "Free Play: " .. song.Title)
+	end
+end)
+
+SpawnCharacterEvent.OnServerEvent:Connect(function(player)
+	if not player.Character then
+		player:LoadCharacter()
 	end
 end)
