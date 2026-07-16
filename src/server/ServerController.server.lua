@@ -44,8 +44,7 @@ local SetGenderFunc = getOrCreateRemote("RemoteFunction", "SetGender")
 local RequestPlayerDataFunc = getOrCreateRemote("RemoteFunction", "RequestPlayerData")
 local FinishCharacterCreationFunc = getOrCreateRemote("RemoteFunction", "FinishCharacterCreation")
 local SpawnCharacterEvent = getOrCreateRemote("RemoteEvent", "SpawnCharacter")
-
-
+local PreviewHairEvent = getOrCreateRemote("RemoteEvent", "PreviewHair")
 
 local function applyCustomCharacter(player, character)
 	local data = DataManager.Get(player)
@@ -99,7 +98,24 @@ local function applyCustomCharacter(player, character)
 		humanoid:ApplyDescription(desc)
 	end)
 	
-	if not success then
+	if success then
+		if data.HairColor and type(data.HairColor) == "table" then
+			task.wait(0.1)
+			local c = Color3.new(data.HairColor[1], data.HairColor[2], data.HairColor[3])
+			for _, acc in pairs(character:GetChildren()) do
+				if acc:IsA("Accessory") and acc.AccessoryType == Enum.AccessoryType.Hair then
+					local handle = acc:FindFirstChild("Handle")
+					if handle then
+						handle.Color = c
+						local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+						if mesh then
+							mesh.VertexColor = Vector3.new(c.R, c.G, c.B)
+						end
+					end
+				end
+			end
+		end
+	else
 		warn("Failed to apply humanoid description for player " .. player.Name .. ": " .. tostring(err))
 	end
 end
@@ -190,7 +206,7 @@ SetGenderFunc.OnServerInvoke = function(player, gender)
 	return false, "Invalid gender selection."
 end
 
-FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, skinColor, artistName)
+FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, skinColor, artistName, hairColor)
 	if gender == "Male" or gender == "Female" then
 		local filteredName = player.Name
 		if artistName and type(artistName) == "string" and artistName ~= "" then
@@ -208,12 +224,51 @@ FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, sk
 		DataManager.Set(player, "SkinColor", skinColor or "Normal")
 		DataManager.Set(player, "ArtistName", filteredName)
 		DataManager.Set(player, "CharacterCreated", true)
+		if hairColor and type(hairColor) == "table" then
+			DataManager.Set(player, "HairColor", hairColor)
+		end
 		
 		player:LoadCharacter()
 		return true, "Character created successfully!"
 	end
 	return false, "Invalid gender selection."
 end
+
+PreviewHairEvent.OnServerEvent:Connect(function(player, gender, hairId, color)
+	local npcName = "NPC" .. string.char(39) .. "S"
+	local npcsFolder = workspace:FindFirstChild(npcName)
+	if not npcsFolder then return end
+	local mainFolder = npcsFolder:FindFirstChild(npcName .. "--Main")
+	if not mainFolder then return end
+	local skinTarget = gender == "Female" and "Starter_Skin--Woman" or "Starter_Skin--Man"
+	local previewModel = mainFolder:FindFirstChild(skinTarget)
+	if not previewModel then return end
+
+	local humanoid = previewModel:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		local desc = humanoid:GetAppliedDescription()
+		desc.HairAccessory = tostring(hairId)
+		
+		local success = pcall(function()
+			humanoid:ApplyDescription(desc)
+		end)
+		if success then
+			task.wait(0.1)
+			for _, acc in pairs(previewModel:GetChildren()) do
+				if acc:IsA("Accessory") and acc.AccessoryType == Enum.AccessoryType.Hair then
+					local handle = acc:FindFirstChild("Handle")
+					if handle then
+						handle.Color = color
+						local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+						if mesh then
+							mesh.VertexColor = Vector3.new(color.R, color.G, color.B)
+						end
+					end
+				end
+			end
+		end
+	end
+end)
 
 
 

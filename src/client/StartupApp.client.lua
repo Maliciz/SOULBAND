@@ -232,7 +232,7 @@ local function App()
 		local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
 		local finishRemote = Remotes and Remotes:FindFirstChild("FinishCharacterCreation")
 		if finishRemote then
-			finishRemote:InvokeServer(gender, hairId, color, name)
+			finishRemote:InvokeServer(gender, hairId, "Normal", name, {color.R, color.G, color.B})
 		end
 
 		replaceSceneModel(gender, hairId, color)
@@ -244,40 +244,10 @@ local function App()
 	end
 
 	local function onPreviewChange(gender, hairId, color)
-		local npcName = "NPC" .. string.char(39) .. "S"
-		local npcsFolder = Workspace:FindFirstChild(npcName)
-		if not npcsFolder then return end
-		local mainFolder = npcsFolder:FindFirstChild(npcName .. "--Main")
-		if not mainFolder then return end
-		local skinTarget = gender == "Female" and "Starter_Skin--Woman" or "Starter_Skin--Man"
-		local skinMan = mainFolder:FindFirstChild(skinTarget)
-		if not skinMan then return end
-
-		local humanoid = skinMan:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			local desc = humanoid:GetAppliedDescription()
-			desc.HairAccessory = tostring(hairId)
-			
-			task.spawn(function()
-				local success = pcall(function()
-					humanoid:ApplyDescription(desc)
-				end)
-				if success then
-					task.wait(0.1) -- Wait for hair accessory parts to load
-					for _, acc in pairs(skinMan:GetChildren()) do
-						if acc:IsA("Accessory") and acc.AccessoryType == Enum.AccessoryType.Hair then
-							local handle = acc:FindFirstChild("Handle")
-							if handle then
-								handle.Color = color
-								local mesh = handle:FindFirstChildOfClass("SpecialMesh")
-								if mesh then
-									mesh.VertexColor = Vector3.new(color.R, color.G, color.B)
-								end
-							end
-						end
-					end
-				end
-			end)
+		local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
+		local previewRemote = Remotes and Remotes:FindFirstChild("PreviewHair")
+		if previewRemote then
+			previewRemote:FireServer(gender, hairId, color)
 		end
 
 		transitionToRig(gender)

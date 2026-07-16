@@ -66,9 +66,12 @@ local function CharacterCreator(props)
 	end
 
 	local function onFinish()
-		if name == "" then return end
+		local finalName = name
+		if finalName == "" then
+			finalName = "Artist"
+		end
 		if props.onFinish then
-			props.onFinish(name, gender, hairId, color)
+			props.onFinish(finalName, gender, hairId, color)
 		end
 	end
 
