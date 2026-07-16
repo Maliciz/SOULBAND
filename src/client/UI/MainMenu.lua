@@ -14,17 +14,6 @@ local function MainMenu(props)
 		BorderSizePixel = 0,
 		ClipsDescendants = true,
 	}, {
-		BackgroundImage = e("ImageLabel", {
-			Size = UDim2.fromScale(1, 1.50),
-			Position = UDim2.fromScale(0, -0.50),
-			Image = "rbxassetid://134954213445053",
-			ScaleType = Enum.ScaleType.Crop,
-			BackgroundTransparency = 1,
-			ImageTransparency = 0,
-			ImageColor3 = Color3.fromRGB(100, 100, 100),
-			ZIndex = 0,
-		}),
-
 		Title = e("TextLabel", {
 			Text = "SELECT GENDER",
 			Font = Enum.Font.AmaticSC,

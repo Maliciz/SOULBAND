@@ -219,7 +219,7 @@ local function replaceSceneModel(gender, hairId, color)
 end
 
 local function App()
-	local appState, setAppState = React.useState("MainMenu")
+	local appState, setAppState = React.useState("Intro")
 	local selectedGender, setSelectedGender = React.useState("Male")
 
 	local function onSelectGender(gender)
@@ -288,7 +288,7 @@ local function App()
 			setupScene()
 			local isMenu = true
 			
-			if appState == "MainMenu" then
+			if appState == "Intro" then
 				task.spawn(function()
 					local loadingUI = player.PlayerGui:WaitForChild("StartupLoadingUI", 10)
 					
@@ -304,6 +304,12 @@ local function App()
 					
 					if isMenu and currentTrack and currentRigName == "CameraRig" then
 						currentTrack:AdjustSpeed(1)
+						currentTrack.Stopped:Wait()
+						if isMenu then
+							setAppState("GenderSelect")
+						end
+					else
+						setAppState("GenderSelect")
 					end
 				end)
 			end
@@ -328,7 +334,11 @@ local function App()
 		end
 	end, {appState})
 
-	if appState == "MainMenu" then
+	if appState == "Intro" then
+		return React.createElement("ScreenGui", { ResetOnSpawn = false, IgnoreGuiInset = true }, 
+			React.createElement(MusicPlayer)
+		)
+	elseif appState == "GenderSelect" then
 		return React.createElement("ScreenGui", { ResetOnSpawn = false, IgnoreGuiInset = true }, 
 			React.createElement(MainMenu, { onSelectGender = onSelectGender }),
 			React.createElement(MusicPlayer)
