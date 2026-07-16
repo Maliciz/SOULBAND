@@ -156,7 +156,7 @@ local function toggleGameUI(visible)
 	end
 end
 
-local function replaceSceneModel(gender, hairId, color)
+local function replaceSceneModel(gender, hairId, color, shirtId, pantsId)
 	local sceneModel = Workspace:FindFirstChild("SCENE_MODEL")
 	if not sceneModel then
 		warn("SCENE_MODEL not found in Workspace")
@@ -196,6 +196,12 @@ local function replaceSceneModel(gender, hairId, color)
 	if humanoid then
 		local desc = humanoid:GetAppliedDescription()
 		desc.HairAccessory = tostring(hairId)
+		if shirtId and shirtId > 0 then
+			desc.Shirt = shirtId
+		end
+		if pantsId and pantsId > 0 then
+			desc.Pants = pantsId
+		end
 		
 		task.spawn(function()
 			local success = pcall(function()
@@ -240,14 +246,14 @@ local function App()
 		transitionToRig(gender)
 	end
 
-	local function onFinish(name, gender, hairId, color)
+	local function onFinish(name, gender, hairId, color, shirtId, pantsId)
 		local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
 		local finishRemote = Remotes and Remotes:FindFirstChild("FinishCharacterCreation")
 		if finishRemote then
-			finishRemote:InvokeServer(gender, hairId, "Normal", name, {color.R, color.G, color.B})
+			finishRemote:InvokeServer(gender, hairId, "Normal", name, {color.R, color.G, color.B}, shirtId, pantsId)
 		end
 
-		replaceSceneModel(gender, hairId, color)
+		replaceSceneModel(gender, hairId, color, shirtId, pantsId)
 		playCameraRig("CameraRig_Scene", "139506285558789", false) -- Set loop to false as requested
 		currentRigName = "CameraRig_Scene"
 
@@ -255,11 +261,11 @@ local function App()
 		toggleGameUI(true)
 	end
 
-	local function onPreviewChange(gender, hairId, color)
+	local function onPreviewChange(gender, hairId, color, shirtId, pantsId)
 		local Remotes = ReplicatedStorage:FindFirstChild("Remotes")
 		local previewRemote = Remotes and Remotes:FindFirstChild("PreviewHair")
 		if previewRemote then
-			previewRemote:FireServer(gender, hairId, color)
+			previewRemote:FireServer(gender, hairId, color, shirtId, pantsId)
 		end
 
 		transitionToRig(gender)

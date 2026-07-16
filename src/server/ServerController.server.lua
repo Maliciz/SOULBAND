@@ -83,11 +83,18 @@ local function applyCustomCharacter(player, character)
 		end
 	end
 
-	if starterSkin then
+	if data.Shirt and data.Shirt > 0 then
+		desc.Shirt = data.Shirt
+	elseif starterSkin then
 		local shirt = starterSkin:FindFirstChildOfClass("Shirt")
 		if shirt and shirt.ShirtTemplate then
 			desc.Shirt = tonumber(shirt.ShirtTemplate:match("%d+")) or 0
 		end
+	end
+
+	if data.Pants and data.Pants > 0 then
+		desc.Pants = data.Pants
+	elseif starterSkin then
 		local pants = starterSkin:FindFirstChildOfClass("Pants")
 		if pants and pants.PantsTemplate then
 			desc.Pants = tonumber(pants.PantsTemplate:match("%d+")) or 0
@@ -206,7 +213,7 @@ SetGenderFunc.OnServerInvoke = function(player, gender)
 	return false, "Invalid gender selection."
 end
 
-FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, skinColor, artistName, hairColor)
+FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, skinColor, artistName, hairColor, shirtId, pantsId)
 	if gender == "Male" or gender == "Female" then
 		local filteredName = player.Name
 		if artistName and type(artistName) == "string" and artistName ~= "" then
@@ -227,6 +234,12 @@ FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, sk
 		if hairColor and type(hairColor) == "table" then
 			DataManager.Set(player, "HairColor", hairColor)
 		end
+		if shirtId and type(shirtId) == "number" then
+			DataManager.Set(player, "Shirt", shirtId)
+		end
+		if pantsId and type(pantsId) == "number" then
+			DataManager.Set(player, "Pants", pantsId)
+		end
 		
 		player:LoadCharacter()
 		return true, "Character created successfully!"
@@ -234,7 +247,7 @@ FinishCharacterCreationFunc.OnServerInvoke = function(player, gender, hairId, sk
 	return false, "Invalid gender selection."
 end
 
-PreviewHairEvent.OnServerEvent:Connect(function(player, gender, hairId, color)
+PreviewHairEvent.OnServerEvent:Connect(function(player, gender, hairId, color, shirtId, pantsId)
 	local npcName = "NPC" .. string.char(39) .. "S"
 	local npcsFolder = workspace:FindFirstChild(npcName)
 	if not npcsFolder then return end
@@ -248,6 +261,12 @@ PreviewHairEvent.OnServerEvent:Connect(function(player, gender, hairId, color)
 	if humanoid then
 		local desc = humanoid:GetAppliedDescription()
 		desc.HairAccessory = tostring(hairId)
+		if shirtId and type(shirtId) == "number" then
+			desc.Shirt = shirtId
+		end
+		if pantsId and type(pantsId) == "number" then
+			desc.Pants = pantsId
+		end
 		
 		local success = pcall(function()
 			humanoid:ApplyDescription(desc)
