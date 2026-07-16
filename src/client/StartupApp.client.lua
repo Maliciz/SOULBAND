@@ -82,12 +82,12 @@ local function transitionToRig(targetGender)
 
 	local currentGender = (currentRigName == "CameraRig_Man") and "Male" or "Female"
 	if currentRigName == nil or currentRigName == "CameraRig" then
-		-- Initial transition
+		-- Initial transition (no loop for idle rigs, they hold on last frame)
 		if targetGender == "Male" then
-			playCameraRig("CameraRig_Man", "136112089522087", true)
+			playCameraRig("CameraRig_Man", "136112089522087", false)
 			currentRigName = "CameraRig_Man"
 		else
-			playCameraRig("CameraRig_Girl", "94550503114605", true)
+			playCameraRig("CameraRig_Girl", "94550503114605", false)
 			currentRigName = "CameraRig_Girl"
 		end
 		isTransitioning = false
@@ -99,12 +99,12 @@ local function transitionToRig(targetGender)
 			if track then
 				track.Stopped:Connect(function()
 					if currentRigName == "CameraRig_ManToGirl" then
-						playCameraRig("CameraRig_Girl", "94550503114605", true)
+						playCameraRig("CameraRig_Girl", "94550503114605", false)
 						currentRigName = "CameraRig_Girl"
 					end
 				end)
 			else
-				playCameraRig("CameraRig_Girl", "94550503114605", true)
+				playCameraRig("CameraRig_Girl", "94550503114605", false)
 				currentRigName = "CameraRig_Girl"
 			end
 		else
@@ -113,12 +113,12 @@ local function transitionToRig(targetGender)
 			if track then
 				track.Stopped:Connect(function()
 					if currentRigName == "CameraRig_GirlToMan" then
-						playCameraRig("CameraRig_Man", "136112089522087", true)
+						playCameraRig("CameraRig_Man", "136112089522087", false)
 						currentRigName = "CameraRig_Man"
 					end
 				end)
 			else
-				playCameraRig("CameraRig_Man", "136112089522087", true)
+				playCameraRig("CameraRig_Man", "136112089522087", false)
 				currentRigName = "CameraRig_Man"
 			end
 		end
@@ -187,11 +187,11 @@ local function replaceSceneModel(gender, hairId, color)
 		desc.HairAccessory = tostring(hairId)
 		
 		task.spawn(function()
-			pcall(function()
+			local success = pcall(function()
 				humanoid:ApplyDescription(desc)
 			end)
-			
-			task.delay(0.1, function()
+			if success then
+				task.wait(0.1) -- Wait a moment for instances to initialize
 				for _, acc in pairs(clone:GetChildren()) do
 					if acc:IsA("Accessory") and acc.AccessoryType == Enum.AccessoryType.Hair then
 						local handle = acc:FindFirstChild("Handle")
@@ -204,7 +204,7 @@ local function replaceSceneModel(gender, hairId, color)
 						end
 					end
 				end
-			end)
+			end
 		end)
 
 		local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
@@ -259,20 +259,20 @@ local function App()
 			desc.HairAccessory = tostring(hairId)
 			
 			task.spawn(function()
-				pcall(function()
+				local success = pcall(function()
 					humanoid:ApplyDescription(desc)
 				end)
-			end)
-
-			task.delay(0.1, function()
-				for _, acc in pairs(skinMan:GetChildren()) do
-					if acc:IsA("Accessory") and acc.AccessoryType == Enum.AccessoryType.Hair then
-						local handle = acc:FindFirstChild("Handle")
-						if handle then
-							handle.Color = color
-							local mesh = handle:FindFirstChildOfClass("SpecialMesh")
-							if mesh then
-								mesh.VertexColor = Vector3.new(color.R, color.G, color.B)
+				if success then
+					task.wait(0.1) -- Wait for hair accessory parts to load
+					for _, acc in pairs(skinMan:GetChildren()) do
+						if acc:IsA("Accessory") and acc.AccessoryType == Enum.AccessoryType.Hair then
+							local handle = acc:FindFirstChild("Handle")
+							if handle then
+								handle.Color = color
+								local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+								if mesh then
+									mesh.VertexColor = Vector3.new(color.R, color.G, color.B)
+								end
 							end
 						end
 					end
