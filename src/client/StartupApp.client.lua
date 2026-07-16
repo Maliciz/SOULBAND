@@ -205,16 +205,17 @@ local function replaceSceneModel(gender, hairId, color)
 					end
 				end
 			end
-		end)
 
-		local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
-		if animator then
-			local anim = Instance.new("Animation")
-			anim.AnimationId = "rbxassetid://103786020375484"
-			local track = animator:LoadAnimation(anim)
-			track.Looped = true
-			track:Play()
-		end
+			-- Start animation AFTER ApplyDescription has completed to avoid it stopping the body joints track
+			local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
+			if animator then
+				local anim = Instance.new("Animation")
+				anim.AnimationId = "rbxassetid://103786020375484"
+				local track = animator:LoadAnimation(anim)
+				track.Looped = true
+				track:Play()
+			end
+		end)
 	end
 end
 
@@ -321,9 +322,12 @@ local function App()
 			}),
 			React.createElement(MusicPlayer)
 		)
+	else
+		-- Keep MusicPlayer active during gameplay (appState None)
+		return React.createElement("ScreenGui", { ResetOnSpawn = false, IgnoreGuiInset = true }, 
+			React.createElement(MusicPlayer)
+		)
 	end
-
-	return nil
 end
 
 local reactContainer = Instance.new("ScreenGui")
